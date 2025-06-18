@@ -1,0 +1,17 @@
+###Obtener TODOS
+GET http://localhost:3000/api/characters
+
+###Obtener ALGUNO /characters/algunId
+GET http://localhost:3000/api/characters/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+
+###Crear un recurso
+POST http://localhost:3000/api/characters
+
+### Moficicar un recurso COMPLETO
+PUT http://localhost:3000/api/characters/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+
+### Moficicar un recurso PARCIAL
+PATCH http://localhost:3000/api/characters/a02b91bc-3769-4221-beb1-d7a3aeba7dad
+
+###Eliminar un recurso
+DELETE http://localhost:3000/api/characters/a02b91bc-3769-4221-beb1-d7a3aeba7dad
