@@ -1,0 +1,27 @@
+### lista completa
+GET http://localhost:3000/api/pilotos
+
+### mandar nuevo piloto
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "Max Verstappen",
+    "team": "Red Bull",
+    "nro": 1,
+    "nationality": "Pais bajeano/Neerlandés",
+    "role": "Primer piloto",
+    "id": "b13fb2d5-c152-41fe-91b2-872476da6e1a" //este puede no enviarse y se genera automáticamente
+}
+
+### editar piloto con el id provisto
+PUT http://localhost:3000/api/pilotos/b13fb2d5-c152-41fe-91b2-872476da6e1a
+Content-Type: application/json
+
+{
+    "name": "Max Verstappen",
+    "team": "Red Bull",
+    "nro": 1,
+    "nationality": "Neerlandés",
+    "role": "Primer piloto"
+}
