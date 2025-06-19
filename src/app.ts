@@ -1,3 +1,9 @@
+//Recordar el pnpm install para los módulos
+//No hace falta hacer nada, ya lo acomodé pero como estamos utilizando Express@4 al instalar los tipos tenemos que instalar pnpm add -D @types/express@4
+//Tener correctamente configurado fnm en la terminal donde abrimos vscode (seguramente el bash de git además de powershell, sino no van a funcionar los comandos de node y npm)
+//Primero buildear y despues start:dev
+//los import, como el de character agregarle .js al final o va a lanzar error de que no lo encuentra(me pelee con copilot por esto como por 2h)
+
 import express, { NextFunction, Request, Response } from 'express'
 import { Piloto } from './piloto.js'
 
@@ -16,7 +22,7 @@ const pilotos = [
     )
 ]
 
-function sanitizeCharacterInput(req: Request, res: Response, next: NextFunction){ //Response, Request y NextFunction son de express
+function sanitizePilotoInput(req: Request, res: Response, next: NextFunction){ //Response, Request y NextFunction son de express
     req.body.sanitizedInput = {
         name: req.body.name,
         team: req.body.team,
@@ -31,7 +37,7 @@ function sanitizeCharacterInput(req: Request, res: Response, next: NextFunction)
 }
 
 app.get('/api/pilotos',(req,res)=>{ //get todos los pilotos
-    res.json({data: pilotos})
+    res.status(200).send({message: 'Pilotos', data: pilotos})
 })
 
 app.get('/api/pilotos/:id', (req,res) => { //get para un piloto en específico
@@ -39,10 +45,10 @@ app.get('/api/pilotos/:id', (req,res) => { //get para un piloto en específico
     if(!Persona){ //if persona es un undefined (no lo encontró)
         res.status(404).send({message: 'Piloto no encontrado.'})
     }
-    res.json({data: Persona})
+    res.status(200).send({message: 'Piloto', data: Persona})
 })
 
-app.post('/api/pilotos/', sanitizeCharacterInput, (req,res) => { //post un nuevo piloto
+app.post('/api/pilotos/', sanitizePilotoInput, (req,res) => { //post un nuevo piloto
     const {name, team, nro, nationality, role} = req.body.sanitizedInput //utilizo la input sanitizada
 
     const piloto = new Piloto(name, team, nro, nationality, role)
@@ -51,7 +57,7 @@ app.post('/api/pilotos/', sanitizeCharacterInput, (req,res) => { //post un nuevo
     res.status(201).send({message: 'Piloto creado correctamente.', data: piloto})
 })
 
-app.put('/api/pilotos/:id', sanitizeCharacterInput, (req,res) => { //put de piloto
+app.put('/api/pilotos/:id', sanitizePilotoInput, (req,res) => { //put de piloto
     const PilotoIdx = pilotos.findIndex((p) => p.id === req.params.id) // .findIndex devuelve la posición en el array del piloto con el id
     
     if(PilotoIdx == -1){
@@ -63,7 +69,7 @@ app.put('/api/pilotos/:id', sanitizeCharacterInput, (req,res) => { //put de pilo
     res.status(200).send({ message: 'Character modificado correctamente.', data: pilotos[PilotoIdx]})
 })
 
-app.patch('/api/pilotos/:id', sanitizeCharacterInput, (req,res) => { //put de piloto
+app.patch('/api/pilotos/:id', sanitizePilotoInput, (req,res) => { //put de piloto
     const PilotoIdx = pilotos.findIndex((p) => p.id === req.params.id) // .findIndex devuelve la posición en el array del piloto con el id
     
     if(PilotoIdx == -1){
@@ -87,9 +93,9 @@ app.delete('/api/pilotos/:id', (req,res) => { //no necesita sanitizacion ya que 
 })
 
 app.use((_,res) => {
-  res.status(404).send({ message: 'Not Found' })
+  res.status(404).send({ message: 'Página no encontrada.' })
 })
 
-app.listen(3000,()=>{
+app.listen(3000, () => {
     console.log('Corriendo en http://localhost:3000');
 })
