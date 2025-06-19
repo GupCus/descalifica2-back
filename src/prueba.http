@@ -10,7 +10,7 @@ Content-Type: application/json
     "team": "Red Bull",
     "nro": 1,
     "nationality": "Pais bajeano/Neerlandés",
-    "role": "Primer piloto",
+    "role": "Primer piloto"
 }
 
 ### editar piloto con el id provisto, chequear que el id que nos da en GET sea el mismo del link de abajo

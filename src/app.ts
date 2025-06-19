@@ -80,11 +80,10 @@ app.delete('/api/pilotos/:id', (req,res) => { //no necesita sanitizacion ya que 
 
     if(PilotoIdx=== -1){
         res.status(404).send({message: 'Piloto no encontrado.'})
+    }else{
+        pilotos.splice(PilotoIdx, 1)
+        res.status(200).send({message: 'Piloto borrado correctamente.'})
     }
-
-    pilotos.splice(PilotoIdx, 1)
-
-    res.status(200).send({message: 'Piloto borrado correctamente.'})
 })
 
 app.listen(3000,()=>{
