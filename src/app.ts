@@ -86,6 +86,10 @@ app.delete('/api/pilotos/:id', (req,res) => { //no necesita sanitizacion ya que 
     }
 })
 
+app.use((_,res) => {
+  res.status(404).send({ message: 'Not Found' })
+})
+
 app.listen(3000,()=>{
     console.log('Corriendo en http://localhost:3000');
 })
