@@ -24,7 +24,9 @@ function sanitizeCharacterInput(req: Request, res: Response, next: NextFunction)
         nationality: req.body.nationality,
         role: req.body.role,
     }
-
+     Object.keys(req.body.sanitizedInput).forEach(key => { //borra todos los atributos que no nos pasaron en el PATCH, evitamos errores
+        if(req.body.sanitizedInput[key] === undefined){delete req.body.sanitizedInput[key]}
+     })
     next()
 }
 
@@ -59,6 +61,30 @@ app.put('/api/pilotos/:id', sanitizeCharacterInput, (req,res) => { //put de pilo
     pilotos[PilotoIdx] = {...pilotos[PilotoIdx], ...req.body.sanitizedInput} // Modifica el objeto en la pos PilotoIdx, pisa el piloto en PilotoIdx con los introducidos que fueron sanitizados previamente
 
     res.status(200).send({ message: 'Character modificado correctamente.', data: pilotos[PilotoIdx]})
+})
+
+app.patch('/api/pilotos/:id', sanitizeCharacterInput, (req,res) => { //put de piloto
+    const PilotoIdx = pilotos.findIndex((p) => p.id === req.params.id) // .findIndex devuelve la posición en el array del piloto con el id
+    
+    if(PilotoIdx == -1){
+        res.status(404).send({message: 'Character not found.'})
+    }
+
+    pilotos[PilotoIdx] = {...pilotos[PilotoIdx], ...req.body.sanitizedInput} // Modifica el objeto en la pos PilotoIdx, pisa el piloto en PilotoIdx con los introducidos que fueron sanitizados previamente
+
+    res.status(200).send({ message: 'Character modificado correctamente.', data: pilotos[PilotoIdx]})
+})
+
+app.delete('/api/pilotos/:id', (req,res) => { //no necesita sanitizacion ya que no hay body
+    const PilotoIdx = pilotos.findIndex((p) => p.id === req.params.id)
+
+    if(PilotoIdx=== -1){
+        res.status(404).send({message: 'Piloto no encontrado.'})
+    }
+
+    pilotos.splice(PilotoIdx, 1)
+
+    res.status(200).send({message: 'Piloto borrado correctamente.'})
 })
 
 app.listen(3000,()=>{
