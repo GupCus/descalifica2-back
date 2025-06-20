@@ -6,8 +6,10 @@
 
 import express, { NextFunction, Request, Response } from 'express'
 import { Piloto } from './piloto.js'
+import cors from 'cors'
 
-const app = express();
+const app = express()  //PRUEBAS, si no pongo estas líneas el front me tira que el back lo saca cagando
+app.use(cors())        //son necesarias para que el back acepte peticiones de otros orígenes.
 
 app.use(express.json())
 
