@@ -5,7 +5,7 @@
 //los import, como el de character agregarle .js al final o va a lanzar error de que no lo encuentra(me pelee con copilot por esto como por 2h)
 
 import express, { NextFunction, Request, Response } from 'express'
-import { Piloto } from './piloto.js'
+import { Piloto } from './piloto/piloto.js'
 
 const app = express();
 
@@ -92,7 +92,7 @@ app.delete('/api/pilotos/:id', (req,res) => { //no necesita sanitizacion ya que 
     }
 })
 
-app.use((_,res) => {
+app.use((_,res) => {//Repuesta default para cualquier unhandled request
   res.status(404).send({ message: 'Página no encontrada.' })
 })
 
