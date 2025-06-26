@@ -5,7 +5,7 @@
 //los import, como el de character agregarle .js al final o va a lanzar error de que no lo encuentra(me pelee con copilot por esto como por 2h)
 
 import express, { NextFunction, Request, Response } from 'express'
-import { Piloto } from './piloto.js'
+import { Piloto } from './piloto/piloto.entity.js'
 import cors from 'cors'
 
 const app = express()  //PRUEBAS, si no pongo estas líneas el front me tira que el back lo saca cagando
