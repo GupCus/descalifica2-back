@@ -11,7 +11,7 @@ Content-Type: application/json
 
 {
     "name": "Max Verstappen",
-    "team": "Red Bull",
+    "team": "2f6cb93c-1d73-4b1e-90b1-2d50e439084f",
     "nro": 1,
     "nationality": "Pais bajeano/Neerlandés",
     "role": "Primer piloto"
@@ -23,7 +23,7 @@ Content-Type: application/json
 
 {
     "name": "Max Verstappen",
-    "team": "Red Bull",
+    "team": "2f6cb93c-1d73-4b1e-90b1-2d50e439084f",
     "nro": 1,
     "nationality": "Neerlandés",
     "role": "Primer piloto"

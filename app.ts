@@ -6,6 +6,7 @@
 
 import express from 'express'
 import { pilotoRouter } from './src/piloto/piloto.routes.js';
+import { escuderiaRouter } from './src/escuderia/escuderia.routes.js';
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json())
 
 //Handler de routeo
 app.use('/api/pilotos',pilotoRouter)
+app.use('/api/escuderias',escuderiaRouter)
 
 //Repuesta default para cualquier unhandled request
 app.use((_,res) => {

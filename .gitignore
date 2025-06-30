@@ -1,7 +1,7 @@
 #LOCAL
 .gitignore
 /src/character/
-/appCharacter.ts
+/src/appCharacter.ts
 
 # Logs
 logs

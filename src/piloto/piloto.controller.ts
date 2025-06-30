@@ -1,13 +1,14 @@
 import { Request,Response,NextFunction } from "express"
 import { pilotoRepository } from "./piloto.repository.js"
 import { Piloto } from "./piloto.entity.js"
+import { EscuderiaRepository } from "../escuderia/escuderia.repository.js"
 
 const repository = new pilotoRepository()
 
 function sanitizePilotoInput(req: Request, res: Response, next: NextFunction){ //Response, Request y NextFunction son de express
   req.body.sanitizedInput = {
       name: req.body.name,
-      team: req.body.team,
+      team: (new EscuderiaRepository).findOne({id:req.body.team}),
       num: req.body.num,
       nationality: req.body.nationality,
       role: req.body.role,

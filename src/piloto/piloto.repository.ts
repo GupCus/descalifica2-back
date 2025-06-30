@@ -1,11 +1,13 @@
 import { Repository } from "../../shared/repository.js"
 import { Piloto } from "./piloto.entity.js"
+import { EscuderiaRepository } from "../escuderia/escuderia.repository.js"
+
 
 //"Repositorio" en memoria
 const pilotos = [
   new Piloto(
       'Franco Colapinto',
-      'Alpine',
+      (new EscuderiaRepository()).findOne({id:'2f6cb93c-1d73-4b1e-90b1-2d50e439084f'}),
       43,
       'Argentino',
       'Segundo piloto',
