@@ -1,0 +1,41 @@
+### lista completa
+GET http://localhost:3000/api/pilotos
+
+### Encontrar uno
+
+GET http://localhost:3000/api/pilotos/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+
+### mandar nuevo piloto
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "Max Verstappen",
+    "team": "2f6cb93c-1d73-4b1e-90b1-2d50e439084f",
+    "nro": 1,
+    "nationality": "Pais bajeano/Neerlandés",
+    "role": "Primer piloto"
+}
+
+### editar piloto con el id
+PUT http://localhost:3000/api/pilotos/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+Content-Type: application/json
+
+{
+    "name": "Max Verstappen",
+    "team": "2f6cb93c-1d73-4b1e-90b1-2d50e439084f",
+    "nro": 1,
+    "nationality": "Neerlandés",
+    "role": "Primer piloto"
+}
+
+### editar parcialmente piloto, por ahora igual que put
+PATCH http://localhost:3000/api/pilotos/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+Content-Type: application/json
+
+{
+    "nationality": "Neerlandés"
+}
+
+###borrar un piloto
+DELETE http://localhost:3000/api/pilotos/2f6cb93c-1d73-4b1e-90b1-2d50e439084f

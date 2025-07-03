@@ -1,0 +1,38 @@
+### lista completa
+GET http://localhost:3000/api/escuderias
+
+### Encontrar uno
+
+GET http://localhost:3000/api/escuderias/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+
+### mandar nuevo escuderia
+POST http://localhost:3000/api/escuderias
+Content-Type: application/json
+
+{
+    "name": "Ferrari",
+    "fundation": 1929,
+    "nationality": "Italy",
+    "engine": "Ferrari tb ni idea"
+}
+
+### editar escuderia con el id
+PUT http://localhost:3000/api/escuderias/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+Content-Type: application/json
+
+{
+    "name": "Racing Bulls Formula One Team",
+    "fundation": 2024,
+    "nationality": "Italy",
+    "engine": "Honda RBPT"
+}
+### editar parcialmente escuderia, por ahora igual que put
+PATCH http://localhost:3000/api/escuderias/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+Content-Type: application/json
+
+{
+    "engine": "Ferrari HP"
+}
+
+###borrar un escuderia
+DELETE http://localhost:3000/api/escuderias/2f6cb93c-1d73-4b1e-90b1-2d50e439084f

@@ -1,3 +1,8 @@
+#LOCAL
+.gitignore
+/src/character/
+/src/appCharacter.ts
+
 # Logs
 logs
 *.log
