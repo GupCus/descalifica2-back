@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { sanitizePilotoInput, findAll, findOne, add, update, remove } from "./piloto.controler.js";
+import { sanitizePilotoInput, findAll, findOne, add, update, remove } from "./piloto.controller.js";
 
 export const pilotoRouter = Router()
 
