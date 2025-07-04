@@ -1,6 +1,6 @@
 import { EscuderiaRepository } from "../escuderia/escuderia.repository.js";
 import { pilotoRepository } from "../piloto/piloto.repository.js";
-import { Categoria } from "./categoria.entity.js";
+import { Categoria } from "./categoria.entity.mem.js";
 import { CategoriaRepository } from "./categoria.repository.js";
 import { NextFunction, Request, Response } from "express";
 

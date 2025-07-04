@@ -1,6 +1,6 @@
 import { Request,Response,NextFunction } from "express"
 import { pilotoRepository } from "./piloto.repository.js"
-import { Piloto } from "./piloto.entity.js"
+import { Piloto } from "./piloto.entity.mem.js"
 import { EscuderiaRepository } from "../escuderia/escuderia.repository.js"
 
 const repository = new pilotoRepository()

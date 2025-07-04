@@ -1,5 +1,5 @@
 import crypto from 'node:crypto'
-import { Escuderia } from '../escuderia/escuderia.entity.js';
+import { Escuderia } from '../escuderia/escuderia.entity.mem.js';
 
 export class Piloto{
     constructor(

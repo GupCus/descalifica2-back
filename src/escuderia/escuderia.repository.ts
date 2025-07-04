@@ -1,5 +1,5 @@
 import { Repository } from "../../shared/repository.js"
-import { Escuderia } from "./escuderia.entity.js"
+import { Escuderia } from "./escuderia.entity.mem.js"
 
 //"Repositorio" en memoria
 const escuderias = [

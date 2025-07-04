@@ -1,5 +1,5 @@
 import { Repository } from "../../shared/repository.js"
-import { Piloto } from "./piloto.entity.js"
+import { Piloto } from "./piloto.entity.mem.js"
 import { EscuderiaRepository } from "../escuderia/escuderia.repository.js"
 
 

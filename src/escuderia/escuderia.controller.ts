@@ -1,6 +1,6 @@
 import { Request,Response,NextFunction } from "express"
 import { EscuderiaRepository } from "./escuderia.repository.js"
-import { Escuderia } from "./escuderia.entity.js"
+import { Escuderia } from "./escuderia.entity.mem.js"
 
 const repository = new EscuderiaRepository()
 

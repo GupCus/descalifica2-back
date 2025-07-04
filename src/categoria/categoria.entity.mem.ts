@@ -1,6 +1,6 @@
 import crypto from 'node:crypto'
-import { Escuderia } from '../escuderia/escuderia.entity.js';
-import { Piloto } from '../piloto/piloto.entity.js';
+import { Escuderia } from '../escuderia/escuderia.entity.mem.js';
+import { Piloto } from '../piloto/piloto.entity.mem.js';
 
 export class Categoria{
     constructor(
