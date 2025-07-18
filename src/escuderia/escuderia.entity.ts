@@ -1,4 +1,5 @@
 import crypto from 'node:crypto'
+import { Piloto } from '../piloto/piloto.entity.js';
 
 export class Escuderia{ 
     constructor(
@@ -6,7 +7,8 @@ export class Escuderia{
         public fundation:number, 
         public nationality:string, 
         public engine:string,
-        public id= crypto.randomUUID()
+        public id:number,
+        public pilotos:Piloto[],
     ) {}
 }
 

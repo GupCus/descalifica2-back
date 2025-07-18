@@ -8,7 +8,7 @@ export class Piloto{
         public num:number, 
         public nationality:string, 
         public role:string,
-        public id= crypto.randomUUID()
+        public id:number,
     ) {}
 }
 //FRAN: hay q pasarlas a español
