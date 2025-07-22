@@ -22,56 +22,27 @@ function sanitizePilotoInput(req: Request, res: Response, next: NextFunction){ /
 
 //get todos los pilotos
 function findAll(req:Request,res:Response){
-   res.status(200).send({message: 'Pilotos', data: repository.findAll()});
+  res.status(500).json({ message: 'Not implemented.'})
 }
 
 //get para un piloto en específico
 function findOne(req:Request,res:Response) { 
-    const piloto = repository.findOne({id:req.params.id})
-    if(!piloto){ //if piloto es un undefined (no lo encontró)
-        res.status(404).send({message: 'Piloto no encontrado.'})
-    }
-    res.status(200).send({message: 'Piloto encontrado', data: piloto})
+  res.status(500).json({ message: 'Not implemented.'})
 }
 
 //post un nuevo piloto
 function add(req:Request,res:Response){
-  
-    const input = req.body.sanitizedInput //utilizo la input limpia
-
-    const piloto = new Piloto(
-      input.name,
-      input.team,
-      input.num,
-      input.nationality,
-      input.role
-    )
-
-    repository.add(piloto)
-    res.status(201).send({message: 'Piloto creado correctamente.', data: piloto})
+  res.status(500).json({ message: 'Not implemented.'})
 }
 
 //put&patch de piloto
 function update(req:Request,res:Response) { 
-
-  const piloto = repository.update(req.body.sanitizedInput)
-  
-  if(!piloto){
-      res.status(404).send({message: 'Piloto no encontrado.'})
-  }else{
-  res.status(200).send({ message: 'Piloto modificado correctamente.', data: piloto})
-  }
+res.status(500).json({ message: 'Not implemented.'})
 }
 
 //Aunque este definida en el repository con un parametro {id: string} de esta forma tenemos la versatilidad de que manden tanto asi como el character entero
 function remove(req:Request,res:Response){ 
-  const piloto = repository.remove(req.body.sanitizedInput)
-
-  if(!piloto){
-      res.status(404).send({message: 'Piloto no encontrado.'})
-  }else{
-      res.status(200).send({message: 'Piloto borrado correctamente.'})
-  }
+  res.status(500).json({ message: 'Not implemented.'})
 }
 
 
