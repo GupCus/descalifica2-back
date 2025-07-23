@@ -2,7 +2,6 @@ import { Entity, ManyToOne, Property, Rel } from '@mikro-orm/core';
 import { baseEntity } from '../shared/baseEntity.entity.js';
 import { Escuderia } from '../escuderia/escuderia.entity.js';
 
-
 @Entity()
 export class Piloto extends baseEntity{ 
         

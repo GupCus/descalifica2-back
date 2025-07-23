@@ -1,11 +1,15 @@
+###ID
+@id = {{createEscuderia.response.body.data.id}}
+
 ### lista completa
+
 GET http://localhost:3000/api/escuderias
 
 ### Encontrar uno
-
-GET http://localhost:3000/api/escuderias/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+GET http://localhost:3000/api/escuderias/{{id}}
 
 ### mandar nuevo escuderia
+# @name createEscuderia
 POST http://localhost:3000/api/escuderias
 Content-Type: application/json
 
@@ -17,7 +21,7 @@ Content-Type: application/json
 }
 
 ### editar escuderia con el id
-PUT http://localhost:3000/api/escuderias/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+PUT http://localhost:3000/api/escuderias/{{id}}
 Content-Type: application/json
 
 {
@@ -27,7 +31,7 @@ Content-Type: application/json
     "engine": "Honda RBPT"
 }
 ### editar parcialmente escuderia, por ahora igual que put
-PATCH http://localhost:3000/api/escuderias/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+PATCH http://localhost:3000/api/escuderias/{{id}}
 Content-Type: application/json
 
 {
@@ -35,4 +39,5 @@ Content-Type: application/json
 }
 
 ###borrar un escuderia
-DELETE http://localhost:3000/api/escuderias/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+DELETE http://localhost:3000/api/escuderias/{{id}}
+

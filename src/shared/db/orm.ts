@@ -6,7 +6,7 @@ export const orm = await MikroORM.init({
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
   dbName: 'descalifica2',
-  //type: 'mysql', DEPRECADO ¿Sabe el profe? Abajo puse la version que creo que se usa ahora
+  //type: 'mysql', DEPRECADO ¿Sabe el profe? -> Abajo puse la version que creo que se usa ahora
   driver: MySqlDriver,
   clientUrl: 'mysql://dsw:dsw@localhost:3306/descalifica2',
   highlighter: new SqlHighlighter(),
@@ -19,6 +19,7 @@ export const orm = await MikroORM.init({
   }
 })
 
+//SOLO EN DESARROLLO, ACTUALIZA LA BD AUTOMATICAMENTE, BORRAR ANTES DE PRODUCCIÓN
 export const syncSchema = async () => {
   const generator = orm.getSchemaGenerator()
   await generator.updateSchema()
