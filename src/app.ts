@@ -5,9 +5,9 @@
 //los import, como el de character agregarle .js al final o va a lanzar error de que no lo encuentra(me pelee con copilot por esto como por 2h)
 
 import express from 'express'
-import { pilotoRouter } from './piloto/piloto.routes.js';
-import { escuderiaRouter } from './escuderia/escuderia.routes.js';
 import 'reflect-metadata'
+import { escuderiaRouter } from './escuderia/escuderia.routes.js';
+import { pilotoRouter } from './piloto/piloto.routes.js';
 import { orm,syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 
