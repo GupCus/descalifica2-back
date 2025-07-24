@@ -12,3 +12,4 @@ export class Escuderia{
 
 //AGUS: ¿¿¿QUE HAY DE IMPORTANTE COMO PARA PONER???
 //FRAN: Es una entidad que representa un equipo de carreras, con propiedades como nombre, fundación, nacionalidad y motor. El ID se genera automáticamente para identificar de manera única cada escudería.
+//FRAN: faltan los pilotos
