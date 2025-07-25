@@ -5,10 +5,25 @@ import { NotFoundError } from "@mikro-orm/core"
 
 const em = orm.em
 
+function sanitizePiloto(req: Request, res: Response, next: NextFunction){ //Response, Request y NextFunction son de express
+  req.body.sanitizedInput = {
+      name: req.body.name,
+      escuderia: req.body.escuderia,
+      num: req.body.num,
+      nationality: req.body.nationality,
+      role: req.body.role,
+      id: req.params.id
+  }
+   Object.keys(req.body.sanitizedInput).forEach(key => { //borra todos los atributos que no nos pasaron en el PATCH, evitamos errores
+      if(req.body.sanitizedInput[key] === undefined){delete req.body.sanitizedInput[key]}
+   })
+  next()
+}
+
 //get todos los pilotos
 async function findAll(req:Request,res:Response){
    try{
-       const pilotos = await em.find(Piloto, {})
+       const pilotos = await em.find(Piloto, {}, {populate:['escuderia']})
        res.status(200).json({message:'OK',data:pilotos})
    }catch(error:any){
        res.status(500).json({message: 'Internal server error'});
@@ -19,7 +34,7 @@ async function findAll(req:Request,res:Response){
 async function findOne(req:Request,res:Response) { 
    try{
     const id = Number.parseInt(req.params.id)
-    const piloto = await em.findOneOrFail(Piloto, {id})
+    const piloto = await em.findOneOrFail(Piloto, {id}, {populate:['escuderia']})
     res.status(200).json({message:'OK',data:piloto})
   }catch(error:any){
     if (error instanceof NotFoundError){
@@ -33,7 +48,7 @@ async function findOne(req:Request,res:Response) {
 //post un nuevo piloto
 async function add(req:Request,res:Response){
   try{
-    const piloto = em.create(Piloto, req.body)
+    const piloto = em.create(Piloto, req.body.sanitizedInput)
     await em.flush()
     res.status(201).json({message:'Created', data: piloto})
   }catch(error:any){
@@ -46,8 +61,8 @@ async function update(req:Request,res:Response) {
 
    try{
     const id = Number.parseInt(req.params.id)
-    const piloto = em.getReference(Piloto,id)
-    em.assign(piloto,req.body)
+    const piloto = await em.findOneOrFail(Piloto,{id})
+    em.assign(piloto,req.body.sanitizedInput)
     await em.flush()
     res.status(204).json({message:'Updated'})
   }catch(error:any){
@@ -75,6 +90,6 @@ async function remove(req:Request,res:Response){
   }
 }
 
-export { findAll, findOne, add, update, remove}
+export { findAll, findOne, add, update, remove, sanitizePiloto}
 
-//Nota para la posterioridad, dejo todos los catch iguales que el findOne, esto es para que en un futuro encontrar una forma de que si no existe el objeto necesario, devuelva not found. Falta implementar.
+//Nota para la posterioridad, dejo todos los catch iguales, esto es para que en un futuro encontrar una forma de que si no existe el objeto necesario, devuelva not found. Falta implementar.

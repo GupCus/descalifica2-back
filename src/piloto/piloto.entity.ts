@@ -7,7 +7,7 @@ export class Piloto extends baseEntity{
         
         @ManyToOne(() => Escuderia, { nullable: false })
         //team!: Escuderia; DA ERROR, por ser una relacion circular. Se usa lo siguiente:
-        team!: Rel<Escuderia>;
+        escuderia!: Rel<Escuderia>;
         @Property({nullable:false,unique:true})
         num!:number
         @Property({nullable:false})

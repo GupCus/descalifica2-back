@@ -1,36 +1,52 @@
 ###ID
 @id = {{createEscuderia.response.body.data.id}}
 
-### lista completa
+### GET ALL
 
 GET http://localhost:3000/api/escuderias
 
-### Encontrar uno
+### GET ONE
 GET http://localhost:3000/api/escuderias/{{id}}
 
-### mandar nuevo escuderia
+### POST 1
 # @name createEscuderia
 POST http://localhost:3000/api/escuderias
 Content-Type: application/json
 
 {
-    "name": "Ferrari",
+    "name": "Scuderia Ferrari",
     "fundation": 1929,
     "nationality": "Italy",
-    "engine": "Ferrari tb ni idea"
+    "engine": "Ferrari 066/10",
+    "pilotos": [1,2]
 }
 
-### editar escuderia con el id
-PUT http://localhost:3000/api/escuderias/{{id}}
+### POST 2
+# @name createEscuderia
+POST http://localhost:3000/api/escuderias
+Content-Type: application/json
+
+{
+    "name": "Alpine F1 Team",
+    "fundation": 2021,
+    "nationality": "France",
+    "engine": "Renault E-Tech RE23",
+    "pilotos": [5,6]
+}
+
+### PUT (UPDATE COMPLETO)
+PUT http://localhost:3000/api/escuderias/1
 Content-Type: application/json
 
 {
     "name": "Racing Bulls Formula One Team",
     "fundation": 2024,
     "nationality": "Italy",
-    "engine": "Honda RBPT"
+    "engine": "Honda RBPT",
+    "pilotos": [3,4]
 }
-### editar parcialmente escuderia, por ahora igual que put
+
+### PATCH (UPDATE PARCIAL)
 PATCH http://localhost:3000/api/escuderias/{{id}}
 Content-Type: application/json
 
@@ -38,6 +54,6 @@ Content-Type: application/json
     "engine": "Ferrari HP"
 }
 
-###borrar un escuderia
+###DELETE
 DELETE http://localhost:3000/api/escuderias/{{id}}
 

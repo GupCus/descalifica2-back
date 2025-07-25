@@ -4,7 +4,8 @@ import { Cascade, Collection, Entity, OneToMany, Property } from '@mikro-orm/cor
 
 @Entity()
 export class Escuderia extends baseEntity{
-    @OneToMany(() => Piloto, (piloto) => piloto.team, { cascade: [Cascade.ALL] })
+    //id y name se heredan de la baseEntity
+    @OneToMany(() => Piloto, (piloto) => piloto.escuderia, { cascade: [Cascade.ALL] })
     pilotos = new Collection<Piloto>(this);
     @Property({nullable:false}) 
     fundation!:number
