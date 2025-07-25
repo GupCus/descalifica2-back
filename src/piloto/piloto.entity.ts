@@ -1,10 +1,9 @@
 import { Cascade, Entity, ManyToOne, OneToMany, OneToOne, PrimaryKey, Property} from "@mikro-orm/core"
 import { Escuderia } from "../escuderia/escuderia.entity.js"
+import { BaseEntity } from "../../shared/db/baseEntity.js"
 
 @Entity()
-export class Piloto {
-    @PrimaryKey()
-    id?: number
+export class Piloto extends BaseEntity{
 
     @Property({nullable: false, unique: true}) //no puede ser null, nombre único
     name!: string
