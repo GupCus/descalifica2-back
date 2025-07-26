@@ -1,41 +1,106 @@
-### lista completa
+###ID
+@id = {{createPiloto.response.body.data.id}}
+
+### GET ALL
 GET http://localhost:3000/api/pilotos
 
-### Encontrar uno
+### GET ONE
 
-GET http://localhost:3000/api/pilotos/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+GET http://localhost:3000/api/pilotos/{{id}}
 
-### mandar nuevo piloto
+### POST Ferrari (escuderia 1)
+# @name createPiloto
 POST http://localhost:3000/api/pilotos
 Content-Type: application/json
 
 {
-    "name": "Max Verstappen",
-    "team": "2f6cb93c-1d73-4b1e-90b1-2d50e439084f",
-    "nro": 1,
-    "nationality": "Pais bajeano/Neerlandés",
+    "name": "Charles Leclerc",
+    "escuderia": 1,
+    "num": 16,
+    "nationality": "Monegasque",
     "role": "Primer piloto"
 }
 
-### editar piloto con el id
-PUT http://localhost:3000/api/pilotos/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+### POST Ferrari (escuderia 1) - Compañero
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "Lewis Hamilton",
+    "escuderia": 1,
+    "num": 44,
+    "nationality": "British",
+    "role": "Segundo piloto"
+}
+
+### POST Alpine (escuderia 2)
+# @name createPiloto
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "Franco Colapinto",
+    "escuderia": 2,
+    "num": 43,
+    "nationality": "Argentinian",
+    "role": "Segundo piloto"
+}
+
+### POST Alpine (escuderia 2) - Compañero
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "Pierre Gasly",
+    "escuderia": 2,
+    "num": 10,
+    "nationality": "French",
+    "role": "Primer piloto"
+}
+
+### POST Racing Bulls (escuderia 3) - Pilotos
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "Isack Hadjar",
+    "escuderia": 1,
+    "num": 6,
+    "nationality": "French",
+    "role": "Primer piloto"
+}
+
+### POST Racing Bulls (escuderia 3) - Pilotos
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "Liam Lawson",
+    "escuderia": 1,
+    "num": 30,
+    "nationality": "New Zealander",
+    "role": "Segundo piloto"
+}
+
+### PUT
+PUT http://localhost:3000/api/pilotos/{{id}}
 Content-Type: application/json
 
 {
     "name": "Max Verstappen",
-    "team": "2f6cb93c-1d73-4b1e-90b1-2d50e439084f",
-    "nro": 1,
+    "escuderia": 2,
+    "num": 1,
     "nationality": "Neerlandés",
     "role": "Primer piloto"
 }
 
-### editar parcialmente piloto, por ahora igual que put
-PATCH http://localhost:3000/api/pilotos/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+### PATCH
+PATCH http://localhost:3000/api/pilotos/{{id}}
 Content-Type: application/json
 
 {
     "nationality": "Neerlandés"
 }
 
-###borrar un piloto
-DELETE http://localhost:3000/api/pilotos/2f6cb93c-1d73-4b1e-90b1-2d50e439084f
+### DELETE
+DELETE http://localhost:3000/api/pilotos/{{id}}

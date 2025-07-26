@@ -1,26 +1,19 @@
-import { Cascade, Entity, ManyToOne, OneToMany, OneToOne, PrimaryKey, Property} from "@mikro-orm/core"
-import { Escuderia } from "../escuderia/escuderia.entity.js"
-import { BaseEntity } from "../../shared/db/baseEntity.js"
+import { Entity, ManyToOne, Property, Rel } from '@mikro-orm/core';
+import { baseEntity } from '../shared/baseEntity.entity.js';
+import { Escuderia } from '../escuderia/escuderia.entity.js';
 
 @Entity()
-export class Piloto extends BaseEntity{
-
-    @Property({nullable: false, unique: true}) //no puede ser null, nombre único
-    name!: string
-
-    @Property({nullable: false})
-    birth_date!: string
-
-    @Property()
-    nationality!: string
-
-    @Property()
-    description!: string
-    
-    @Property()
-    role?: string
-
-    @ManyToOne(() => Escuderia, { cascade: [Cascade.ALL] })
-    actualTeam?: Escuderia
-    
+export class Piloto extends baseEntity{ 
+        
+        @ManyToOne(() => Escuderia, { nullable: false })
+        //team!: Escuderia; DA ERROR, por ser una relacion circular. Se usa lo siguiente:
+        escuderia!: Rel<Escuderia>;
+        @Property({nullable:false,unique:true})
+        num!:number
+        @Property({nullable:false})
+        nationality!:string
+        @Property({nullable:false})
+        role!:string
 }
+//FRAN: hay q pasarlas a español
+//AGUS: me gustan mas en inglés estas cosas

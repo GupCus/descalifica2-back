@@ -1,16 +1,18 @@
 import { Request,Response,NextFunction } from "express"
-import { EscuderiaRepository } from "./escuderia.repository.js"
-import { Escuderia } from "./escuderia.entity.mem.js"
+import { Escuderia } from "./escuderia.entity.js"
+import { orm } from "../shared/db/orm.js"
+import { NotFoundError } from "@mikro-orm/core"
 
-const repository = new EscuderiaRepository()
+const em = orm.em
 
-function sanitizeEscuderiaInput(req: Request, res: Response, next: NextFunction){ 
+function sanitizeEscuderia(req: Request, res: Response, next: NextFunction){ 
   req.body.sanitizedInput = {
       name: req.body.name,
       fundation: req.body.fundation,
       nationality: req.body.nationality,
       engine: req.body.engine,
-      id: req.params.id
+      id: req.params.id,
+      pilotos: req.params.pilotos
   }
    Object.keys(req.body.sanitizedInput).forEach(key => { 
       if(req.body.sanitizedInput[key] === undefined){delete req.body.sanitizedInput[key]}
@@ -18,59 +20,76 @@ function sanitizeEscuderiaInput(req: Request, res: Response, next: NextFunction)
   next()
 }
 
-//get todos los Escuderias
-function findAll(req:Request,res:Response){
-   res.status(200).send({message: 'Escuderias', data: repository.findAll()});
+//GET ALL
+async function findAll(req:Request,res:Response){
+  try{
+    const escuderias = await em.find(Escuderia, {}, {populate:['pilotos']})
+    res.status(200).json({message:'OK',data:escuderias})
+  }catch(error:any){
+    res.status(500).json({message: 'Internal server error'});
+  }
 }
 
-//get para un Escuderia en específico
-function findOne(req:Request,res:Response) { 
-    const Escuderia = repository.findOne({id:req.params.id})
-    if(!Escuderia){ //if Escuderia es un undefined (no lo encontró)
-        res.status(404).send({message: 'Escuderia no encontrada.'})
+//GET ONE
+async function findOne(req:Request,res:Response) { 
+   try{
+    const id = Number.parseInt(req.params.id)
+    const escuderia = await em.findOneOrFail(Escuderia, {id}, {populate:['pilotos']})
+    res.status(200).json({message:'OK',data:escuderia})
+  }catch(error:any){
+    if (error instanceof NotFoundError){
+      res.status(404).json({message:'Resource not found'})
+    }else{
+      res.status(500).json({message: 'Internal server error'});
     }
-    res.status(200).send({message: 'Escuderia encontrada', data: Escuderia})
-}
-
-//post un nuevo Escuderia
-function add(req:Request,res:Response){
-  
-    const input = req.body.sanitizedInput //utilizo la input limpia
-
-    const escuderia = new Escuderia(
-      input.name,
-      input.fundation,
-      input.nationality,
-      input.engine
-    )
-
-    repository.add(escuderia)
-    res.status(201).send({message: 'Escuderia creada correctamente.', data: escuderia})
-}
-
-//put&patch de Escuderia
-function update(req:Request,res:Response) { 
-
-  const escuderia = repository.update(req.body.sanitizedInput)
-  
-  if(!escuderia){
-      res.status(404).send({message: 'Escuderia no encontrado.'})
-  }else{
-  res.status(200).send({ message: 'Escuderia modificado correctamente.', data: escuderia})
   }
 }
 
-//Aunque este definida en el repository con un parametro {id: string} de esta forma tenemos la versatilidad de que manden tanto asi como el character entero
-function remove(req:Request,res:Response){ 
-  const escuderia = repository.remove(req.body.sanitizedInput)
-
-  if(!escuderia){
-      res.status(404).send({message: 'Escuderia no encontrado.'})
-  }else{
-      res.status(200).send({message: 'Escuderia borrado correctamente.'})
+//POST
+async function add(req:Request,res:Response){
+  
+  try{
+    const escuderia = em.create(Escuderia, req.body.sanitizedInput)
+    await em.flush()
+    res.status(201).json({message:'Created', data: escuderia})
+  }catch(error:any){
+    res.status(500).json({message: 'Internal server error'});
   }
 }
 
+//PUT & PATCH
+async function update(req:Request,res:Response) { 
+   try{
+    const id = Number.parseInt(req.params.id)
+    const escuderia = await em.findOneOrFail(Escuderia, {id})
+    em.assign(escuderia,req.body.sanitizedInput)
+    await em.flush()
+    res.status(204).json({message:'Updated'})
+  }catch(error:any){
+    if (error instanceof NotFoundError){
+      res.status(404).json({message:'Resource not found'})
+    }else{
+      res.status(500).json({message: 'Internal server error'});
+    }
+  }
+}
 
+//DELETE
+async function remove(req:Request,res:Response){ 
+   try{
+    const id = Number.parseInt(req.params.id)
+    const escuderia = em.getReference(Escuderia,id)
+    await em.removeAndFlush(escuderia)
+    res.status(204).json({message:'Deleted'})
+  }catch(error:any){
+    if (error instanceof NotFoundError){
+      res.status(404).json({message:'Resource not found'})
+    }else{
+      res.status(500).json({message: 'Internal server error'});
+    }
+  }
+}
 
-export {sanitizeEscuderiaInput, findAll, findOne, add, update, remove}
+export { findAll, findOne, add, update, remove, sanitizeEscuderia}
+
+//Nota para la posterioridad, dejo todos los catch iguales, esto es para que en un futuro encontrar una forma de que si no existe el objeto necesario, devuelva not found. Falta implementar.

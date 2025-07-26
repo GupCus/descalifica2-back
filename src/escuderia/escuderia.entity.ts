@@ -1,14 +1,10 @@
-import { Cascade, Collection, Entity, ManyToOne, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
-import { Piloto } from "../piloto/piloto.entity.js";
-import { Categoria } from "../categoria/categoria.entity.js";
-import { BaseEntity } from "../../shared/db/baseEntity.js";
-
+import { Categoria } from '../categoria/categoria.entity.js';
+import { Piloto } from '../piloto/piloto.entity.js';
+import { baseEntity } from '../shared/baseEntity.entity.js';
+import { Cascade, Collection, Entity, OneToMany, Property, ManyToOne } from '@mikro-orm/core';
 @Entity()
-export class Escuderia extends BaseEntity{
-    
-    @Property({nullable: false, unique: true})
-    name!: string
-
+export class Escuderia extends baseEntity{
+    //id y name se heredan de la baseEntity
     @Property({nullable: false})
     fundation_year!: number
 
@@ -18,7 +14,7 @@ export class Escuderia extends BaseEntity{
     @Property()
     engine!: string
 
-    @OneToMany(() => Piloto, piloto => piloto.actualTeam, {cascade: [Cascade.ALL]})
+    @OneToMany(() => Piloto, piloto => piloto.escuderia, {cascade: [Cascade.ALL]})
     pilotos = new Collection<Piloto>(this)
 
     @ManyToOne(() => Categoria, {cascade: [Cascade.ALL]})
