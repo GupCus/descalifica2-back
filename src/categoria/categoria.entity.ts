@@ -2,6 +2,7 @@ import { Collection, Entity, ManyToMany, OneToMany, PrimaryKey, Property, Cascad
 import { Escuderia } from "../escuderia/escuderia.entity.js";
 import { baseEntity } from "../shared/baseEntity.entity.js";
 import { Temporada } from "../temporada/temporada.entity.js";
+import { Piloto } from "../piloto/piloto.entity.js";
 
 
 
@@ -13,6 +14,9 @@ export class Categoria extends baseEntity{
 
     @Property({nullable: true})
     description?: string
+
+    @OneToMany(() => Piloto, piloto => piloto.racing_series,)
+    drivers = new Collection<Piloto>(this)
 
     @OneToMany(() => Escuderia, escuderia => escuderia.categoria)
     escuderias = new Collection<Escuderia>(this);

@@ -1,6 +1,7 @@
-import { Entity, ManyToOne, Property, Rel } from '@mikro-orm/core';
+import { Cascade, Entity, ManyToOne, Property, Rel } from '@mikro-orm/core';
 import { baseEntity } from '../shared/baseEntity.entity.js';
 import { Escuderia } from '../escuderia/escuderia.entity.js';
+import { Categoria } from '../categoria/categoria.entity.js';
 
 @Entity()
 export class Piloto extends baseEntity{ 
@@ -14,6 +15,8 @@ export class Piloto extends baseEntity{
         nationality!:string
         @Property({nullable:false})
         role!:string
+        @ManyToOne(() => Categoria, {cascade:[Cascade.ALL]})
+        racing_series?: Categoria
 }
 //FRAN: hay q pasarlas a español
 //AGUS: me gustan mas en inglés estas cosas
