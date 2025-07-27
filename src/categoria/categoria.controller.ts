@@ -1,8 +1,6 @@
 import { Categoria } from "./categoria.entity.js";
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../shared/db/orm.js";
-import { Piloto } from "../piloto/piloto.entity.js";
-import { Escuderia } from "../escuderia/escuderia.entity.js";
 
 const em = orm.em
 

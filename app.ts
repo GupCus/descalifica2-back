@@ -11,6 +11,7 @@ import { escuderiaRouter } from './src/escuderia/escuderia.routes.js';
 import { orm, syncSchema } from './src/shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import { categoriaRouter } from './src/categoria/categoria.routes.js';
+import { temporadaRouter } from './src/temporada/temporada.routes.js';
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use((req,res,next)=>{
 app.use('/api/pilotos',pilotoRouter)
 app.use('/api/escuderias',escuderiaRouter)
 app.use('/api/categorias/',categoriaRouter)
+app.use('/api/temporadas/',temporadaRouter)
 
 //Repuesta default para cualquier unhandled request
 app.use((_,res) => {
