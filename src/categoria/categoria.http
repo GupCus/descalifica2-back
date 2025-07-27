@@ -1,5 +1,11 @@
+###ID
+@id = {{createCategoria.response.body.data.id}}
+
 ### GET ALL
 GET http://localhost:3000/api/categorias
+
+###GET ONE
+GET http://localhost:3000/api/categorias/4
 
 ### POST F1
 # @name createCategoria
@@ -7,5 +13,16 @@ POST http://localhost:3000/api/categorias
 Content-Type: application/json
 
 {
-    "name": "F1"
+    "name": "Rally Cordobés"
 }
+
+###PUT F2 -> F3 
+PUT http://localhost:3000/api/categorias/2
+Content-Type: application/json
+
+{
+    "name": "F2"
+}
+
+###DELETE
+DELETE http://localhost:3000/api/categorias/4

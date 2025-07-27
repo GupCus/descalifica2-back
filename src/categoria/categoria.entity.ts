@@ -7,8 +7,11 @@ import { baseEntity } from "../shared/baseEntity.entity.js";
 
 @Entity()
 export class Categoria extends baseEntity{
-    @Property()
+    @Property({nullable: false})
     name!: string
+
+    @Property({nullable: true})
+    description?: string
 
     @OneToMany(() => Escuderia, escuderia => escuderia.categoria)
     escuderias = new Collection<Escuderia>(this);
