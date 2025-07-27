@@ -8,8 +8,9 @@ import 'reflect-metadata'
 import express from 'express'
 import { pilotoRouter } from './src/piloto/piloto.routes.js';
 import { escuderiaRouter } from './src/escuderia/escuderia.routes.js';
-import { orm, syncSchema } from './shared/db/orm.js';
+import { orm, syncSchema } from './src/shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
+import { categoriaRouter } from './src/categoria/categoria.routes.js';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use((req,res,next)=>{
 //Handler de routeo
 app.use('/api/pilotos',pilotoRouter)
 app.use('/api/escuderias',escuderiaRouter)
+app.use('/api/categorias/',categoriaRouter)
 
 //Repuesta default para cualquier unhandled request
 app.use((_,res) => {

@@ -1,18 +1,16 @@
-import { EscuderiaRepository } from "../escuderia/escuderia.repository.js";
-import { pilotoRepository } from "../piloto/piloto.repository.js";
 import { Categoria } from "./categoria.entity.mem.js";
-import { CategoriaRepository } from "./categoria.repository.js";
 import { NextFunction, Request, Response } from "express";
+import { orm } from "../shared/db/orm.js";
+import { Piloto } from "../piloto/piloto.entity.js";
+import { Escuderia } from "../escuderia/escuderia.entity.js";
 
-
-
-const repository = new CategoriaRepository()
+const em = orm.em
 
 function sanitizeCategoriaInput(req: Request, res: Response, next: NextFunction){ 
   req.body.sanitizedInput = {
       name: req.body.name,
-      escuderias: (new EscuderiaRepository).findAll(),
-      pilotos: (new pilotoRepository).findAll(),
+      escuderias: req.body.escuderias,
+      pilotos: req.body.pilotos,
       id: req.params.id
   }
    Object.keys(req.body.sanitizedInput).forEach(key => { 
@@ -20,52 +18,36 @@ function sanitizeCategoriaInput(req: Request, res: Response, next: NextFunction)
    })
   next()
 }
-
-function findAll(req:Request,res:Response){
-   res.status(200).send({message: 'Categorías', data: repository.findAll()});
+ //findALL
+async function findAll(req:Request,res:Response){
+  try{
+    const categorias = await em.find(Categoria, {})
+    res.status(200).json({message: 'findAll categorías:', data: categorias})
+  }catch(error:any){
+    res.status(500).json({message: 'Internal server error'});
+  }
 }
 
 function findOne(req:Request,res:Response) { 
-    const categoria = repository.findOne({id:req.params.id})
-    if(!categoria){
-        res.status(404).send({message: 'Categoría no encontrado.'})
-    }
-    res.status(200).send({message: 'Categoría encontrada', data: categoria})
+    res.status(200).send({message: 'Not implemented yet'})
 }
 
-function add(req:Request,res:Response){
-  
-    const input = req.body.sanitizedInput //utilizo la input limpia
-
-    const categoria = new Categoria(
-      input.name,
-      input.escuderias, //preguntar como ingresar varios, creo que es como cuando hace los objetos
-      input.pilotos
-    )
-
-    repository.add(categoria)
-    res.status(201).send({message: 'Categoría creada correctamente.', data: categoria})
+async function add(req:Request,res:Response){
+  try{
+    const categoria = em.create(Categoria, req.body.sanitizedInput)
+    await em.flush()
+    res.status(201).json({message: 'categoria created succesfully', data: categoria})
+  }catch(error:any){
+    res.status(500).json({ message: error.message})
+  }
 }
 
 function update(req:Request,res:Response) { 
-
-  const categoria = repository.update(req.body.sanitizedInput)
-  
-  if(!categoria){
-      res.status(404).send({message: 'Categoría no encontrada.'})
-  }else{
-  res.status(200).send({ message: 'Categoría modificada correctamente.', data: categoria})
-  }
+  res.status(200).send({message: 'Not implemented yet'})
 }
 
 function remove(req:Request,res:Response){ 
-  const categoria = repository.remove(req.body.sanitizedInput)
-
-  if(!categoria){
-      res.status(404).send({message: 'Categoría no encontrada.'})
-  }else{
-      res.status(200).send({message: 'Categoría borrada correctamente.'})
-  }
+  res.status(200).send({message: 'Not implemented yet'})
 }
 
 export {sanitizeCategoriaInput, findAll, findOne, add, update, remove}

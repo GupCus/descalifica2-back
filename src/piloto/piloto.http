@@ -9,7 +9,7 @@ GET http://localhost:3000/api/pilotos
 GET http://localhost:3000/api/pilotos/{{id}}
 
 ### POST Ferrari (escuderia 1)
-# @name createPiloto
+
 POST http://localhost:3000/api/pilotos
 Content-Type: application/json
 
