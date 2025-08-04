@@ -33,6 +33,7 @@ import { pilotoRouter } from './piloto/piloto.routes.js';
 import { carreraRouter } from './carrera/carrera.router.js';
 import { orm,syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
+import { circuitoClassRouter } from './circuito/circuitoClass.routes.js';
 
 const app = express();
 
@@ -47,7 +48,11 @@ app.use((req,res,next) =>{
 //Handler de routeo
 app.use('/api/pilotos',pilotoRouter)
 app.use('/api/escuderias',escuderiaRouter)
+<<<<<<< HEAD
 app.use('/api/carreras',carreraRouter)
+=======
+app.use('/api/circuitos/clases',circuitoClassRouter)
+>>>>>>> 980f635f0d99e651f48435859692081824e36e00
 
 //Repuesta default para cualquier unhandled request
 app.use((_,res) => {

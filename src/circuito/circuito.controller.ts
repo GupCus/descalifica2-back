@@ -44,12 +44,9 @@ function findOne(req: Request, res: Response) {
 function add(req: Request, res: Response) {
   const input = req.body.sanitizedInput; //utilizo la input limpia
 
-  const circuito = new Circuito(
-    input.name,
-    input.fundation,
-    input.nationality,
-    input.engine //MODIFICAR
-  );
+  const circuito = new Circuito();
+
+    //MODIFICAR
 
   repository.add(circuito);
   res
