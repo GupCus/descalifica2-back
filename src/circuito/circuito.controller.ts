@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import { CircuitoRepository } from './circuito.repository.js';
+/*import { Request, Response, NextFunction } from 'express';
+// import { CircuitoRepository } from './circuito.repository.js';
 import { Circuito } from './circuito.entity.js';
 
-const repository = new CircuitoRepository();
+// const repository = new CircuitoRepository();
 
 function sanitizeCircuitoInput(
   req: Request,
@@ -82,4 +82,4 @@ function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeCircuitoInput, findAll, findOne, add, update, remove };
+export { sanitizeCircuitoInput, findAll, findOne, add, update, remove };*/ 

@@ -30,6 +30,7 @@ import express from 'express'
 import 'reflect-metadata'
 import { escuderiaRouter } from './escuderia/escuderia.routes.js';
 import { pilotoRouter } from './piloto/piloto.routes.js';
+import { carreraRouter } from './carrera/carrera.router.js';
 import { orm,syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 
@@ -46,6 +47,7 @@ app.use((req,res,next) =>{
 //Handler de routeo
 app.use('/api/pilotos',pilotoRouter)
 app.use('/api/escuderias',escuderiaRouter)
+app.use('/api/carreras',carreraRouter)
 
 //Repuesta default para cualquier unhandled request
 app.use((_,res) => {

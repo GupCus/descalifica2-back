@@ -1,8 +1,8 @@
 //import { Repository } from '../shared/repository.js';
-import { Circuito } from './circuito.entity.js';
+//import { Circuito } from './circuito.entity.js';
 
 //"Repositorio" en memoria
-const circuitos = [new Circuito('Monaco', 'Monaco', 3.35, 1929)];
+//const circuitos = [new Circuito('Monaco', 'Monaco', 3.35, 1929)];
 
 //Acciones sobre el ""repositorio"" definido en base a la interfaz shared/repository
 // veáse que tanto findOne como remove en vez de tener parametro un object "Circuito", tienen un objeto {id:item}
