@@ -47,8 +47,9 @@ app.use((req, res, next) => {
 //Handler de routeo
 app.use('/api/pilotos', pilotoRouter);
 app.use('/api/escuderias', escuderiaRouter);
+
 app.use('/api/carreras', carreraRouter);
-app.use('/api/circuitos', circuitoRouter);
+app.use('/api/circuitos/clases', circuitoRouter);
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {
