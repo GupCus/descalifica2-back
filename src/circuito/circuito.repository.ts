@@ -53,4 +53,3 @@ export class CircuitoRepository implements Repository<Circuito> {
     }
   }
 }
-

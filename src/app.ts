@@ -31,6 +31,7 @@ import 'reflect-metadata'
 import { escuderiaRouter } from './escuderia/escuderia.routes.js';
 import { pilotoRouter } from './piloto/piloto.routes.js';
 import { carreraRouter } from './carrera/carrera.router.js';
+import { marcaRouter } from './marca/marca.router.js';
 import { orm,syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import { circuitoClassRouter } from './circuito/circuitoClass.routes.js';
@@ -48,11 +49,9 @@ app.use((req,res,next) =>{
 //Handler de routeo
 app.use('/api/pilotos',pilotoRouter)
 app.use('/api/escuderias',escuderiaRouter)
-<<<<<<< HEAD
 app.use('/api/carreras',carreraRouter)
-=======
+app.use('/api/marcas',marcaRouter)
 app.use('/api/circuitos/clases',circuitoClassRouter)
->>>>>>> 980f635f0d99e651f48435859692081824e36e00
 
 //Repuesta default para cualquier unhandled request
 app.use((_,res) => {
