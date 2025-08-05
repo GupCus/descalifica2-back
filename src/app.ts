@@ -50,7 +50,7 @@ app.use('/api/pilotos', pilotoRouter);
 app.use('/api/escuderias', escuderiaRouter);
 app.use('/api/marcas', marcaRouter);
 app.use('/api/carreras', carreraRouter);
-app.use('/api/circuitos/clases', circuitoRouter);
+app.use('/api/circuitos', circuitoRouter);
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {

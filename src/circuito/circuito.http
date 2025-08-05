@@ -64,3 +64,14 @@ Content-Type: application/json
   "length": 7.004,
   "year": 1921
 }
+
+
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+{
+  "name": "Circuito Nationale di Monza",
+  "country": "Italia",
+  "length": 5.793,
+  "year": 1950
+}
