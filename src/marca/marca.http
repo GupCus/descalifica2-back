@@ -4,9 +4,6 @@
 ### GET ALL MARCAS
 GET http://localhost:3000/api/marcas
 
-### GET ONE MARCA
-GET http://localhost:3000/api/marcas/{{id}}
-
 
 # @name createMarca
 ### POST - Crear nueva marca
