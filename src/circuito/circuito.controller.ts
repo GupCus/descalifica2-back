@@ -1,8 +1,9 @@
-/*import { Request, Response, NextFunction } from 'express';
-// import { CircuitoRepository } from './circuito.repository.js';
+import { Request, Response, NextFunction } from 'express';
 import { Circuito } from './circuito.entity.js';
+import { orm } from '../shared/db/orm.js';
+import { NotFoundError } from '@mikro-orm/core';
 
-// const repository = new CircuitoRepository();
+const em = orm.em;
 
 function sanitizeCircuitoInput(
   req: Request,
@@ -14,7 +15,7 @@ function sanitizeCircuitoInput(
     country: req.body.country,
     length: req.body.length,
     year: req.body.year,
-    id: req.params.id,
+    id: req.body.id,
   };
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -26,57 +27,78 @@ function sanitizeCircuitoInput(
 }
 
 //get todos los Circuitos
-function findAll(req: Request, res: Response) {
-  res.status(200).send({ message: 'Circuitos', data: repository.findAll() });
+async function findAll(req: Request, res: Response) {
+  try {
+    const circuitos = await em.find(Circuito, {});
+    res.status(200).json({ message: 'OK', data: circuitos });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
 }
 
 //get para un Circuito en específico
-function findOne(req: Request, res: Response) {
-  const Circuito = repository.findOne({ id: req.params.id });
-  if (!Circuito) {
-    //if circuito es un undefined (no lo encontró)
-    res.status(404).send({ message: 'Circuito no encontrado.' });
+async function findOne(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const circuito = await em.findOneOrFail(Circuito, { id });
+    res.status(200).json({ message: 'OK', data: circuito });
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ message: 'Resource not found' });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
-  res.status(200).send({ message: 'Circuito encontrado', data: Circuito });
 }
 
 //post un nuevo Circuito
-function add(req: Request, res: Response) {
-  const input = req.body.sanitizedInput; //utilizo la input limpia
-
-  const circuito = new Circuito();
-
-    //MODIFICAR
-
-  repository.add(circuito);
-  res
-    .status(201)
-    .send({ message: 'Circuito creado correctamente.', data: circuito });
+async function add(req: Request, res: Response) {
+  try {
+    const circuito = em.create(Circuito, req.body.sanitizedInput);
+    await em.flush();
+    res
+      .status(201)
+      .json({ message: 'Circuito created successfully', data: circuito });
+  } catch (error: any) {
+    console.error('Error creating circuito: ', error);
+    res.status(500).json({ message: error.message });
+  }
 }
 
 //put&patch de Circuito
 
-function update(req: Request, res: Response) {
-  const circuito = repository.update(req.body.sanitizedInput);
-
-  if (!circuito) {
-    res.status(404).send({ message: 'Circuito no encontrado.' });
-  } else {
+async function update(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const circuito = await em.findOneOrFail(Circuito, { id });
+    em.assign(circuito, req.body.sanitizedInput);
+    await em.flush();
     res
       .status(200)
-      .send({ message: 'Circuito modificado correctamente.', data: circuito });
+      .json({ message: 'Circuito updated successfully', data: circuito });
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ message: 'Resource not found' });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 }
 
 //Aunque este definida en el repository con un parametro {id: string} de esta forma tenemos la versatilidad de que manden tanto asi como el character entero
-function remove(req: Request, res: Response) {
-  const circuito = repository.remove(req.body.sanitizedInput);
-
-  if (!circuito) {
-    res.status(404).send({ message: 'Circuito no encontrado.' });
-  } else {
-    res.status(200).send({ message: 'Circuito borrado correctamente.' });
+async function remove(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const circuito = await em.findOneOrFail(Circuito, { id });
+    await em.removeAndFlush(circuito);
+    res.status(200).json({ message: 'Circuito deleted successfully' });
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ message: 'Resource not found' });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
   }
 }
 
-export { sanitizeCircuitoInput, findAll, findOne, add, update, remove };*/ 
+export { findAll, findOne, add, update, remove, sanitizeCircuitoInput };

@@ -1,2 +1,0 @@
-### GET ALL
-GET http://localhost:3000/api/circuitos/clases HTTP/1.1

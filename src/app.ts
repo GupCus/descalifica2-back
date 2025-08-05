@@ -25,43 +25,39 @@
 Sentite libre de agregar otro problema q te tuvo mal - Agus
 */
 
-
-import express from 'express'
-import 'reflect-metadata'
+import express from 'express';
+import 'reflect-metadata';
 import { escuderiaRouter } from './escuderia/escuderia.routes.js';
 import { pilotoRouter } from './piloto/piloto.routes.js';
 import { carreraRouter } from './carrera/carrera.router.js';
-import { orm,syncSchema } from './shared/db/orm.js';
+import { orm, syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
-import { circuitoClassRouter } from './circuito/circuitoClass.routes.js';
+import { circuitoRouter } from './circuito/circuito.routes.js';
 
 const app = express();
 
 //Middleware para poder leer paquetes json
-app.use(express.json())
+app.use(express.json());
 
-//Bootstrap 
-app.use((req,res,next) =>{
-  RequestContext.create(orm.em,next)
+//Bootstrap
+app.use((req, res, next) => {
+  RequestContext.create(orm.em, next);
 });
 
 //Handler de routeo
-app.use('/api/pilotos',pilotoRouter)
-app.use('/api/escuderias',escuderiaRouter)
-<<<<<<< HEAD
-app.use('/api/carreras',carreraRouter)
-=======
-app.use('/api/circuitos/clases',circuitoClassRouter)
->>>>>>> 980f635f0d99e651f48435859692081824e36e00
+app.use('/api/pilotos', pilotoRouter);
+app.use('/api/escuderias', escuderiaRouter);
+app.use('/api/carreras', carreraRouter);
+app.use('/api/circuitos', circuitoRouter);
 
 //Repuesta default para cualquier unhandled request
-app.use((_,res) => {
-  res.status(404).send({ message: 'Recurso no encontrado.' })
-})
+app.use((_, res) => {
+  res.status(404).send({ message: 'Recurso no encontrado.' });
+});
 
 //SOLO EN DESARROLLO, ELIMINAR DESPUES ; Espero a que mikroORM se ponga al dia con la BD
-await syncSchema()
+await syncSchema();
 
 app.listen(3000, () => {
-    console.log('Corriendo en http://localhost:3000');
-})
+  console.log('Corriendo en http://localhost:3000');
+});
