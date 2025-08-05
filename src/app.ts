@@ -33,6 +33,7 @@ import { carreraRouter } from './carrera/carrera.router.js';
 import { orm, syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import { circuitoRouter } from './circuito/circuito.routes.js';
+import { marcaRouter } from './marca/marca.router.js';
 
 const app = express();
 
@@ -47,7 +48,7 @@ app.use((req, res, next) => {
 //Handler de routeo
 app.use('/api/pilotos', pilotoRouter);
 app.use('/api/escuderias', escuderiaRouter);
-
+app.use('/api/marcas', marcaRouter);
 app.use('/api/carreras', carreraRouter);
 app.use('/api/circuitos/clases', circuitoRouter);
 
