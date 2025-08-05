@@ -24,9 +24,9 @@ POST http://localhost:3000/api/marcas
 Content-Type: application/json
 
 {
-    "name": "McLaren", 
+    "name": "Aston Martin", 
     "nationality": "British",
-    "foundation": 1963
+    "foundation": 1913
 }
 
 
