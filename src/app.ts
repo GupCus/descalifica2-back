@@ -34,6 +34,7 @@ import { orm, syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import { circuitoRouter } from './circuito/circuito.routes.js';
 import { marcaRouter } from './marca/marca.router.js';
+import { sesionRouter } from './sesion/sesion.routes.js';
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use('/api/escuderias', escuderiaRouter);
 app.use('/api/marcas', marcaRouter);
 app.use('/api/carreras', carreraRouter);
 app.use('/api/circuitos', circuitoRouter);
+app.use('/api/sesiones', sesionRouter);
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {
