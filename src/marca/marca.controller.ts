@@ -11,6 +11,7 @@ function sanitizeMarca(req: Request, res: Response, next: NextFunction){
       id: req.params.id,
       nationality: req.body.nationality,
       foundation: req.body.foundation
+      // ¿Mostramos escuderias de c/ marca??
   }
    Object.keys(req.body.sanitizedInput).forEach(key => { 
       if(req.body.sanitizedInput[key] === undefined){delete req.body.sanitizedInput[key]}
@@ -21,7 +22,7 @@ function sanitizeMarca(req: Request, res: Response, next: NextFunction){
 //Traer todas las marcas
 async function findAll(req:Request,res:Response){
    try{
-       const marcas = await em.find(Marca, {})
+       const marcas = await em.find(Marca, {}, { populate: ['escuderias'] })
        res.status(200).json({message:'OK',data:marcas})
    }catch(error:any){
        res.status(500).json({message: error.message});
@@ -38,7 +39,7 @@ async function findOne(req:Request,res:Response) {
       return res.status(400).json({message: 'ID debe ser un número válido'})
     }
     
-    const marca = await em.findOneOrFail(Marca, {id})
+    const marca = await em.findOneOrFail(Marca, {id}, { populate: ['escuderias'] })
     console.log('Marca encontrada:', marca)
     res.status(200).json({message:'OK',data:marca})
   }catch(error:any){

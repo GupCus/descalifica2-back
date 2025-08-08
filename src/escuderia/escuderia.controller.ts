@@ -12,7 +12,8 @@ function sanitizeEscuderia(req: Request, res: Response, next: NextFunction){
       nationality: req.body.nationality,
       engine: req.body.engine,
       id: req.params.id,
-      pilotos: req.params.pilotos
+      pilotos: req.body.pilotos,
+      marca: req.body.marcaId ? Number(req.body.marcaId) : undefined
   }
    Object.keys(req.body.sanitizedInput).forEach(key => { 
       if(req.body.sanitizedInput[key] === undefined){delete req.body.sanitizedInput[key]}
@@ -23,7 +24,7 @@ function sanitizeEscuderia(req: Request, res: Response, next: NextFunction){
 //GET ALL
 async function findAll(req:Request,res:Response){
   try{
-    const escuderias = await em.find(Escuderia, {}, {populate:['pilotos']})
+    const escuderias = await em.find(Escuderia, {}, {populate:['pilotos', 'marca']})
     res.status(200).json({message:'OK',data:escuderias})
   }catch(error:any){
     res.status(500).json({message: 'Internal server error'});
@@ -34,7 +35,7 @@ async function findAll(req:Request,res:Response){
 async function findOne(req:Request,res:Response) { 
    try{
     const id = Number.parseInt(req.params.id)
-    const escuderia = await em.findOneOrFail(Escuderia, {id}, {populate:['pilotos']})
+    const escuderia = await em.findOneOrFail(Escuderia, {id}, {populate:['pilotos', 'marca']})
     res.status(200).json({message:'OK',data:escuderia})
   }catch(error:any){
     if (error instanceof NotFoundError){
@@ -49,11 +50,14 @@ async function findOne(req:Request,res:Response) {
 async function add(req:Request,res:Response){
   
   try{
+    console.log('Request body:', req.body);//borrar
+    console.log('Sanitized input:', req.body.sanitizedInput);// borrar 
     const escuderia = em.create(Escuderia, req.body.sanitizedInput)
     await em.flush()
     res.status(201).json({message:'Created', data: escuderia})
   }catch(error:any){
-    res.status(500).json({message: 'Internal server error'});
+    console.error('Error creating escuderia:', error);
+    res.status(500).json({message: 'Internal server error', error: error.message});
   }
 }
 
@@ -91,5 +95,7 @@ async function remove(req:Request,res:Response){
 }
 
 export { findAll, findOne, add, update, remove, sanitizeEscuderia}
+
+//Nota para la posterioridad, dejo todos los catch iguales, esto es para que en un futuro encontrar una forma de que si no existe el objeto necesario, devuelva not found. Falta implementar.
 
 //Nota para la posterioridad, dejo todos los catch iguales, esto es para que en un futuro encontrar una forma de que si no existe el objeto necesario, devuelva not found. Falta implementar.

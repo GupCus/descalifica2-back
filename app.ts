@@ -12,7 +12,8 @@ import { orm, syncSchema } from './src/shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
 import { categoriaRouter } from './src/categoria/categoria.routes.js';
 import { temporadaRouter } from './src/temporada/temporada.routes.js';
-
+import { carreraRouter } from './src/carrera/carrera.router.js';
+import { marcaRouter } from './src/marca/marca.router.js';
 const app = express();
 
 //Middleware para poder leer paquetes json
@@ -30,6 +31,8 @@ app.use('/api/pilotos',pilotoRouter)
 app.use('/api/escuderias',escuderiaRouter)
 app.use('/api/categorias',categoriaRouter)
 app.use('/api/temporadas',temporadaRouter)
+app.use('/api/carreras', carreraRouter)
+app.use('/api/marcas', marcaRouter)
 
 //Repuesta default para cualquier unhandled request
 app.use((_,res) => {

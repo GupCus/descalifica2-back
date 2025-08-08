@@ -2,6 +2,7 @@
 @id = {{createEscuderia.response.body.data.id}}
 
 ### GET ALL
+
 GET http://localhost:3000/api/escuderias
 
 ### GET ONE
@@ -14,10 +15,11 @@ Content-Type: application/json
 
 {
     "name": "Scuderia Ferrari",
-    "fundation_year": 1929,
+    "fundation": 1929,
     "nationality": "Italy",
     "engine": "Ferrari 066/10",
-    "categoria": 1
+    "marcaId": 5,
+    "pilotos": [1, 2]
 }
 
 ### POST 2
@@ -26,11 +28,12 @@ POST http://localhost:3000/api/escuderias
 Content-Type: application/json
 
 {
-    "name": "Alpine F1 Team",
-    "fundation": 2021,
-    "nationality": "France",
-    "engine": "Renault E-Tech RE23",
-    "pilotos": [5,6]
+    "name": "Mercedes-AMG Petronas F1 Team",
+    "fundation": 2010,
+    "nationality": "Germany",
+    "engine": "Mercedes M15 E Performance",
+    "marcaId": 14,
+    "pilotos": [3, 4]
 }
 
 ### PUT (UPDATE COMPLETO)
@@ -42,6 +45,7 @@ Content-Type: application/json
     "fundation": 2024,
     "nationality": "Italy",
     "engine": "Honda RBPT",
+    "marcaId": 8,
     "pilotos": [3,4]
 }
 
