@@ -28,8 +28,8 @@ app.use((req,res,next)=>{
 //Handler de routeo
 app.use('/api/pilotos',pilotoRouter)
 app.use('/api/escuderias',escuderiaRouter)
-app.use('/api/categorias/',categoriaRouter)
-app.use('/api/temporadas/',temporadaRouter)
+app.use('/api/categorias',categoriaRouter)
+app.use('/api/temporadas',temporadaRouter)
 
 //Repuesta default para cualquier unhandled request
 app.use((_,res) => {

@@ -1,0 +1,55 @@
+###VARIABLES
+@id = {{createMarca.response.body.data.id}}
+
+### GET ALL MARCAS
+GET http://localhost:3000/api/marcas
+
+### GET ONE MARCA
+GET http://localhost:3000/api/marcas/{{id}}
+
+
+# @name createMarca
+### POST - Crear nueva marca
+POST http://localhost:3000/api/marcas
+Content-Type: application/json
+
+{
+    "name": "Ferrari",
+    "nationality": "Italian",
+    "foundation": 1947
+}
+
+### POST - Otra marca de ejemplo
+POST http://localhost:3000/api/marcas
+Content-Type: application/json
+
+{
+    "name": "Aston Martin", 
+    "nationality": "British",
+    "foundation": 1913
+}
+
+
+### PUT - Actualizar marca completa
+PUT http://localhost:3000/api/marcas/{{id}}
+Content-Type: application/json
+
+{
+    "name": "Ferrari (Actualizado)",
+    "nationality": "Italian",
+    "foundation": 1947
+}
+### PATCH - Actualizar marca parcial (solo nacionalidad)
+PATCH http://localhost:3000/api/marcas/{{id}}
+Content-Type: application/json
+
+{
+    "nationality": "Italian (Actualizado)"
+}
+
+### DELETE - Eliminar marca
+DELETE http://localhost:3000/api/marcas/{{id}}
+
+### GET ONE - Marca específica (ID fijo para pruebas)
+GET http://localhost:3000/api/marcas/2
+

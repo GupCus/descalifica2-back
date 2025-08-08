@@ -2,7 +2,6 @@
 @id = {{createEscuderia.response.body.data.id}}
 
 ### GET ALL
-
 GET http://localhost:3000/api/escuderias
 
 ### GET ONE
@@ -15,10 +14,10 @@ Content-Type: application/json
 
 {
     "name": "Scuderia Ferrari",
-    "fundation": 1929,
+    "fundation_year": 1929,
     "nationality": "Italy",
     "engine": "Ferrari 066/10",
-    "pilotos": [1,2]
+    "categoria": 1
 }
 
 ### POST 2

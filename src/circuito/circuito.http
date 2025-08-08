@@ -1,0 +1,77 @@
+### Variables
+
+@id = {{createCircuito.response.body.data.id}}
+
+
+### GET ALL - Obtener todos los circuitos
+GET http://localhost:3000/api/circuitos
+
+### GET ONE - Obtener un circuito específico por ID
+GET http://localhost:3000/api/circuitos/{{id}}
+
+### POST - Crear un nuevo circuito
+# @name createCircuito
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+{
+  "name": "Circuito de Mónaco",
+  "country": "Mónaco",
+  "length": 3.337,
+  "year": 1929
+}
+
+### PUT - Actualizar un circuito completo
+PUT http://localhost:3000/api/circuitos/{{id}}
+Content-Type: application/json
+
+{
+  "name": "Circuito de Mónaco",
+  "country": "Mónaco",
+  "length": 3.337,
+  "year": 1929
+}
+
+### PATCH - Actualizar parcialmente un circuito
+PATCH http://localhost:3000/api/circuitos/{{id}}
+Content-Type: application/json
+
+{
+  "length": 3.340
+}
+
+### DELETE - Eliminar un circuito
+DELETE http://localhost:3000/api/circuitos/{{id}}
+
+### POST - Ejemplo con circuito de Silverstone
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+{
+  "name": "Silverstone Circuit",
+  "country": "Reino Unido",
+  "length": 5.891,
+  "year": 1948
+}
+
+### POST - Ejemplo con circuito de Spa-Francorchamps
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+{
+  "name": "Circuit de Spa-Francorchamps",
+  "country": "Bélgica",
+  "length": 7.004,
+  "year": 1921
+}
+
+
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+{
+  "name": "Circuito Nationale di Monza",
+  "country": "Italia",
+  "length": 5.793,
+  "year": 1950
+}

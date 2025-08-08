@@ -2,7 +2,7 @@
 @id = {{createPiloto.response.body.data.id}}
 
 ### GET ALL
-GET http://localhost:3000/api/pilotos
+GET http://localhost:3000/api/pilotos/
 
 ### GET ONE
 
@@ -10,7 +10,7 @@ GET http://localhost:3000/api/pilotos/{{id}}
 
 ### POST Ferrari (escuderia 1)
 
-POST http://localhost:3000/api/pilotos
+POST http://localhost:3000/api/pilotos/
 Content-Type: application/json
 
 {
