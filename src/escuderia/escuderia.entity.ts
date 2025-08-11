@@ -2,6 +2,7 @@ import { Piloto } from '../piloto/piloto.entity.js';
 import { baseEntity } from '../shared/baseEntity.entity.js';
 import { Cascade, Collection, Entity, OneToMany, Property, ManyToOne, Rel } from '@mikro-orm/core';
 import { Marca } from '../marca/marca.entity.js';
+import {Categoria} from '../categoria/categoria.entity.js';
 
 @Entity()
 export class Escuderia extends baseEntity{
@@ -20,6 +21,10 @@ export class Escuderia extends baseEntity{
     
     @ManyToOne(() => Marca)
     marca!: Rel<Marca>
+
+     @ManyToOne(() => Categoria, {cascade: [Cascade.ALL]})
+    categoria!: Rel<Categoria>
+   
 }
 
 //AGUS: ¿¿¿QUE HAY DE IMPORTANTE COMO PARA PONER???

@@ -13,6 +13,7 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
     fecha_Hora_sesion: req.body.fecha
       ? new Date(req.body.fecha)
       : req.body.fecha_Hora_sesion,
+    carrera: req.body.carrera,
     grilla: req.body.grilla,
     resultados: req.body.resultados,
     id: req.params.id,
@@ -26,7 +27,7 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-// Get all sessions
+// Obtener todas las sesiones
 
 async function findAll(req: Request, res: Response) {
   try {
@@ -41,7 +42,7 @@ async function findAll(req: Request, res: Response) {
   }
 }
 
-// Get a specific session
+// Obtener una sesión específica
 
 async function findOne(req: Request, res: Response) {
   try {
@@ -61,7 +62,7 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
-// Post a new session
+// Crear una sesion
 
 async function add(req: Request, res: Response) {
   try {
@@ -97,7 +98,7 @@ async function add(req: Request, res: Response) {
   }
 }
 
-// Put & Patch a session
+// Actualizar una sesión
 
 async function update(req: Request, res: Response) {
   try {
@@ -115,7 +116,7 @@ async function update(req: Request, res: Response) {
   }
 }
 
-// Delete a session
+// Eliminar una sesión
 
 async function remove(req: Request, res: Response) {
   try {

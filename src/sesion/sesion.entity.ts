@@ -9,7 +9,8 @@ import {
 } from '@mikro-orm/core';
 import { baseEntity } from '../shared/baseEntity.entity.js';
 import { Piloto } from '../piloto/piloto.entity.js';
-import { Circuito } from '../circuito/circuito.entity.js';
+import { Carrera } from '../carrera/carrera.entity.js';
+
 
 @Entity()
 export class Sesion extends baseEntity {
@@ -22,9 +23,9 @@ export class Sesion extends baseEntity {
   @Property({ nullable: false, unique: true })
   fecha_Hora_sesion!: Date;
 
-  // Relación con circuito
-  @ManyToOne(() => Circuito, { nullable: true })
-  circuito?: Rel<Circuito>;
+  // Relación con carrera
+  @ManyToOne(() => Carrera, { nullable: true })
+  carrera?: Rel<Carrera>;
 
   // Array de pilotos ordenados según la grilla de largada
   @ManyToMany(() => Piloto, undefined, { cascade: [Cascade.ALL] })
