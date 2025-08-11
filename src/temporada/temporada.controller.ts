@@ -7,7 +7,7 @@ const em = orm.em
 function sanitizeTemporadaInput(req: Request, res: Response, next: NextFunction){ 
   req.body.sanitizedInput = {
       year: req.body.year,
-      //races: req.body.races, DESCOMENTAR AL HACER CRUD CARRERA!!!!
+      races: req.body.races, 
       racing_series: req.body.racing_series,
       winner_driver: req.body.winner_driver,
       winner_team: req.body.winner_team,

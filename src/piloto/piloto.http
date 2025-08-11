@@ -9,13 +9,13 @@ GET http://localhost:3000/api/pilotos/
 GET http://localhost:3000/api/pilotos/{{id}}
 
 ### POST Ferrari (escuderia 1)
-
+# @name createPiloto
 POST http://localhost:3000/api/pilotos/
 Content-Type: application/json
 
 {
     "name": "Charles Leclerc",
-    "escuderia": 1,
+    "escuderia": 6,
     "num": 16,
     "nationality": "Monegasque",
     "role": "Primer piloto"
@@ -27,7 +27,7 @@ Content-Type: application/json
 
 {
     "name": "Lewis Hamilton",
-    "escuderia": 1,
+    "escuderia": 6,
     "num": 44,
     "nationality": "British",
     "role": "Segundo piloto"

@@ -14,6 +14,7 @@ import { categoriaRouter } from './src/categoria/categoria.routes.js';
 import { temporadaRouter } from './src/temporada/temporada.routes.js';
 import { carreraRouter } from './src/carrera/carrera.router.js';
 import { marcaRouter } from './src/marca/marca.router.js';
+import { circuitoRouter } from './src/circuito/circuito.routes.js';
 const app = express();
 
 //Middleware para poder leer paquetes json
@@ -33,6 +34,7 @@ app.use('/api/categorias',categoriaRouter)
 app.use('/api/temporadas',temporadaRouter)
 app.use('/api/carreras', carreraRouter)
 app.use('/api/marcas', marcaRouter)
+app.use('/api/circuitos', circuitoRouter)
 
 //Repuesta default para cualquier unhandled request
 app.use((_,res) => {

@@ -5,8 +5,6 @@ import { Temporada } from "../temporada/temporada.entity.js";
 import { Piloto } from "../piloto/piloto.entity.js";
 
 
-
-
 @Entity()
 export class Categoria extends baseEntity{
     @Property({nullable: false})

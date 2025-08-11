@@ -10,7 +10,8 @@ function sanitizeCarrera(req: Request, res: Response, next: NextFunction){
        name: req.body.name,
       start_date: req.body.start_date ? new Date(req.body.start_date) : undefined,
       end_date: req.body.end_date ? new Date(req.body.end_date) : undefined,
-      temporada: req.body.temporada
+      temporada: req.body.temporada,
+      Circuito: req.body.circuito ? Number(req.body.circuito) : undefined
   }
    Object.keys(req.body.sanitizedInput).forEach(key => { 
       if(req.body.sanitizedInput[key] === undefined){delete req.body.sanitizedInput[key]}
@@ -21,7 +22,7 @@ function sanitizeCarrera(req: Request, res: Response, next: NextFunction){
 //Traer todas las carreras
 async function findAll(req:Request,res:Response){
    try{
-       const carreras = await em.find(Carrera, {})
+       const carreras = await em.find(Carrera, {}, {populate: ['Circuito', 'temporada']})
        res.status(200).json({message:'OK',data:carreras})
    }catch(error:any){
        res.status(500).json({message: 'message: error.message'});
@@ -30,7 +31,7 @@ async function findAll(req:Request,res:Response){
 async function findOne(req:Request,res:Response) { 
    try{
     const id = Number.parseInt(req.params.id)
-    const carrera = await em.findOneOrFail(Carrera, {id}) // Populate comentado temporalmente
+    const carrera = await em.findOneOrFail(Carrera, {id}, {populate: ['Circuito', 'temporada']})
     res.status(200).json({message:'OK',data:carrera})
   }catch(error:any){
     if (error instanceof NotFoundError){
@@ -45,6 +46,10 @@ async function add(req:Request,res:Response) {
   try{
     const carrera = em.create(Carrera, req.body.sanitizedInput)
     await em.flush()
+    
+    // Populate las relaciones para mostrar información completa
+    await em.populate(carrera, ['Circuito', 'temporada'])
+    
     res.status(201).json({message:'Carrera created successfully',data:carrera})
   }catch(error:any){
     console.error('Error creating carrera:', error);

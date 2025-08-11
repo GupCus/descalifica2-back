@@ -19,10 +19,10 @@ export class Escuderia extends baseEntity{
     @Property({nullable:false})
     engine!:string
     
-    @ManyToOne(() => Marca)
+    @ManyToOne(() => Marca,{nullable:false})
     marca!: Rel<Marca>
 
-     @ManyToOne(() => Categoria, {cascade: [Cascade.ALL]})
+    @ManyToOne(() => Categoria, { nullable: true})
     categoria!: Rel<Categoria>
    
 }

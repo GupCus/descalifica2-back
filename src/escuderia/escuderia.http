@@ -18,8 +18,8 @@ Content-Type: application/json
     "fundation": 1929,
     "nationality": "Italy",
     "engine": "Ferrari 066/10",
-    "marcaId": 5,
-    "pilotos": [1, 2]
+    "marca": 5,
+    "pilotos": [3, 4]
 }
 
 ### POST 2

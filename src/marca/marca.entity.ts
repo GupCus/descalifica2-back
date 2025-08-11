@@ -11,10 +11,8 @@ export class Marca extends baseEntity {
     @Property({ nullable: false })
     foundation!: number;
     
-    // Relación inversa con Escuderias
     @OneToMany(() => Escuderia, (escuderia) => escuderia.marca, { cascade: [Cascade.ALL] })
     escuderias = new Collection<Escuderia>(this);
     
-    // La propiedad 'name' ya está heredada de baseEntity
-    // La propiedad 'id' ya está heredada de baseEntity
+ 
 }
