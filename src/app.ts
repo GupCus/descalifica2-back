@@ -32,9 +32,10 @@ import { escuderiaRouter } from './escuderia/escuderia.routes.js';
 import { pilotoRouter } from './piloto/piloto.routes.js';
 import { orm,syncSchema } from './shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
+import cors from 'cors';
 
 const app = express();
-
+app.use(cors());
 //Middleware para poder leer paquetes json
 app.use(express.json())
 
