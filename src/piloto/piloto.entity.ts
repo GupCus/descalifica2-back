@@ -7,6 +7,7 @@ import { Categoria } from '../categoria/categoria.entity.js';
 export class Piloto extends baseEntity{ 
         
         @ManyToOne(() => Escuderia, { nullable: false })
+        //Escudería no muestra pilotos en la QUERY!!!
         //team!: Escuderia; DA ERROR, por ser una relacion circular. Se usa lo siguiente:
         escuderia!: Rel<Escuderia>;
         @Property({nullable:false,unique:true})

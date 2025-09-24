@@ -7,6 +7,7 @@ import {Categoria} from '../categoria/categoria.entity.js';
 @Entity()
 export class Escuderia extends baseEntity{
     //id y name se heredan de la baseEntity
+    //Escudería no muestra pilotos en la QUERY!!!
     @OneToMany(() => Piloto, (piloto) => piloto.escuderia, { cascade: [Cascade.ALL] })
     pilotos = new Collection<Piloto>(this);
     

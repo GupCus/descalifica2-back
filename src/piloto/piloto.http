@@ -15,7 +15,7 @@ Content-Type: application/json
 
 {
     "name": "Charles Leclerc",
-    "escuderia": 6,
+    "escuderia": 2,
     "num": 16,
     "nationality": "Monegasque",
     "role": "Primer piloto"
@@ -27,7 +27,7 @@ Content-Type: application/json
 
 {
     "name": "Lewis Hamilton",
-    "escuderia": 6,
+    "escuderia": 2,
     "num": 44,
     "nationality": "British",
     "role": "Segundo piloto"
