@@ -14,7 +14,7 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
       ? new Date(req.body.fecha)
       : req.body.fecha_Hora_sesion,
     carrera: req.body.carrera,
-    grilla: req.body.grilla,
+    //grilla: req.body.grilla,
     resultados: req.body.resultados,
     id: req.params.id,
   };
@@ -34,7 +34,7 @@ async function findAll(req: Request, res: Response) {
     const sesiones = await em.find(
       Sesion,
       {},
-      { populate: ['grilla', 'resultados'] }
+      { populate: ['resultados'] }
     );
     res.status(200).json({ message: 'OK', data: sesiones });
   } catch (error: any) {
@@ -50,7 +50,7 @@ async function findOne(req: Request, res: Response) {
     const sesion = await em.findOneOrFail(
       Sesion,
       { id },
-      { populate: ['grilla', 'resultados'] }
+      { populate: ['resultados'] }
     );
     res.status(200).json({ message: 'OK', data: sesion });
   } catch (error: any) {
@@ -71,14 +71,6 @@ async function add(req: Request, res: Response) {
     // Crear la sesión sin las relaciones primero
     const { grilla, resultados, ...sesionProps } = sesionData;
     const sesion = em.create(Sesion, sesionProps);
-
-    // Si hay pilotos en grilla, agregarlos
-    if (grilla && Array.isArray(grilla)) {
-      for (const pilotoId of grilla) {
-        const piloto = await em.findOne(Piloto, { id: pilotoId });
-        if (piloto) sesion.grilla.add(piloto);
-      }
-    }
 
     // Si hay pilotos en resultados, agregarlos
     if (resultados && Array.isArray(resultados)) {

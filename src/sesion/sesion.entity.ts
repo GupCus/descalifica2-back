@@ -27,11 +27,9 @@ export class Sesion extends baseEntity {
   @ManyToOne(() => Carrera, { nullable: true })
   carrera?: Rel<Carrera>;
 
-  // Array de pilotos ordenados según la grilla de largada
-  @ManyToMany(() => Piloto, undefined, { cascade: [Cascade.ALL] })
-  grilla = new Collection<Piloto>(this);
-
   // Array de pilotos ordenados según resultados finales
   @ManyToMany(() => Piloto, undefined, { cascade: [Cascade.ALL] })
   resultados = new Collection<Piloto>(this);
 }
+
+
