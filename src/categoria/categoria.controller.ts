@@ -7,8 +7,10 @@ const em = orm.em
 function sanitizeCategoriaInput(req: Request, res: Response, next: NextFunction){ 
   req.body.sanitizedInput = {
       name: req.body.name,
+      description: req.body.description,
       escuderias: req.body.escuderias,
-      pilotos: req.body.pilotos,
+      drivers: req.body.drivers,
+      seasons: req.body.seasons,
       id: req.params.id
   }
    Object.keys(req.body.sanitizedInput).forEach(key => { 

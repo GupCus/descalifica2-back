@@ -14,8 +14,8 @@ POST http://localhost:3000/api/marcas
 Content-Type: application/json
 
 {
-    "name": "Ferrari",
-    "nationality": "Italian",
+    "name": "Mercedes",
+    "nationality": "German",
     "foundation": 1947
 }
 

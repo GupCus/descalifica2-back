@@ -13,13 +13,13 @@ export class Categoria extends baseEntity{
     @Property({nullable: true})
     description?: string
 
-    @OneToMany(() => Piloto, piloto => piloto.racing_series,)
+    @OneToMany(() => Piloto, (piloto) => piloto.racing_series, {cascade:[Cascade.ALL], nullable: true})
     drivers = new Collection<Piloto>(this)
 
-    @OneToMany(() => Escuderia, escuderia => escuderia.categoria)
+    @OneToMany(() => Escuderia, (escuderia) => escuderia.categoria)
     escuderias = new Collection<Escuderia>(this);
 
-    @OneToMany(() => Temporada, temporada => temporada.racing_series, {cascade:[Cascade.ALL]})
+    @OneToMany(() => Temporada, (temporada) => temporada.racing_series, {cascade:[Cascade.ALL], nullable: true})
     seasons = new Collection<Temporada>(this)
 
 }

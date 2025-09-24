@@ -5,11 +5,7 @@ import { NotFoundError } from '@mikro-orm/core';
 
 const em = orm.em;
 
-function sanitizeCircuitoInput(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+function sanitizeCircuitoInput(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     name: req.body.name,
     country: req.body.country,

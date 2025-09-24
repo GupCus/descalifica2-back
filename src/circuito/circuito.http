@@ -14,12 +14,146 @@ GET http://localhost:3000/api/circuitos/{{id}}
 POST http://localhost:3000/api/circuitos
 Content-Type: application/json
 
-{
-  "name": "Circuito de Mónaco",
-  "country": "Mónaco",
-  "length": 3.337,
-  "year": 1929
-}
+{"name":"Bahrain International Circuit","country":"Baréin","length":5.412,"year":2004}
+
+### POST Jeddah
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Jeddah Corniche Circuit","country":"Arabia Saudita","length":6.174,"year":2021}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Albert Park Circuit","country":"Australia","length":5.278,"year":1953}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Suzuka Circuit","country":"Japón","length":5.807,"year":1962}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Shanghai International Circuit","country":"China","length":5.451,"year":2004}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Miami International Autodrome","country":"Estados Unidos","length":5.412,"year":2022}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Autodromo Enzo e Dino Ferrari (Imola)","country":"Italia","length":4.909,"year":1953}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Circuit de Monaco","country":"Mónaco","length":3.337,"year":1929}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Circuit Gilles Villeneuve","country":"Canadá","length":4.361,"year":1978}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Circuit de Barcelona-Catalunya","country":"España","length":4.655,"year":1991}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Red Bull Ring (Spielberg)","country":"Austria","length":4.318,"year":1969}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Silverstone Circuit","country":"Reino Unido","length":5.891,"year":1948}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Hungaroring","country":"Hungría","length":4.381,"year":1986}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Circuit de Spa-Francorchamps","country":"Bélgica","length":7.004,"year":1924}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Circuit Zandvoort","country":"Países Bajos","length":4.259,"year":1948}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Autodromo Nazionale Monza","country":"Italia","length":5.793,"year":1922}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Baku City Circuit","country":"Azerbaiyán","length":6.003,"year":2016}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Marina Bay Street Circuit (Singapore)","country":"Singapur","length":5.063,"year":2008}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Circuit of the Americas (COTA)","country":"Estados Unidos","length":5.513,"year":2012}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Autódromo Hermanos Rodríguez","country":"México","length":4.304,"year":1959}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Autódromo José Carlos Pace (Interlagos)","country":"Brasil","length":4.309,"year":1940}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Las Vegas Strip Circuit","country":"Estados Unidos","length":6.201,"year":2023}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Lusail International Circuit","country":"Qatar","length":5.380,"year":2021}
+
+### POST
+POST http://localhost:3000/api/circuitos
+Content-Type: application/json
+
+  {"name":"Yas Marina Circuit","country":"Emiratos Árabes Unidos","length":5.281,"year":2009}
+
 
 ### PUT - Actualizar un circuito completo
 PUT http://localhost:3000/api/circuitos/{{id}}
@@ -41,7 +175,7 @@ Content-Type: application/json
 }
 
 ### DELETE - Eliminar un circuito
-DELETE http://localhost:3000/api/circuitos/{{id}}
+DELETE http://localhost:3000/api/circuitos/
 
 ### POST - Ejemplo con circuito de Silverstone
 POST http://localhost:3000/api/circuitos

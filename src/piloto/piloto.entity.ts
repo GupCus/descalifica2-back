@@ -7,7 +7,6 @@ import { Categoria } from '../categoria/categoria.entity.js';
 export class Piloto extends baseEntity{ 
         
         @ManyToOne(() => Escuderia, { nullable: false })
-        //Escudería no muestra pilotos en la QUERY!!!
         //team!: Escuderia; DA ERROR, por ser una relacion circular. Se usa lo siguiente:
         escuderia!: Rel<Escuderia>;
         @Property({nullable:false,unique:true})
@@ -16,8 +15,8 @@ export class Piloto extends baseEntity{
         nationality!:string
         @Property({nullable:false})
         role!:string
-        @ManyToOne(() => Categoria, {cascade:[Cascade.ALL]})
-        racing_series?: Categoria
+        @ManyToOne(() => Categoria, { cascade:[Cascade.ALL], nullable: true })
+        racing_series?: Rel<Categoria>
 }
 //FRAN: hay q pasarlas a español
 //AGUS: me gustan mas en inglés estas cosas

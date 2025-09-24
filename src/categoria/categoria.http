@@ -13,7 +13,7 @@ POST http://localhost:3000/api/categorias
 Content-Type: application/json
 
 {
-    "name": "Rally Cordobés"
+    "name": "Fórmula 1"
 }
 
 ###PUT F2 -> F3 
@@ -22,6 +22,14 @@ Content-Type: application/json
 
 {
     "name": "F2"
+}
+
+###PATCH
+PATCH http://localhost:3000/api/categorias/1
+Content-Type: application/json
+
+{
+    "pilotos": 1
 }
 
 ###DELETE

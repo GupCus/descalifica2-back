@@ -32,8 +32,7 @@ Content-Type: application/json
     "fundation": 2010,
     "nationality": "Germany",
     "engine": "Mercedes M15 E Performance",
-    "marcaId": 14,
-    "pilotos": [3, 4]
+    "marca": 3
 }
 
 ### PUT (UPDATE COMPLETO)
@@ -50,11 +49,11 @@ Content-Type: application/json
 }
 
 ### PATCH (UPDATE PARCIAL)
-PATCH http://localhost:3000/api/escuderias/{{id}}
+PATCH http://localhost:3000/api/escuderias/2
 Content-Type: application/json
 
 {
-    "engine": "Ferrari HP"
+    "categoria": 1
 }
 
 ###DELETE

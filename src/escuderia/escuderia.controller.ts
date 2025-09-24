@@ -13,6 +13,7 @@ function sanitizeEscuderia(req: Request, res: Response, next: NextFunction){
       engine: req.body.engine,
       id: req.params.id,
       pilotos: req.body.pilotos,
+      categoria: req.body.categoria,
       marca: req.body.marca ? Number(req.body.marca) : undefined
   }
    Object.keys(req.body.sanitizedInput).forEach(key => { 

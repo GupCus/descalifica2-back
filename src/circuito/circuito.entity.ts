@@ -6,6 +6,6 @@ import { baseEntity } from '../shared/baseEntity.entity.js';
 export class Circuito extends baseEntity {
   @Property({ nullable: false }) name!: string;
   @Property({ nullable: false }) country!: string;
-  @Property({ nullable: false }) length!: number;
+  @Property({ nullable: false }) length!: string;
   @Property({ nullable: false }) year!: number;
 }

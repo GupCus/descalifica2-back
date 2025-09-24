@@ -12,6 +12,7 @@ function sanitizePiloto(req: Request, res: Response, next: NextFunction){ //Resp
       num: req.body.num,
       nationality: req.body.nationality,
       role: req.body.role,
+      racing_series: req.body.racing_series,
       id: req.params.id
   }
    Object.keys(req.body.sanitizedInput).forEach(key => { //borra todos los atributos que no nos pasaron en el PATCH, evitamos errores

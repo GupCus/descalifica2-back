@@ -82,6 +82,30 @@ Content-Type: application/json
     "role": "Segundo piloto"
 }
 
+### POST Osama Bin Russell
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "George Russell",
+    "escuderia": 3,
+    "num": 63,
+    "nationality": "Inglés",
+    "role": "Primer piloto"
+}
+
+### POST Talibantonelli
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "Andrea Kimi Antonelli",
+    "escuderia": 3,
+    "num": 12,
+    "nationality": "Italiano",
+    "role": "Segundo piloto"
+}
+
 ### PUT
 PUT http://localhost:3000/api/pilotos/{{id}}
 Content-Type: application/json
@@ -95,11 +119,11 @@ Content-Type: application/json
 }
 
 ### PATCH
-PATCH http://localhost:3000/api/pilotos/{{id}}
+PATCH http://localhost:3000/api/pilotos/5
 Content-Type: application/json
 
 {
-    "nationality": "Neerlandés"
+      "racing_series": 1
 }
 
 ### DELETE

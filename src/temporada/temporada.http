@@ -8,7 +8,7 @@ POST http://localhost:3000/api/temporadas/
 Content-Type: application/json
 
 {
-    "year": 2024,
+    "year": 2025,
     "racing_series": 1
 }
 
