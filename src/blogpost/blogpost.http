@@ -1,4 +1,4 @@
-@id = {{createBlogpost.response.body.data.id}}
+@id = {{createBlogpost.response.body.id}}
 
 
 ### lista de Blogposts
@@ -15,7 +15,7 @@ Content-Type: application/json
 {
     "title": "Los mejores autos deportivos de 2024",
     "content": "En este artículo, exploramos los autos deportivos más emocionantes que llegarán al mercado en 2024...",
-    "authorId": 1
+    "authorId": 4
 }
 
 

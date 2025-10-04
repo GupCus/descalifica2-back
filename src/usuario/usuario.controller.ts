@@ -17,7 +17,7 @@ function sanitizeUsuario(req: Request, res: Response, next: NextFunction){
       fav_team: req.body.fav_team,
       fav_circuit: req.body.fav_circuit,
       bio: req.body.bio,
-      id: req.body.id
+      id: req.params.id
   }
    Object.keys(req.body.sanitizedInput).forEach(key => { 
       if(req.body.sanitizedInput[key] === undefined){delete req.body.sanitizedInput[key]}
