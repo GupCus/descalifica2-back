@@ -1,4 +1,4 @@
-@id = {{createBlogpost.response.body.id}}
+@id = {{createBlogpost.response.body.data.id}}
 
 
 ### lista de Blogposts

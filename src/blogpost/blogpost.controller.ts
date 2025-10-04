@@ -4,6 +4,7 @@ import { orm } from '../shared/db/orm.js'
 import { NotFoundError } from '@mikro-orm/core'
 
 const em = orm.em
+
 function sanitizeBlogpost(req: Request, res: Response, next: NextFunction){ 
   req.body.sanitizedInput = {
       title: req.body.title,

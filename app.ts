@@ -17,6 +17,7 @@ import { marcaRouter } from './src/marca/marca.router.js';
 import { circuitoRouter } from './src/circuito/circuito.routes.js';
 import { usuarioRouter } from './src/usuario/usuario.routes.js';
 import { sesionRouter } from './src/sesion/sesion.routes.js';
+import { blogpostRouter } from './src/blogpost/blogpost.routes.js';
 const app = express();
 
 //Middleware para poder leer paquetes json
@@ -39,6 +40,7 @@ app.use('/api/carreras', carreraRouter)
 app.use('/api/marcas', marcaRouter)
 app.use('/api/circuitos', circuitoRouter)
 app.use('/api/sesion',sesionRouter)
+app.use('/api/blogposts', blogpostRouter);
 
 //Repuesta default para cualquier unhandled request
 app.use((_,res) => {
