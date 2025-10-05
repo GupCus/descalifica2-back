@@ -9,6 +9,7 @@ function sanitizeBlogpost(req: Request, res: Response, next: NextFunction){
   req.body.sanitizedInput = {
       title: req.body.title,
       content: req.body.content,
+      author:req.body.authorID ? Number(req.body.authorID) : undefined,
       id:req.params.id
   }
     Object.keys(req.body.sanitizedInput).forEach(key => {
