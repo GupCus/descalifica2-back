@@ -32,7 +32,7 @@ Content-Type: application/json
     "fundation": 2010,
     "nationality": "Germany",
     "engine": "Mercedes M15 E Performance",
-    "marca": 3
+    "marca": 2
 }
 
 ### PUT (UPDATE COMPLETO)

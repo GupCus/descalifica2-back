@@ -6,19 +6,15 @@ import {
   Cascade,
   ManyToOne,
   Rel,
-} from '@mikro-orm/core';
-import { baseEntity } from '../shared/baseEntity.entity.js';
-import { Piloto } from '../piloto/piloto.entity.js';
-import { Carrera } from '../carrera/carrera.entity.js';
-
+} from "@mikro-orm/core";
+import { baseEntity } from "../shared/baseEntity.entity.js";
+import { Piloto } from "../piloto/piloto.entity.js";
+import { Carrera } from "../carrera/carrera.entity.js";
 
 @Entity()
 export class Sesion extends baseEntity {
-  @Property({ nullable: false })
-  nombre!: string;
-
   @Property({ nullable: true })
-  tipoSesion?: string;
+  tipoSesion?: string; //ELEGIR UPPERCASE O GUIONES BAJOS PARA SEPARAR LAS PALABRAS!!!!!
 
   @Property({ nullable: false, unique: true })
   fecha_Hora_sesion!: Date;
@@ -31,5 +27,3 @@ export class Sesion extends baseEntity {
   @ManyToMany(() => Piloto, undefined, { cascade: [Cascade.ALL] })
   resultados = new Collection<Piloto>(this);
 }
-
-

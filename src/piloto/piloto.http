@@ -15,7 +15,7 @@ Content-Type: application/json
 
 {
     "name": "Charles Leclerc",
-    "escuderia": 2,
+    "escuderia": 3,
     "num": 16,
     "nationality": "Monegasque",
     "role": "Primer piloto"
@@ -27,7 +27,7 @@ Content-Type: application/json
 
 {
     "name": "Lewis Hamilton",
-    "escuderia": 2,
+    "escuderia": 3,
     "num": 44,
     "nationality": "British",
     "role": "Segundo piloto"
@@ -88,7 +88,7 @@ Content-Type: application/json
 
 {
     "name": "George Russell",
-    "escuderia": 3,
+    "escuderia": 4,
     "num": 63,
     "nationality": "Inglés",
     "role": "Primer piloto"
@@ -100,7 +100,7 @@ Content-Type: application/json
 
 {
     "name": "Andrea Kimi Antonelli",
-    "escuderia": 3,
+    "escuderia": 4,
     "num": 12,
     "nationality": "Italiano",
     "role": "Segundo piloto"
