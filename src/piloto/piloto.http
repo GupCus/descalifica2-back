@@ -2,7 +2,7 @@
 @id = {{createPiloto.response.body.data.id}}
 
 ### GET ALL
-GET http://localhost:3000/api/pilotos
+GET http://localhost:3000/api/pilotos/
 
 ### GET ONE
 
@@ -10,12 +10,12 @@ GET http://localhost:3000/api/pilotos/{{id}}
 
 ### POST Ferrari (escuderia 1)
 # @name createPiloto
-POST http://localhost:3000/api/pilotos
+POST http://localhost:3000/api/pilotos/
 Content-Type: application/json
 
 {
     "name": "Charles Leclerc",
-    "escuderia": 1,
+    "escuderia": 3,
     "num": 16,
     "nationality": "Monegasque",
     "role": "Primer piloto"
@@ -27,7 +27,7 @@ Content-Type: application/json
 
 {
     "name": "Lewis Hamilton",
-    "escuderia": 1,
+    "escuderia": 3,
     "num": 44,
     "nationality": "British",
     "role": "Segundo piloto"
@@ -82,6 +82,30 @@ Content-Type: application/json
     "role": "Segundo piloto"
 }
 
+### POST Osama Bin Russell
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "George Russell",
+    "escuderia": 4,
+    "num": 63,
+    "nationality": "Inglés",
+    "role": "Primer piloto"
+}
+
+### POST Talibantonelli
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "Andrea Kimi Antonelli",
+    "escuderia": 4,
+    "num": 12,
+    "nationality": "Italiano",
+    "role": "Segundo piloto"
+}
+
 ### PUT
 PUT http://localhost:3000/api/pilotos/{{id}}
 Content-Type: application/json
@@ -95,11 +119,11 @@ Content-Type: application/json
 }
 
 ### PATCH
-PATCH http://localhost:3000/api/pilotos/{{id}}
+PATCH http://localhost:3000/api/pilotos/5
 Content-Type: application/json
 
 {
-    "nationality": "Neerlandés"
+      "racing_series": 1
 }
 
 ### DELETE

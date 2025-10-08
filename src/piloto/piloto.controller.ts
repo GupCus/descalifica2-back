@@ -12,6 +12,7 @@ function sanitizePiloto(req: Request, res: Response, next: NextFunction){ //Resp
       num: req.body.num,
       nationality: req.body.nationality,
       role: req.body.role,
+      racing_series: req.body.racing_series,
       id: req.params.id
   }
    Object.keys(req.body.sanitizedInput).forEach(key => { //borra todos los atributos que no nos pasaron en el PATCH, evitamos errores
@@ -50,9 +51,14 @@ async function add(req:Request,res:Response){
   try{
     const piloto = em.create(Piloto, req.body.sanitizedInput)
     await em.flush()
+    
+    // Populate la escudería para mostrar información completa
+    await em.populate(piloto, ['escuderia'])
+    
     res.status(201).json({message:'Created', data: piloto})
   }catch(error:any){
-    res.status(500).json({message: 'Internal server error'});
+    console.error('Error creating piloto:', error);
+    res.status(500).json({message: 'Internal server error', error: error.message});
   }
 }
 

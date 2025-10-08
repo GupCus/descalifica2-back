@@ -17,9 +17,6 @@ importers:
       '@mikro-orm/sql-highlighter':
         specifier: 1.0.1
         version: 1.0.1
-      '@types/cors':
-        specifier: ^2.8.19
-        version: 2.8.19
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -30,8 +27,11 @@ importers:
         specifier: 0.2.2
         version: 0.2.2
     devDependencies:
+      '@types/cors':
+        specifier: ^2.8.19
+        version: 2.8.19
       '@types/express':
-        specifier: 4.17.23
+        specifier: '4'
         version: 4.17.23
       '@types/node':
         specifier: ^24.0.3

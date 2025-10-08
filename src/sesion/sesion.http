@@ -1,0 +1,68 @@
+### ID
+
+@id = {{createSesion.response.body.data.id}}
+
+### GET ALL - Obtener todas las sesiones
+
+GET http://localhost:3000/api/sesion
+
+### GET ONE - Obtener una sesión específica por ID
+GET http://localhost:3000/api/sesion/{{id}}
+
+### POST - Crear una nueva sesión
+# @name createSesion
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Carrera Bahréin",
+  "tipoSesion":"Race",
+  "fecha_Hora_sesion": "2023-10-02 14:00:00",
+  "carrera": 1,
+  "resultados": [4, 3, 6]
+}
+
+### PUT - Actualizar una sesión completa
+PUT http://localhost:3000/api/sesion/{{id}}
+Content-Type: application/json
+{
+  "nombre": "Qualifying Updated",
+  "fecha": "2023-10-01T15:00:00Z",
+  "carrera": 1,
+  "resultados": [2, 3, 1]
+}
+
+### PATCH - Actualizar parcialmente una sesión
+PATCH http://localhost:3000/api/sesion/{{id}}
+Content-Type: application/json
+
+{
+  "nombre": "Qualifying Updated",
+  "fecha": "2023-10-01T15:00:00Z"
+}
+
+### DELETE - Eliminar una sesión
+DELETE http://localhost:3000/api/sesion/{{id}}
+
+### POST - Ejemplo con sesión de carrera
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "nombre": "Carrera",
+  "fecha": "2023-10-01T14:00:00Z",
+  "carrera": 1,
+  "grilla": [1, 2, 3],
+  "resultados": [2, 3, 1]
+}
+### POST - Ejemplo con sesión de práctica
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "nombre": "Práctica",
+  "fecha": "2023-10-01T14:00:00Z",
+  "carrera": 1,
+  "grilla": [1, 2, 3],
+  "resultados": [2, 3, 1]
+}

@@ -1,0 +1,25 @@
+###GET ALL
+GET http://localhost:3000/api/temporadas/
+
+
+
+###POST
+POST http://localhost:3000/api/temporadas/
+Content-Type: application/json
+
+{
+    "year": 2025,
+    "racing_series": 1
+}
+
+###PUT
+PUT http://localhost:3000/api/temporadas/2
+Content-Type: application/json
+
+{
+    "winner_driver": "Max Verstappen",
+    "winner_team": "McLaren"
+}
+
+###DELETE
+DELETE http://localhost:3000/api/temporadas/3
