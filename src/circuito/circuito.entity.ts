@@ -12,4 +12,7 @@ export class Circuito extends baseEntity {
 
   @Property({ nullable: false })
   year!: number;
+
+  @Property({ nullable: true })
+  imagen?: string;
 }

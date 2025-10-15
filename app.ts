@@ -33,6 +33,7 @@ Sentite libre de agregar otro problema q te tuvo mal - Agus
 
 import "reflect-metadata";
 import express from "express";
+import cors from "cors";
 import { pilotoRouter } from "./src/piloto/piloto.routes.js";
 import { escuderiaRouter } from "./src/escuderia/escuderia.routes.js";
 import { orm, syncSchema } from "./src/shared/db/orm.js";
@@ -45,7 +46,10 @@ import { circuitoRouter } from "./src/circuito/circuito.routes.js";
 import { usuarioRouter } from "./src/usuario/usuario.routes.js";
 import { sesionRouter } from "./src/sesion/sesion.routes.js";
 import { blogpostRouter } from "./src/blogpost/blogpost.routes.js";
+
 const app = express();
+
+app.use(cors());
 
 //Middleware para poder leer paquetes json
 app.use(express.json());

@@ -1,17 +1,22 @@
-import { Request, Response, NextFunction } from 'express';
-import { Circuito } from './circuito.entity.js';
-import { orm } from '../shared/db/orm.js';
-import { NotFoundError } from '@mikro-orm/core';
+import { Request, Response, NextFunction } from "express";
+import { Circuito } from "./circuito.entity.js";
+import { orm } from "../shared/db/orm.js";
+import { NotFoundError } from "@mikro-orm/core";
 
 const em = orm.em;
 
-function sanitizeCircuitoInput(req: Request, res: Response, next: NextFunction) {
+function sanitizeCircuitoInput(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   req.body.sanitizedInput = {
     name: req.body.name,
     country: req.body.country,
     length: req.body.length,
     year: req.body.year,
     id: req.body.id,
+    imagen: req.body.imagen,
   };
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -26,7 +31,7 @@ function sanitizeCircuitoInput(req: Request, res: Response, next: NextFunction) 
 async function findAll(req: Request, res: Response) {
   try {
     const circuitos = await em.find(Circuito, {});
-    res.status(200).json({ message: 'OK', data: circuitos });
+    res.status(200).json({ message: "OK", data: circuitos });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -37,12 +42,12 @@ async function findOne(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
     const circuito = await em.findOneOrFail(Circuito, { id });
-    res.status(200).json({ message: 'OK', data: circuito });
+    res.status(200).json({ message: "OK", data: circuito });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
@@ -54,9 +59,9 @@ async function add(req: Request, res: Response) {
     await em.flush();
     res
       .status(201)
-      .json({ message: 'Circuito created successfully', data: circuito });
+      .json({ message: "Circuito created successfully", data: circuito });
   } catch (error: any) {
-    console.error('Error creating circuito: ', error);
+    console.error("Error creating circuito: ", error);
     res.status(500).json({ message: error.message });
   }
 }
@@ -71,12 +76,12 @@ async function update(req: Request, res: Response) {
     await em.flush();
     res
       .status(200)
-      .json({ message: 'Circuito updated successfully', data: circuito });
+      .json({ message: "Circuito updated successfully", data: circuito });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
@@ -87,12 +92,12 @@ async function remove(req: Request, res: Response) {
     const id = Number.parseInt(req.params.id);
     const circuito = await em.findOneOrFail(Circuito, { id });
     await em.removeAndFlush(circuito);
-    res.status(200).json({ message: 'Circuito deleted successfully' });
+    res.status(200).json({ message: "Circuito deleted successfully" });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
