@@ -7,62 +7,75 @@
 GET http://localhost:3000/api/sesion
 
 ### GET ONE - Obtener una sesión específica por ID
+
 GET http://localhost:3000/api/sesion/{{id}}
 
 ### POST - Crear una nueva sesión
+
 # @name createSesion
 POST http://localhost:3000/api/sesion
 Content-Type: application/json
 
 {
   "name": "Carrera Bahréin",
-  "tipoSesion":"Race",
-  "fecha_Hora_sesion": "2023-10-02 14:00:00",
+  "tipo_Sesion":"Race",
+  "fecha_Hora_inicio": "2023-10-02 14:00:00",
+  "fecha_Hora_fin": "2023-10-02 16:00:00",
   "carrera": 1,
-  "resultados": [4, 3, 6]
+  "resultados": [4, 5]
 }
 
 ### PUT - Actualizar una sesión completa
+
 PUT http://localhost:3000/api/sesion/{{id}}
 Content-Type: application/json
 {
-  "nombre": "Qualifying Updated",
-  "fecha": "2023-10-01T15:00:00Z",
+  "name": "Qualifying Updated",
+  "fecha_Hora_inicio": "2023-10-01T15:00:00Z",
+  "fecha_Hora_fin": "2023-10-01T16:00:00Z",
   "carrera": 1,
-  "resultados": [2, 3, 1]
+  "resultados": [4, 5]
 }
 
 ### PATCH - Actualizar parcialmente una sesión
+
 PATCH http://localhost:3000/api/sesion/{{id}}
 Content-Type: application/json
 
 {
-  "nombre": "Qualifying Updated",
-  "fecha": "2023-10-01T15:00:00Z"
+  "name": "Qualifying Updated",
+  "fecha_Hora_inicio": "2023-10-01T15:00:00Z"
 }
 
 ### DELETE - Eliminar una sesión
+
 DELETE http://localhost:3000/api/sesion/{{id}}
 
-### POST - Ejemplo con sesión de carrera
+
+
+### post - Crear sesión carrera 
 POST http://localhost:3000/api/sesion
 Content-Type: application/json
 
 {
-  "nombre": "Carrera",
-  "fecha": "2023-10-01T14:00:00Z",
+  "name": "Carrera de Australia",
+  "tipo_Sesion":"Race",   
+  "fecha_Hora_inicio": "2024-03-17T14:00:00Z",
+  "fecha_Hora_fin": "2024-03-17T16:00:00Z",
   "carrera": 1,
-  "grilla": [1, 2, 3],
-  "resultados": [2, 3, 1]
+  "resultados": [4, 5]
 }
-### POST - Ejemplo con sesión de práctica
+
+
+### post - Crear sesión practica
 POST http://localhost:3000/api/sesion
 Content-Type: application/json
 
 {
-  "nombre": "Práctica",
-  "fecha": "2023-10-01T14:00:00Z",
+  "name": "FP1 Australia",
+  "tipo_Sesion":"Practice",   
+  "fecha_Hora_inicio": "2024-03-15T11:00:00Z",
+  "fecha_Hora_fin": "2024-03-15T12:00:00Z",
   "carrera": 1,
-  "grilla": [1, 2, 3],
-  "resultados": [2, 3, 1]
+  "resultados": [4, 5]
 }
