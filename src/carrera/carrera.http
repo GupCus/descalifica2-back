@@ -9,27 +9,76 @@ GET http://localhost:3000/api/carreras/{{id}}
 
 ### POST - Crear nueva carrera
 # @name createCarrera
+### POST - Gran Premio de Estados Unidos (Austin)
 POST http://localhost:3000/api/carreras
 Content-Type: application/json
 
 {
-    "name": "Gran Premio de Australia",
-    "start_date": "2024-03-15T10:00:00Z",
-    "end_date": "2024-03-17T16:00:00Z",
-    "temporada": 1,
-    "circuito": 1,
-    "sesiones": [1, 2]
+    "name": "Gran Premio de Estados Unidos",
+    "start_date": "2025-10-17T19:00:00Z",
+    "end_date": "2025-10-19T21:00:00Z",
+    "temporada": 2,
+    "circuito": 1
 }
 
-### POST - Otra carrera de ejemplo
+### POST - Gran Premio de México
 POST http://localhost:3000/api/carreras
 Content-Type: application/json
 
 {
-    "name": "Gran Premio de Argentina",
-    "start_date": "2027-06-18T10:00:00Z",
-    "end_date": "2027-06-20T17:00:00Z",
-    "temporada": "2027"
+    "name": "Gran Premio de México",
+    "start_date": "2025-10-24T19:00:00Z",
+    "end_date": "2025-10-26T21:00:00Z",
+    "temporada": 2,
+    "circuito": 1
+}
+
+### POST - Gran Premio de Brasil
+POST http://localhost:3000/api/carreras
+Content-Type: application/json
+
+{
+    "name": "Gran Premio de Brasil",
+    "start_date": "2025-10-31T17:00:00Z",
+    "end_date": "2025-11-02T19:00:00Z",
+    "temporada": 2,
+    "circuito": 1
+}
+
+### POST - Gran Premio de Las Vegas
+POST http://localhost:3000/api/carreras
+Content-Type: application/json
+
+{
+    "name": "Gran Premio de Las Vegas",
+    "start_date": "2025-11-20T06:00:00Z",
+    "end_date": "2025-11-22T08:00:00Z",
+    "temporada": 2,
+    "circuito": 1
+}
+
+### POST - Gran Premio de Qatar
+POST http://localhost:3000/api/carreras
+Content-Type: application/json
+
+{
+    "name": "Gran Premio de Qatar",
+    "start_date": "2025-11-28T15:00:00Z",
+    "end_date": "2025-11-30T17:00:00Z",
+    "temporada": 2,
+    "circuito": 1
+}
+
+### POST - Gran Premio de Abu Dhabi
+POST http://localhost:3000/api/carreras
+Content-Type: application/json
+
+{
+    "name": "Gran Premio de Abu Dhabi",
+    "start_date": "2025-12-05T13:00:00Z",
+    "end_date": "2025-12-07T15:00:00Z",
+    "temporada": 2,
+    "circuito": 1
 }
 
 ### PUT - Actualizar carrera completa

@@ -20,7 +20,7 @@ export class Sesion extends baseEntity {
   fecha_Hora_inicio!: Date;
 
   @Property({ nullable: false, unique: true })
-  fecha_Hora_fin!: Date;
+  fecha_Hora_fin?: Date;
 
   // Relación con carrera
   @ManyToOne(() => Carrera, { nullable: true })

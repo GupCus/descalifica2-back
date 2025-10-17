@@ -13,16 +13,298 @@ GET http://localhost:3000/api/sesion/{{id}}
 ### POST - Crear una nueva sesión
 
 # @name createSesion
+### ===== GRAN PREMIO DE ESTADOS UNIDOS (ID: 6) =====
+
+### POST - FP1 Estados Unidos
 POST http://localhost:3000/api/sesion
 Content-Type: application/json
 
 {
-  "name": "Carrera Bahréin",
-  "tipo_Sesion":"Race",
-  "fecha_Hora_inicio": "2023-10-02 14:00:00",
-  "fecha_Hora_fin": "2023-10-02 16:00:00",
-  "carrera": 1,
-  "resultados": [4, 5]
+  "name": "FP1 Estados Unidos",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-10-17T15:00:00Z",
+  "fecha_Hora_fin": "2025-10-17T15:00:00Z",
+  "carrera": 6,
+  "resultados": [1, 2, 3]
+}
+
+### POST - FP2 Estados Unidos
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP2 Estados Unidos",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-10-17T19:00:00Z",
+  "fecha_Hora_fin": "2025-10-17T19:00:00Z",
+  "carrera": 6,
+  "resultados": [1, 2, 3]
+}
+
+### POST - FP3 Estados Unidos
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP3 Estados Unidos",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-10-18T16:00:00Z",
+  "fecha_Hora_fin": "2025-10-18T16:00:00Z",
+  "carrera": 6,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Sprint Shootout Estados Unidos
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Sprint Shootout Estados Unidos",
+  "tipo_Sesion": "Q",
+  "fecha_Hora_inicio": "2025-10-18T19:30:00Z",
+  "fecha_Hora_fin": "2025-10-18T19:30:00Z",
+  "carrera": 6,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Sprint Estados Unidos
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Sprint Estados Unidos",
+  "tipo_Sesion": "Sprint",
+  "fecha_Hora_inicio": "2025-10-19T18:00:00Z",
+  "fecha_Hora_fin": "2025-10-19T18:00:00Z",
+  "carrera": 6,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Qualifying Estados Unidos
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Qualifying Estados Unidos",
+  "tipo_Sesion": "Q",
+  "fecha_Hora_inicio": "2025-10-19T20:00:00Z",
+  "fecha_Hora_fin": "2025-10-19T20:00:00Z",
+  "carrera": 6,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Race Estados Unidos
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Race Estados Unidos",
+  "tipo_Sesion": "GP",
+  "fecha_Hora_inicio": "2025-10-19T21:00:00Z",
+  "fecha_Hora_fin": "2025-10-19T21:00:00Z",
+  "carrera": 6,
+  "resultados": [1, 2, 3]
+}
+
+### ===== GRAN PREMIO DE MÉXICO (ID: 7) =====
+
+### POST - FP1 México
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP1 México",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-10-24T17:00:00Z",
+  "fecha_Hora_fin": "2025-10-24T17:00:00Z",
+  "carrera": 7,
+  "resultados": [1, 2, 3]
+}
+
+### POST - FP2 México
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP2 México",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-10-24T21:00:00Z",
+  "fecha_Hora_fin": "2025-10-24T21:00:00Z",
+  "carrera": 7,
+  "resultados": [1, 2, 3]
+}
+
+### POST - FP3 México
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP3 México",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-10-25T18:00:00Z",
+  "fecha_Hora_fin": "2025-10-25T18:00:00Z",
+  "carrera": 7,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Qualifying México
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Qualifying México",
+  "tipo_Sesion": "Q",
+  "fecha_Hora_inicio": "2025-10-25T21:00:00Z",
+  "fecha_Hora_fin": "2025-10-25T21:00:00Z",
+  "carrera": 7,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Race México
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Race México",
+  "tipo_Sesion": "GP",
+  "fecha_Hora_inicio": "2025-10-26T20:00:00Z",
+  "fecha_Hora_fin": "2025-10-26T20:00:00Z",
+  "carrera": 7,
+  "resultados": [1, 2, 3]
+}
+
+### ===== GRAN PREMIO DE BRASIL (ID: 8) =====
+
+### POST - FP1 Brasil
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP1 Brasil",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-11-07T15:00:00Z",
+  "fecha_Hora_fin": "2025-11-07T15:00:00Z",
+  "carrera": 8,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Sprint Shootout Brasil
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Sprint Shootout Brasil",
+  "tipo_Sesion": "Q",
+  "fecha_Hora_inicio": "2025-11-07T19:00:00Z",
+  "fecha_Hora_fin": "2025-11-07T19:00:00Z",
+  "carrera": 8,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Sprint Brasil
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Sprint Brasil",
+  "tipo_Sesion": "Sprint",
+  "fecha_Hora_inicio": "2025-11-08T14:00:00Z",
+  "fecha_Hora_fin": "2025-11-08T14:00:00Z",
+  "carrera": 8,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Qualifying Brasil
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Qualifying Brasil",
+  "tipo_Sesion": "Q",
+  "fecha_Hora_inicio": "2025-11-08T18:00:00Z",
+  "fecha_Hora_fin": "2025-11-08T18:00:00Z",
+  "carrera": 8,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Race Brasil
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Race Brasil",
+  "tipo_Sesion": "GP",
+  "fecha_Hora_inicio": "2025-11-09T18:00:00Z",
+  "fecha_Hora_fin": "2025-11-09T18:00:00Z",
+  "carrera": 8,
+  "resultados": [1, 2, 3]
+}
+
+### ===== GRAN PREMIO DE LAS VEGAS (ID: 9) =====
+
+### POST - FP1 Las Vegas
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP1 Las Vegas",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-11-20T02:30:00Z",
+  "fecha_Hora_fin": "2025-11-20T02:30:00Z",
+  "carrera": 9,
+  "resultados": [1, 2, 3]
+}
+
+### POST - FP2 Las Vegas
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP2 Las Vegas",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-11-20T06:00:00Z",
+  "fecha_Hora_fin": "2025-11-20T06:00:00Z",
+  "carrera": 9,
+  "resultados": [1, 2, 3]
+}
+
+### POST - FP3 Las Vegas
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP3 Las Vegas",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-11-21T02:30:00Z",
+  "fecha_Hora_fin": "2025-11-21T02:30:00Z",
+  "carrera": 9,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Qualifying Las Vegas
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Qualifying Las Vegas",
+  "tipo_Sesion": "Q",
+  "fecha_Hora_inicio": "2025-11-21T06:00:00Z",
+  "fecha_Hora_fin": "2025-11-21T06:00:00Z",
+  "carrera": 9,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Race Las Vegas
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Race Las Vegas",
+  "tipo_Sesion": "GP",
+  "fecha_Hora_inicio": "2025-11-22T06:00:00Z",
+  "fecha_Hora_fin": "2025-11-22T06:00:00Z",
+  "carrera": 9,
+  "resultados": [1, 2, 3]
 }
 
 ### PUT - Actualizar una sesión completa
@@ -32,6 +314,7 @@ Content-Type: application/json
 {
   "name": "Qualifying Updated",
   "fecha_Hora_inicio": "2023-10-01T15:00:00Z",
+  "fecha_Hora_fin": "2023-10-01T15:00:00Z",
   "fecha_Hora_fin": "2023-10-01T16:00:00Z",
   "carrera": 1,
   "resultados": [4, 5]
@@ -45,7 +328,8 @@ Content-Type: application/json
 {
   "name": "Qualifying Updated",
   "fecha_Hora_inicio": "2023-10-01T15:00:00Z"
-}
+
+"fecha_Hora_fin": "2023-10-01T15:00:00Z",}
 
 ### DELETE - Eliminar una sesión
 
@@ -61,6 +345,7 @@ Content-Type: application/json
   "name": "Carrera de Australia",
   "tipo_Sesion":"Race",   
   "fecha_Hora_inicio": "2024-03-17T14:00:00Z",
+  "fecha_Hora_fin": "2024-03-17T14:00:00Z",
   "fecha_Hora_fin": "2024-03-17T16:00:00Z",
   "carrera": 1,
   "resultados": [4, 5]
@@ -75,6 +360,7 @@ Content-Type: application/json
   "name": "FP1 Australia",
   "tipo_Sesion":"Practice",   
   "fecha_Hora_inicio": "2024-03-15T11:00:00Z",
+  "fecha_Hora_fin": "2024-03-15T11:00:00Z",
   "fecha_Hora_fin": "2024-03-15T12:00:00Z",
   "carrera": 1,
   "resultados": [4, 5]
