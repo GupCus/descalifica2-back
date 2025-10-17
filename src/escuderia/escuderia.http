@@ -19,7 +19,7 @@ Content-Type: application/json
     "nationality": "Italy",
     "engine": "Ferrari 066/10",
     "marca": 1,
-    "pilotos": [3, 4]
+    "pilotos": [5, 4]
 }
 
 ### POST 2
