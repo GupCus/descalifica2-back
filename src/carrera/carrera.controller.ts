@@ -28,7 +28,7 @@ async function findAll(req: Request, res: Response) {
     const carreras = await em.find(
       Carrera,
       {},
-      { populate: ['Circuito', 'temporada', 'sesiones'] }
+      { populate: ['Circuito', 'temporada', 'sesiones', 'sesiones.resultados', 'sesiones.resultados.escuderia'] }
     );
     res.status(200).json({ message: 'OK', data: carreras });
   } catch (error: any) {

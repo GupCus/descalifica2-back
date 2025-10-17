@@ -13,7 +13,141 @@ GET http://localhost:3000/api/sesion/{{id}}
 ### POST - Crear una nueva sesión
 
 # @name createSesion
+### ===== GRAN PREMIO DE AZERBAIYÁN (ID: 12) =====
+
+### POST - FP1 Azerbaiyán
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP1 Azerbaiyán",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-09-19T10:00:00Z",
+  "fecha_Hora_fin": "2025-09-19T11:00:00Z",
+  "carrera": 12,
+  "resultados": [1, 2, 3]
+}
+
+### POST - FP2 Azerbaiyán
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP2 Azerbaiyán",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-09-19T14:00:00Z",
+  "fecha_Hora_fin": "2025-09-19T15:00:00Z",
+  "carrera": 12,
+  "resultados": [1, 2, 3]
+}
+
+### POST - FP3 Azerbaiyán
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP3 Azerbaiyán",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-09-20T11:00:00Z",
+  "fecha_Hora_fin": "2025-09-20T12:00:00Z",
+  "carrera": 12,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Qualifying Azerbaiyán
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Qualifying Azerbaiyán",
+  "tipo_Sesion": "Q",
+  "fecha_Hora_inicio": "2025-09-20T14:00:00Z",
+  "fecha_Hora_fin": "2025-09-20T15:00:00Z",
+  "carrera": 12,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Race Azerbaiyán
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Race Azerbaiyán",
+  "tipo_Sesion": "GP",
+  "fecha_Hora_inicio": "2025-09-21T13:00:00Z",
+  "fecha_Hora_fin": "2025-09-21T15:00:00Z",
+  "carrera": 12,
+  "resultados": [1, 2, 3]
+}
+
+### ===== GRAN PREMIO DE SINGAPUR (ID: 13) =====
+
+### POST - FP1 Singapur
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP1 Singapur",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-10-03T10:30:00Z",
+  "fecha_Hora_fin": "2025-10-03T11:30:00Z",
+  "carrera": 13,
+  "resultados": [1, 2, 3]
+}
+
+### POST - FP2 Singapur
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP2 Singapur",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-10-03T14:00:00Z",
+  "fecha_Hora_fin": "2025-10-03T15:00:00Z",
+  "carrera": 13,
+  "resultados": [1, 2, 3]
+}
+
+### POST - FP3 Singapur
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "FP3 Singapur",
+  "tipo_Sesion": "FP",
+  "fecha_Hora_inicio": "2025-10-04T11:30:00Z",
+  "fecha_Hora_fin": "2025-10-04T12:30:00Z",
+  "carrera": 13,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Qualifying Singapur
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Qualifying Singapur",
+  "tipo_Sesion": "Q",
+  "fecha_Hora_inicio": "2025-10-04T14:00:00Z",
+  "fecha_Hora_fin": "2025-10-04T15:00:00Z",
+  "carrera": 13,
+  "resultados": [1, 2, 3]
+}
+
+### POST - Race Singapur
+POST http://localhost:3000/api/sesion
+Content-Type: application/json
+
+{
+  "name": "Race Singapur",
+  "tipo_Sesion": "GP",
+  "fecha_Hora_inicio": "2025-10-05T13:00:00Z",
+  "fecha_Hora_fin": "2025-10-05T15:00:00Z",
+  "carrera": 13,
+  "resultados": [1, 2, 3]
+}
 ### ===== GRAN PREMIO DE ESTADOS UNIDOS (ID: 6) =====
+
 
 ### POST - FP1 Estados Unidos
 POST http://localhost:3000/api/sesion

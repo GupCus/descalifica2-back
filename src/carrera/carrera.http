@@ -5,10 +5,34 @@
 GET http://localhost:3000/api/carreras
 
 ### GET ONE CARRERA
-GET http://localhost:3000/api/carreras/{{id}}
+GET http://localhost:3000/api/carreras/12
 
 ### POST - Crear nueva carrera
 # @name createCarrera
+
+### POST - Gran Premio de Azerbaiyán
+POST http://localhost:3000/api/carreras
+Content-Type: application/json
+
+{
+    "name": "Gran Premio de Azerbaiyán",
+    "start_date": "2025-09-19T13:00:00Z",
+    "end_date": "2025-09-21T15:00:00Z",
+    "temporada": 2,
+    "circuito": 1
+}
+
+### POST - Gran Premio de Singapur
+POST http://localhost:3000/api/carreras
+Content-Type: application/json
+
+{
+    "name": "Gran Premio de Singapur",
+    "start_date": "2025-10-03T13:00:00Z",
+    "end_date": "2025-10-05T15:00:00Z",
+    "temporada": 2,
+    "circuito": 1
+}
 ### POST - Gran Premio de Estados Unidos (Austin)
 POST http://localhost:3000/api/carreras
 Content-Type: application/json
