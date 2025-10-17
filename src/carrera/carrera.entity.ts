@@ -5,6 +5,7 @@ import {
   Rel,
   Collection,
   OneToMany,
+  Cascade,
 } from '@mikro-orm/core';
 import { baseEntity } from '../shared/baseEntity.entity.js';
 import { Circuito } from '../circuito/circuito.entity.js';
@@ -25,7 +26,10 @@ export class Carrera extends baseEntity {
   @ManyToOne(() => Temporada, { nullable: false })
   temporada!: Rel<Temporada>;
 
-  // coleccion de sesiones
-  @OneToMany(() => Sesion, (sesion) => sesion.carrera)
+  // Colección de sesiones - con CASCADE para eliminar sesiones si se elimina la carrera
+  @OneToMany(() => Sesion, (sesion) => sesion.carrera, {
+    cascade: [Cascade.ALL], // Elimina, actualiza y persiste sesiones automáticamente
+    orphanRemoval: true,    // Elimina sesiones huérfanas (sin carrera asignada)
+  })
   sesiones = new Collection<Sesion>(this);
 }

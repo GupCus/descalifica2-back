@@ -22,9 +22,9 @@ export class Sesion extends baseEntity {
   @Property({ nullable: false, unique: true })
   fecha_Hora_fin?: Date;
 
-  // Relación con carrera
-  @ManyToOne(() => Carrera, { nullable: true })
-  carrera?: Rel<Carrera>;
+  // Relación con carrera DEBIL
+  @ManyToOne(() => Carrera, { nullable: false })
+  carrera!: Rel<Carrera>;
 
   // Array de pilotos ordenados según resultados finales
   @ManyToMany(() => Piloto, undefined, { cascade: [Cascade.ALL] })
