@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import { Piloto } from './piloto.entity.js';
-import { orm } from '../shared/db/orm.js';
-import { NotFoundError } from '@mikro-orm/core';
+import { Request, Response, NextFunction } from "express";
+import { Piloto } from "./piloto.entity.js";
+import { orm } from "../shared/db/orm.js";
+import { NotFoundError } from "@mikro-orm/core";
 
 const em = orm.em;
 
@@ -14,6 +14,7 @@ function sanitizePiloto(req: Request, res: Response, next: NextFunction) {
     nationality: req.body.nationality,
     role: req.body.role,
     racing_series: req.body.racing_series,
+    temporadas_ganadas: req.body.temporadas_ganadas,
     id: req.params.id,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -32,12 +33,12 @@ async function findAll(req: Request, res: Response) {
       Piloto,
       {},
       {
-        populate: ['escuderia', 'racing_series'],
+        populate: ["escuderia", "racing_series", "temporadas_ganadas"],
       }
     );
-    res.status(200).json({ message: 'OK', data: pilotos });
+    res.status(200).json({ message: "OK", data: pilotos });
   } catch (error: any) {
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
 }
 
@@ -48,14 +49,14 @@ async function findOne(req: Request, res: Response) {
     const piloto = await em.findOneOrFail(
       Piloto,
       { id },
-      { populate: ['escuderia', 'racing_series'] }
+      { populate: ["escuderia", "racing_series"] }
     );
-    res.status(200).json({ message: 'OK', data: piloto });
+    res.status(200).json({ message: "OK", data: piloto });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
@@ -67,14 +68,14 @@ async function add(req: Request, res: Response) {
     await em.flush();
 
     // Populate la escudería para mostrar información completa
-    await em.populate(piloto, ['escuderia']);
+    await em.populate(piloto, ["escuderia"]);
 
-    res.status(201).json({ message: 'Created', data: piloto });
+    res.status(201).json({ message: "Created", data: piloto });
   } catch (error: any) {
-    console.error('Error creating piloto:', error);
+    console.error("Error creating piloto:", error);
     res
       .status(500)
-      .json({ message: 'Internal server error', error: error.message });
+      .json({ message: "Internal server error", error: error.message });
   }
 }
 
@@ -85,12 +86,12 @@ async function update(req: Request, res: Response) {
     const piloto = await em.findOneOrFail(Piloto, { id });
     em.assign(piloto, req.body.sanitizedInput);
     await em.flush();
-    res.status(204).json({ message: 'Updated' });
+    res.status(204).json({ message: "Updated" });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
@@ -100,12 +101,12 @@ async function remove(req: Request, res: Response) {
     const id = Number.parseInt(req.params.id);
     const piloto = em.getReference(Piloto, id);
     await em.removeAndFlush(piloto);
-    res.status(204).json({ message: 'Deleted' });
+    res.status(204).json({ message: "Deleted" });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }

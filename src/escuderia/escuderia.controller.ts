@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
-import { Escuderia } from './escuderia.entity.js';
-import { orm } from '../shared/db/orm.js';
-import { NotFoundError } from '@mikro-orm/core';
+import { Request, Response, NextFunction } from "express";
+import { Escuderia } from "./escuderia.entity.js";
+import { orm } from "../shared/db/orm.js";
+import { NotFoundError } from "@mikro-orm/core";
 
 const em = orm.em;
 
@@ -14,6 +14,7 @@ function sanitizeEscuderia(req: Request, res: Response, next: NextFunction) {
     id: req.params.id,
     pilotos: req.body.pilotos,
     categoria: req.body.categoria,
+    temporadas_ganadas: req.body.temporadas_ganadas,
     marca: req.body.marca ? Number(req.body.marca) : undefined,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -30,11 +31,11 @@ async function findAll(req: Request, res: Response) {
     const escuderias = await em.find(
       Escuderia,
       {},
-      { populate: ['pilotos', 'marca', 'categoria'] }
+      { populate: ["pilotos", "marca", "categoria", "temporadas_ganadas"] }
     );
-    res.status(200).json({ message: 'OK', data: escuderias });
+    res.status(200).json({ message: "OK", data: escuderias });
   } catch (error: any) {
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
 }
 
@@ -45,14 +46,14 @@ async function findOne(req: Request, res: Response) {
     const escuderia = await em.findOneOrFail(
       Escuderia,
       { id },
-      { populate: ['pilotos', 'marca'] }
+      { populate: ["pilotos", "marca"] }
     );
-    res.status(200).json({ message: 'OK', data: escuderia });
+    res.status(200).json({ message: "OK", data: escuderia });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
@@ -63,14 +64,14 @@ async function add(req: Request, res: Response) {
     const escuderia = em.create(Escuderia, req.body.sanitizedInput);
     await em.flush();
 
-    await em.populate(escuderia, ['marca', 'pilotos']);
+    await em.populate(escuderia, ["marca", "pilotos"]);
 
-    res.status(201).json({ message: 'Created', data: escuderia });
+    res.status(201).json({ message: "Created", data: escuderia });
   } catch (error: any) {
-    console.error('Error creating escuderia:', error);
+    console.error("Error creating escuderia:", error);
     res
       .status(500)
-      .json({ message: 'Internal server error', error: error.message });
+      .json({ message: "Internal server error", error: error.message });
   }
 }
 
@@ -81,12 +82,12 @@ async function update(req: Request, res: Response) {
     const escuderia = await em.findOneOrFail(Escuderia, { id });
     em.assign(escuderia, req.body.sanitizedInput);
     await em.flush();
-    res.status(204).json({ message: 'Updated' });
+    res.status(204).json({ message: "Updated" });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
@@ -97,12 +98,12 @@ async function remove(req: Request, res: Response) {
     const id = Number.parseInt(req.params.id);
     const escuderia = em.getReference(Escuderia, id);
     await em.removeAndFlush(escuderia);
-    res.status(204).json({ message: 'Deleted' });
+    res.status(204).json({ message: "Deleted" });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }

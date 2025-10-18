@@ -1,5 +1,5 @@
-import { Piloto } from '../piloto/piloto.entity.js';
-import { baseEntity } from '../shared/baseEntity.entity.js';
+import { Piloto } from "../piloto/piloto.entity.js";
+import { baseEntity } from "../shared/baseEntity.entity.js";
 import {
   Cascade,
   Collection,
@@ -8,9 +8,10 @@ import {
   Property,
   ManyToOne,
   Rel,
-} from '@mikro-orm/core';
-import { Marca } from '../marca/marca.entity.js';
-import { Categoria } from '../categoria/categoria.entity.js';
+} from "@mikro-orm/core";
+import { Marca } from "../marca/marca.entity.js";
+import { Categoria } from "../categoria/categoria.entity.js";
+import { Temporada } from "../temporada/temporada.entity.js";
 
 @Entity()
 export class Escuderia extends baseEntity {
@@ -35,6 +36,9 @@ export class Escuderia extends baseEntity {
 
   @ManyToOne(() => Categoria, { nullable: true })
   categoria!: Rel<Categoria>;
+
+  @OneToMany(() => Temporada, (temporada) => temporada.winner_team)
+  temporadas_ganadas = new Collection<Temporada>(this);
 }
 
 //AGUS: ¿¿¿QUE HAY DE IMPORTANTE COMO PARA PONER???

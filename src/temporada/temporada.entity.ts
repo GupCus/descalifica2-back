@@ -8,8 +8,11 @@ import {
   Rel,
   Collection,
   OneToMany,
+  Cascade,
 } from "@mikro-orm/core";
 import { Carrera } from "../carrera/carrera.entity.js";
+import { Piloto } from "../piloto/piloto.entity.js";
+import { Escuderia } from "../escuderia/escuderia.entity.js";
 
 @Entity()
 export class Temporada {
@@ -25,9 +28,9 @@ export class Temporada {
   @ManyToOne(() => Categoria) //UTILIZO REL "Cannot access 'Categoria' before initialization" at ".../temporada.entity.js"
   racing_series!: Rel<Categoria>;
 
-  @Property({ nullable: true }) //Capaz haya que cambiar esto para que nos traiga la info necesaria de piloto y escudería ganadora.
-  winner_driver?: string;
+  @ManyToOne(() => Piloto, { nullable: true, cascade: [Cascade.ALL] }) //Capaz haya que cambiar esto para que nos traiga la info necesaria de piloto y escudería ganadora.
+  winner_driver?: Rel<Escuderia>;
 
-  @Property({ nullable: true })
-  winner_team?: string;
+  @ManyToOne(() => Escuderia, { nullable: true, cascade: [Cascade.ALL] })
+  winner_team?: Rel<Escuderia>;
 }
