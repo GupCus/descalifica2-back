@@ -28,7 +28,7 @@ async function findAll(req: Request, res: Response) {
     const carreras = await em.find(
       Carrera,
       {},
-      { populate: ['Circuito', 'temporada', 'sesiones', 'sesiones.resultados', 'sesiones.resultados.escuderia'] }
+      { populate: ['Circuito', 'temporada', 'sesiones', 'sesiones.resultados', 'sesiones.resultados.escuderia','temporada.racing_series'] }
     );
     res.status(200).json({ message: 'OK', data: carreras });
   } catch (error: any) {
@@ -41,7 +41,7 @@ async function findOne(req: Request, res: Response) {
     const carrera = await em.findOneOrFail(
       Carrera,
       { id },
-      { populate: ['Circuito', 'temporada'] }
+      { populate: ['Circuito', 'temporada', 'sesiones', 'sesiones.resultados', 'sesiones.resultados.escuderia'] }
     );
     res.status(200).json({ message: 'OK', data: carrera });
   } catch (error: any) {
