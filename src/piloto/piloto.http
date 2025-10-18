@@ -15,10 +15,11 @@ Content-Type: application/json
 
 {
     "name": "Charles Leclerc",
-    "escuderia": 9,
+    "escuderia": 13,
     "num": 16,
-    "nationality": "Monegasque",
-    "role": "Primer piloto"
+    "nationality": "Monaco",
+    "role": "Primer piloto",
+    "racing_series": 2
 }
 
 ### POST Ferrari (escuderia 1) - Compañero
@@ -27,10 +28,11 @@ Content-Type: application/json
 
 {
     "name": "Lewis Hamilton",
-    "escuderia": 9,
+    "escuderia": 12,
     "num": 44,
-    "nationality": "British",
-    "role": "Segundo piloto"
+    "nationality": "UK",
+    "role": "Segundo piloto",
+    "racing_series": 2
 }
 
 ### POST Alpine (escuderia 2)
@@ -40,10 +42,11 @@ Content-Type: application/json
 
 {
     "name": "Franco Colapinto",
-    "escuderia": 2,
+    "escuderia": 13,
     "num": 43,
-    "nationality": "Argentinian",
-    "role": "Segundo piloto"
+    "nationality": "Argentina",
+    "role": "Segundo piloto",
+    "racing_series": 2
 }
 
 ### POST Alpine (escuderia 2) - Compañero
@@ -52,10 +55,11 @@ Content-Type: application/json
 
 {
     "name": "Pierre Gasly",
-    "escuderia": 2,
+    "escuderia": 13,
     "num": 10,
-    "nationality": "French",
-    "role": "Primer piloto"
+    "nationality": "Francia",
+    "role": "Primer piloto",
+    "racing_series": 2
 }
 
 ### POST Racing Bulls (escuderia 3) - Pilotos
@@ -66,7 +70,7 @@ Content-Type: application/json
     "name": "Isack Hadjar",
     "escuderia": 1,
     "num": 6,
-    "nationality": "French",
+    "nationality": "Frances",
     "role": "Primer piloto"
 }
 
@@ -103,8 +107,35 @@ Content-Type: application/json
     "escuderia": 4,
     "num": 12,
     "nationality": "Italiano",
-    "role": "Segundo piloto"
+    "role": "Segundo piloto",
+    "racing_series": 2
 }
+
+### POST Joshua Durksen 
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+
+{
+    "name": "Joshua Durksen",
+    "escuderia": 15,
+    "num": 5,
+    "nationality": "Paraguay",
+    "role": "Segundo piloto",
+    "racing_series": 3
+}
+
+### POST Jack Doohan
+POST http://localhost:3000/api/pilotos
+Content-Type: application/json
+{
+    "name": "Jack Doohan",
+    "escuderia": 15,
+    "num": 27,
+    "nationality": "Australia",
+    "role": "Primer piloto",
+    "racing_series": 3
+}
+
 
 ### PUT
 PUT http://localhost:3000/api/pilotos/{{id}}
