@@ -16,7 +16,7 @@ export class Marca extends baseEntity {
   @Property({ nullable: false })
   foundation!: number;
 
-  @OneToMany(() => Escuderia, (escuderia) => escuderia.marca, {
+  @OneToMany(() => Escuderia, (escuderia) => escuderia.brand, {
     cascade: [Cascade.ALL],
   })
   teams = new Collection<Escuderia>(this);

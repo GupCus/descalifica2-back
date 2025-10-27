@@ -23,7 +23,7 @@ export class Categoria extends baseEntity {
   })
   drivers = new Collection<Piloto>(this);
 
-  @OneToMany(() => Escuderia, (escuderia) => escuderia.categoria)
+  @OneToMany(() => Escuderia, (escuderia) => escuderia.racing_series)
   teams = new Collection<Escuderia>(this);
 
   @OneToMany(() => Temporada, (temporada) => temporada.racing_series, {

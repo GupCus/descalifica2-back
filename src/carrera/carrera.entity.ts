@@ -27,7 +27,7 @@ export class Carrera extends baseEntity {
   season!: Rel<Temporada>;
 
   // Colección de sesiones - con CASCADE para eliminar sesiones si se elimina la carrera
-  @OneToMany(() => Sesion, (sesion) => sesion.carrera, {
+  @OneToMany(() => Sesion, (sesion) => sesion.race, {
     cascade: [Cascade.ALL], // Elimina, actualiza y persiste sesiones automáticamente
     orphanRemoval: true, // Elimina sesiones huérfanas (sin carrera asignada)
   })

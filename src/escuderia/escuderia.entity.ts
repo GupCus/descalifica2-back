@@ -16,7 +16,7 @@ import { Temporada } from "../temporada/temporada.entity.js";
 @Entity()
 export class Escuderia extends baseEntity {
   //id y name se heredan de la baseEntity
-  @OneToMany(() => Piloto, (piloto) => piloto.escuderia, {
+  @OneToMany(() => Piloto, (piloto) => piloto.team, {
     cascade: [Cascade.ALL],
   })
   drivers = new Collection<Piloto>(this);

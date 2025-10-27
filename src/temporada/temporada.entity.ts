@@ -22,14 +22,14 @@ export class Temporada {
   @Property({ nullable: false })
   year!: number;
 
-  @OneToMany(() => Carrera, (carrera) => carrera.temporada) //cambiar "season" al nombre que le pongan en la CRUD carrera
+  @OneToMany(() => Carrera, (carrera) => carrera.season)
   races = new Collection<Carrera>(this);
 
   @ManyToOne(() => Categoria) //UTILIZO REL "Cannot access 'Categoria' before initialization" at ".../temporada.entity.js"
   racing_series!: Rel<Categoria>;
 
-  @ManyToOne(() => Piloto, { nullable: true, cascade: [Cascade.ALL] }) //Capaz haya que cambiar esto para que nos traiga la info necesaria de piloto y escudería ganadora.
-  winner_driver?: Rel<Escuderia>;
+  @ManyToOne(() => Piloto, { nullable: true, cascade: [Cascade.ALL] })
+  winner_driver?: Rel<Piloto>;
 
   @ManyToOne(() => Escuderia, { nullable: true, cascade: [Cascade.ALL] })
   winner_team?: Rel<Escuderia>;

@@ -33,8 +33,8 @@ async function findAll(req: Request, res: Response) {
           "track",
           "season",
           "sessions",
-          "sessions.resultados",
-          "sessions.resultados.escuderia",
+          "sessions.results",
+          "sessions.results.team",
           "season.racing_series",
         ],
       }
@@ -55,8 +55,8 @@ async function findOne(req: Request, res: Response) {
           "track",
           "season",
           "sessions",
-          "sessions.resultados",
-          "sessions.resultados.escuderia",
+          "sessions.results",
+          "sessions.results.team",
         ],
       }
     );
@@ -88,7 +88,7 @@ async function add(req: Request, res: Response) {
           // si viene un id,busca la session y la asocia.
           const found_sesion = await em.findOne(Sesion, { id: Number(s) });
           if (found_sesion) {
-            found_sesion.carrera = carrera;
+            found_sesion.race = carrera;
           }
         }
       }
