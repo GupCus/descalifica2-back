@@ -1,24 +1,24 @@
-import { Request, Response, NextFunction } from 'express';
-import { orm } from '../shared/db/orm.js';
-import { Sesion } from './sesion.entity.js';
-import { Piloto } from '../piloto/piloto.entity.js';
-import { Carrera } from '../carrera/carrera.entity.js';
-import { NotFoundError } from '@mikro-orm/core';
+import { Request, Response, NextFunction } from "express";
+import { orm } from "../shared/db/orm.js";
+import { Sesion } from "./sesion.entity.js";
+import { Piloto } from "../piloto/piloto.entity.js";
+import { Carrera } from "../carrera/carrera.entity.js";
+import { NotFoundError } from "@mikro-orm/core";
 
 const em = orm.em;
 
 function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     name: req.body.name,
-    tipo_Sesion: req.body.tipo_Sesion,
-    fecha_Hora_inicio: req.body.fecha_Hora_inicio
-      ? new Date(req.body.fecha_Hora_inicio)
-      : req.body.fecha_Hora_inicio,
-    fecha_Hora_fin: req.body.fecha_Hora_fin
-      ? new Date(req.body.fecha_Hora_fin)
-      : req.body.fecha_Hora_fin,
-    carrera: req.body.carrera,
-    resultados: req.body.resultados,
+    type: req.body.type,
+    start_time: req.body.start_time
+      ? new Date(req.body.start_time)
+      : req.body.start_time,
+    end_time: req.body.end_time
+      ? new Date(req.body.end_time)
+      : req.body.end_time,
+    race: req.body.race,
+    results: req.body.results,
     id: req.params.id,
   };
 
@@ -34,8 +34,8 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const sesiones = await em.find(Sesion, {}, { populate: ['resultados'] });
-    res.status(200).json({ message: 'OK', data: sesiones });
+    const sesiones = await em.find(Sesion, {}, { populate: ["results"] });
+    res.status(200).json({ message: "OK", data: sesiones });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -49,14 +49,14 @@ async function findOne(req: Request, res: Response) {
     const sesion = await em.findOneOrFail(
       Sesion,
       { id },
-      { populate: ['resultados'] }
+      { populate: ["results"] }
     );
-    res.status(200).json({ message: 'OK', data: sesion });
+    res.status(200).json({ message: "OK", data: sesion });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
@@ -66,14 +66,14 @@ async function findOne(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   try {
     const sesionData = { ...req.body.sanitizedInput };
-    const { resultados, ...sesionProps } = sesionData;
+    const { results, ...sesionProps } = sesionData;
     const sesion = em.create(Sesion, sesionProps);
 
-    // Si hay pilotos en resultados, agregarlos
-    if (resultados && Array.isArray(resultados)) {
-      for (const pilotoId of resultados) {
+    // Si hay pilotos en results, agregarlos
+    if (results && Array.isArray(results)) {
+      for (const pilotoId of results) {
         const piloto = await em.findOne(Piloto, { id: pilotoId });
-        if (piloto) sesion.resultados.add(piloto);
+        if (piloto) sesion.results.add(piloto);
       }
     }
     // Averiguar los datos que nos da la API para ver que hay que validar
@@ -81,9 +81,9 @@ async function add(req: Request, res: Response) {
     await em.flush();
     res
       .status(201)
-      .json({ message: 'Sesion created successfully', data: sesion });
+      .json({ message: "Sesion created successfully", data: sesion });
   } catch (error: any) {
-    console.error('Error creating sesion:', error);
+    console.error("Error creating sesion:", error);
     res.status(500).json({ message: error.message });
   }
 }
@@ -96,12 +96,12 @@ async function update(req: Request, res: Response) {
     const sesion = await em.findOneOrFail(Sesion, { id });
     em.assign(sesion, req.body.sanitizedInput);
     await em.flush();
-    res.status(204).json({ message: 'Updated' });
+    res.status(204).json({ message: "Updated" });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
@@ -113,12 +113,12 @@ async function remove(req: Request, res: Response) {
     const id = Number.parseInt(req.params.id);
     const sesion = em.getReference(Sesion, id);
     await em.removeAndFlush(sesion);
-    res.status(204).json({ message: 'Deleted' });
+    res.status(204).json({ message: "Deleted" });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: 'Resource not found' });
+      res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 }
