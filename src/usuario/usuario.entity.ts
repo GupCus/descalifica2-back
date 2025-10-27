@@ -6,8 +6,8 @@ import {
   Cascade,
   ManyToOne,
   Rel,
-} from '@mikro-orm/core';
-import { baseEntity } from '../shared/baseEntity.entity.js';
+} from "@mikro-orm/core";
+import { baseEntity } from "../shared/baseEntity.entity.js";
 
 @Entity()
 export class Usuario extends baseEntity {
@@ -16,7 +16,7 @@ export class Usuario extends baseEntity {
   @Property({ nullable: false })
   password!: string;
   @Property({ nullable: false })
-  name!: string; 
+  name!: string;
   @Property({ nullable: false })
   surname!: string;
   @Property({ nullable: false, unique: true })
@@ -26,10 +26,9 @@ export class Usuario extends baseEntity {
   @Property({ nullable: true })
   fav_driver!: string;
   @Property({ nullable: true })
-  fav_team!: string
+  fav_team!: string;
   @Property({ nullable: true })
   fav_circuit!: string;
   @Property({ nullable: true })
   bio!: string;
-
 }

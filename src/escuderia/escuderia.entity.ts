@@ -16,11 +16,10 @@ import { Temporada } from "../temporada/temporada.entity.js";
 @Entity()
 export class Escuderia extends baseEntity {
   //id y name se heredan de la baseEntity
-  //Escudería no muestra pilotos en la QUERY!!!
   @OneToMany(() => Piloto, (piloto) => piloto.escuderia, {
     cascade: [Cascade.ALL],
   })
-  pilotos = new Collection<Piloto>(this);
+  drivers = new Collection<Piloto>(this);
 
   @Property({ nullable: false })
   fundation!: number;
@@ -32,13 +31,13 @@ export class Escuderia extends baseEntity {
   engine!: string;
 
   @ManyToOne(() => Marca, { nullable: false })
-  marca!: Rel<Marca>;
+  brand!: Rel<Marca>;
 
   @ManyToOne(() => Categoria, { nullable: true })
-  categoria!: Rel<Categoria>;
+  racing_series!: Rel<Categoria>;
 
   @OneToMany(() => Temporada, (temporada) => temporada.winner_team)
-  temporadas_ganadas = new Collection<Temporada>(this);
+  wccs = new Collection<Temporada>(this);
 }
 
 //AGUS: ¿¿¿QUE HAY DE IMPORTANTE COMO PARA PONER???

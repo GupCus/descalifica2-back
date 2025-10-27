@@ -12,10 +12,10 @@ function sanitizeEscuderia(req: Request, res: Response, next: NextFunction) {
     nationality: req.body.nationality,
     engine: req.body.engine,
     id: req.params.id,
-    pilotos: req.body.pilotos,
-    categoria: req.body.categoria,
-    temporadas_ganadas: req.body.temporadas_ganadas,
-    marca: req.body.marca ? Number(req.body.marca) : undefined,
+    drivers: req.body.drivers,
+    racing_series: req.body.racing_series,
+    wccs: req.body.wccs,
+    brand: req.body.brand ? Number(req.body.brand) : undefined,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
@@ -31,7 +31,7 @@ async function findAll(req: Request, res: Response) {
     const escuderias = await em.find(
       Escuderia,
       {},
-      { populate: ["pilotos", "marca", "categoria", "temporadas_ganadas"] }
+      { populate: ["drivers", "brand", "racing_series", "wccs"] }
     );
     res.status(200).json({ message: "OK", data: escuderias });
   } catch (error: any) {
@@ -46,7 +46,7 @@ async function findOne(req: Request, res: Response) {
     const escuderia = await em.findOneOrFail(
       Escuderia,
       { id },
-      { populate: ["pilotos", "marca"] }
+      { populate: ["drivers", "brand"] }
     );
     res.status(200).json({ message: "OK", data: escuderia });
   } catch (error: any) {
@@ -64,7 +64,7 @@ async function add(req: Request, res: Response) {
     const escuderia = em.create(Escuderia, req.body.sanitizedInput);
     await em.flush();
 
-    await em.populate(escuderia, ["marca", "pilotos"]);
+    await em.populate(escuderia, ["brand", "drivers"]);
 
     res.status(201).json({ message: "Created", data: escuderia });
   } catch (error: any) {

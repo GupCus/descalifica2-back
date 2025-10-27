@@ -16,7 +16,7 @@ import { Temporada } from "../temporada/temporada.entity.js";
 export class Piloto extends baseEntity {
   @ManyToOne(() => Escuderia, { nullable: false })
   //team!: Escuderia; DA ERROR, por ser una relacion circular. Se usa lo siguiente:
-  escuderia!: Rel<Escuderia>;
+  team!: Rel<Escuderia>;
 
   @Property({ nullable: false, unique: true })
   num!: number;
@@ -31,7 +31,7 @@ export class Piloto extends baseEntity {
   racing_series?: Rel<Categoria>;
 
   @OneToMany(() => Temporada, (temporada) => temporada.winner_driver)
-  temporadas_ganadas = new Collection<Temporada>(this);
+  wdcs = new Collection<Temporada>(this);
 }
 //FRAN: hay q pasarlas a español
 //AGUS: me gustan mas en inglés estas cosas

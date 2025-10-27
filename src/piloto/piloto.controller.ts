@@ -9,12 +9,12 @@ function sanitizePiloto(req: Request, res: Response, next: NextFunction) {
   //Response, Request y NextFunction son de express
   req.body.sanitizedInput = {
     name: req.body.name,
-    escuderia: req.body.escuderia,
+    team: req.body.team,
     num: req.body.num,
     nationality: req.body.nationality,
     role: req.body.role,
     racing_series: req.body.racing_series,
-    temporadas_ganadas: req.body.temporadas_ganadas,
+    wdcs: req.body.wdcs,
     id: req.params.id,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -33,7 +33,7 @@ async function findAll(req: Request, res: Response) {
       Piloto,
       {},
       {
-        populate: ["escuderia", "racing_series", "temporadas_ganadas"],
+        populate: ["team", "racing_series", "wdcs"],
       }
     );
     res.status(200).json({ message: "OK", data: pilotos });
@@ -49,7 +49,7 @@ async function findOne(req: Request, res: Response) {
     const piloto = await em.findOneOrFail(
       Piloto,
       { id },
-      { populate: ["escuderia", "racing_series"] }
+      { populate: ["team", "racing_series"] }
     );
     res.status(200).json({ message: "OK", data: piloto });
   } catch (error: any) {
@@ -68,7 +68,7 @@ async function add(req: Request, res: Response) {
     await em.flush();
 
     // Populate la escudería para mostrar información completa
-    await em.populate(piloto, ["escuderia"]);
+    await em.populate(piloto, ["team"]);
 
     res.status(201).json({ message: "Created", data: piloto });
   } catch (error: any) {

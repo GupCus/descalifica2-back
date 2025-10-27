@@ -16,7 +16,7 @@ function sanitizeCircuitoInput(
     length: req.body.length,
     year: req.body.year,
     id: req.body.id,
-    imagen: req.body.imagen,
+    track_map_url: req.body.track_map_url,
   };
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {

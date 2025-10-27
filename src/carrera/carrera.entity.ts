@@ -6,11 +6,11 @@ import {
   Collection,
   OneToMany,
   Cascade,
-} from '@mikro-orm/core';
-import { baseEntity } from '../shared/baseEntity.entity.js';
-import { Circuito } from '../circuito/circuito.entity.js';
-import { Temporada } from '../temporada/temporada.entity.js';
-import { Sesion } from '../sesion/sesion.entity.js';
+} from "@mikro-orm/core";
+import { baseEntity } from "../shared/baseEntity.entity.js";
+import { Circuito } from "../circuito/circuito.entity.js";
+import { Temporada } from "../temporada/temporada.entity.js";
+import { Sesion } from "../sesion/sesion.entity.js";
 
 @Entity()
 export class Carrera extends baseEntity {
@@ -21,15 +21,15 @@ export class Carrera extends baseEntity {
   end_date!: Date;
 
   @ManyToOne(() => Circuito, { nullable: false })
-  Circuito!: Rel<Circuito>;
+  track!: Rel<Circuito>;
 
   @ManyToOne(() => Temporada, { nullable: false })
-  temporada!: Rel<Temporada>;
+  season!: Rel<Temporada>;
 
   // Colección de sesiones - con CASCADE para eliminar sesiones si se elimina la carrera
   @OneToMany(() => Sesion, (sesion) => sesion.carrera, {
     cascade: [Cascade.ALL], // Elimina, actualiza y persiste sesiones automáticamente
-    orphanRemoval: true,    // Elimina sesiones huérfanas (sin carrera asignada)
+    orphanRemoval: true, // Elimina sesiones huérfanas (sin carrera asignada)
   })
-  sesiones = new Collection<Sesion>(this);
+  sessions = new Collection<Sesion>(this);
 }
