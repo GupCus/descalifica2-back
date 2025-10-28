@@ -16,7 +16,7 @@ Content-Type: application/json
 {
     "name": "Scuderia Ferrari",
     "fundation": 1929,
-    "nationality": "Italy",
+    "nationality": "Italia",
     "engine": "Ferrari 066/10",
     "marca": 1,
     "pilotos": [5, 4]
@@ -30,7 +30,7 @@ Content-Type: application/json
 {
     "name": "Mercedes-AMG Petronas F1 Team",
     "fundation": 2010,
-    "nationality": "Germany",
+    "nationality": "Alemania",
     "engine": "Mercedes M15 E Performance",
     "marca": 2
 }
@@ -42,7 +42,7 @@ Content-Type: application/json
 {
     "name": "Racing Bulls Formula One Team",
     "fundation": 2024,
-    "nationality": "Italy",
+    "nationality": "Italia",
     "engine": "Honda RBPT",
     "marcaId": 8,
     "pilotos": [3,4]
@@ -57,5 +57,5 @@ Content-Type: application/json
 }
 
 ###DELETE
-DELETE http://localhost:3000/api/escuderias/{{id}}
+DELETE http://localhost:3000/api/escuderias/12
 
