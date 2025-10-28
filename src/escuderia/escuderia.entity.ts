@@ -30,8 +30,8 @@ export class Escuderia extends baseEntity {
   @Property({ nullable: false })
   engine!: string;
 
-  @ManyToOne(() => Marca, { nullable: false })
-  brand!: Rel<Marca>;
+  @ManyToOne(() => Marca, { nullable: true })
+  brand?: Rel<Marca>;
 
   @ManyToOne(() => Categoria, { nullable: true })
   racing_series!: Rel<Categoria>;
