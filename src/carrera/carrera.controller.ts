@@ -29,14 +29,7 @@ async function findAll(req: Request, res: Response) {
       Carrera,
       {},
       {
-        populate: [
-          "track",
-          "season",
-          "sessions",
-          "sessions.results",
-          "sessions.results.team",
-          "season.racing_series",
-        ],
+        populate: ["track", "season", "sessions", "season.racing_series"],
       }
     );
     res.status(200).json({ message: "OK", data: carreras });
@@ -51,13 +44,7 @@ async function findOne(req: Request, res: Response) {
       Carrera,
       { id },
       {
-        populate: [
-          "track",
-          "season",
-          "sessions",
-          "sessions.results",
-          "sessions.results.team",
-        ],
+        populate: ["track", "season", "sessions"],
       }
     );
     res.status(200).json({ message: "OK", data: carrera });

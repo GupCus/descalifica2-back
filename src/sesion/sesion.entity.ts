@@ -26,7 +26,6 @@ export class Sesion extends baseEntity {
   @ManyToOne(() => Carrera, { nullable: false })
   race!: Rel<Carrera>;
 
-  // Array de pilotos ordenados según resultados finales
-  @ManyToMany(() => Piloto, undefined, { cascade: [Cascade.ALL] })
-  results = new Collection<Piloto>(this);
+  @Property({ type: "json", nullable: true })
+  results?: [string, string][];
 }
