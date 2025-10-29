@@ -69,13 +69,6 @@ async function add(req: Request, res: Response) {
     const { results, ...sesionProps } = sesionData;
     const sesion = em.create(Sesion, sesionProps);
 
-    // Si hay pilotos en results, agregarlos
-    if (results && Array.isArray(results)) {
-      for (const pilotoId of results) {
-        const piloto = await em.findOne(Piloto, { id: pilotoId });
-        if (piloto) sesion.results.add(piloto);
-      }
-    }
     // Averiguar los datos que nos da la API para ver que hay que validar
 
     await em.flush();
