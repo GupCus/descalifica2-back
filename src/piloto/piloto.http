@@ -18,6 +18,7 @@ Content-Type: application/json
     "escuderia": 13,
     "num": 16,
     "nationality": "Monaco",
+    "birth_date": "1997-10-16",
     "role": "Primer piloto",
     "racing_series": 2
 }

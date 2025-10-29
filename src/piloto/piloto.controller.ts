@@ -12,6 +12,7 @@ function sanitizePiloto(req: Request, res: Response, next: NextFunction) {
     team: req.body.team,
     num: req.body.num,
     nationality: req.body.nationality,
+    birth_date: req.body.birth_date ? new Date(req.body.birth_date) : undefined,
     role: req.body.role,
     racing_series: req.body.racing_series,
     wdcs: req.body.wdcs,
@@ -49,7 +50,7 @@ async function findOne(req: Request, res: Response) {
     const piloto = await em.findOneOrFail(
       Piloto,
       { id },
-      { populate: ["team", "racing_series"] }
+      { populate: ["team"] }
     );
     res.status(200).json({ message: "OK", data: piloto });
   } catch (error: any) {
@@ -68,7 +69,7 @@ async function add(req: Request, res: Response) {
     await em.flush();
 
     // Populate la escudería para mostrar información completa
-    await em.populate(piloto, ["team"]);
+    await em.populate(piloto, ["team", "racing_series"]);
 
     res.status(201).json({ message: "Created", data: piloto });
   } catch (error: any) {

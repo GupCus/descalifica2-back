@@ -25,6 +25,9 @@ export class Piloto extends baseEntity {
   nationality!: string;
 
   @Property({ nullable: false })
+  birth_date!: Date;
+
+  @Property({ nullable: false })
   role!: string;
 
   @ManyToOne(() => Categoria, { cascade: [Cascade.ALL], nullable: true })
