@@ -46,7 +46,7 @@ async function findOne(req: Request, res: Response) {
     const escuderia = await em.findOneOrFail(
       Escuderia,
       { id },
-      { populate: ["drivers", "brand"] }
+      { populate: ["drivers", "brand", "racing_series"] }
     );
     res.status(200).json({ message: "OK", data: escuderia });
   } catch (error: any) {
