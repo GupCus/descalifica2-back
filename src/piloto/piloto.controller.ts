@@ -50,7 +50,7 @@ async function findOne(req: Request, res: Response) {
     const piloto = await em.findOneOrFail(
       Piloto,
       { id },
-      { populate: ["team"] }
+      { populate: ["team", "racing_series"] }
     );
     res.status(200).json({ message: "OK", data: piloto });
   } catch (error: any) {
