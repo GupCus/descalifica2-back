@@ -6,11 +6,11 @@ import {
   Property,
   Rel,
   Collection,
-} from "@mikro-orm/core";
-import { baseEntity } from "../shared/baseEntity.entity.js";
-import { Escuderia } from "../escuderia/escuderia.entity.js";
-import { Categoria } from "../categoria/categoria.entity.js";
-import { Temporada } from "../temporada/temporada.entity.js";
+} from '@mikro-orm/core';
+import { baseEntity } from '../shared/baseEntity.entity.js';
+import { Escuderia } from '../escuderia/escuderia.entity.js';
+import { Categoria } from '../categoria/categoria.entity.js';
+import { Temporada } from '../temporada/temporada.entity.js';
 
 @Entity()
 export class Piloto extends baseEntity {
@@ -18,7 +18,7 @@ export class Piloto extends baseEntity {
   //team!: Escuderia; DA ERROR, por ser una relacion circular. Se usa lo siguiente:
   team!: Rel<Escuderia>;
 
-  @Property({ nullable: false, unique: true })
+  @Property({ nullable: false, unique: false })
   num!: number;
 
   @Property({ nullable: false })
