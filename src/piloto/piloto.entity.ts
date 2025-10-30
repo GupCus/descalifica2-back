@@ -24,8 +24,8 @@ export class Piloto extends baseEntity {
   @Property({ nullable: false })
   nationality!: string;
 
-  @Property({ nullable: false })
-  birth_date!: Date;
+  @Property({ nullable: true })
+  birth_date?: Date;
 
   @Property({ nullable: false })
   role!: string;
