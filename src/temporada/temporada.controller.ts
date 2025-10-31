@@ -46,7 +46,7 @@ async function findOne(req: Request, res: Response) {
     const temporada = await em.findOneOrFail(
       Temporada,
       { id },
-      { populate: ['racing_series'] }
+      { populate: ['racing_series', 'winner_driver', 'winner_team', 'races'] }
     );
     res.status(200).json({ data: temporada });
   } catch (error: any) {
