@@ -54,12 +54,9 @@ app.use(cors());
 //Middleware para poder leer paquetes json
 app.use(express.json());
 
-//antes
-
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
 });
-//despues
 
 //Handler de routeo
 app.use("/api/usuarios", usuarioRouter);

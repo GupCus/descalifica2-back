@@ -1,13 +1,6 @@
-import {
-  Entity,
-  Property,
-  ManyToMany,
-  Collection,
-  Cascade,
-  ManyToOne,
-  Rel,
-} from "@mikro-orm/core";
+import { Collection, Entity, OneToMany, Property } from "@mikro-orm/core";
 import { baseEntity } from "../shared/baseEntity.entity.js";
+import { Blogpost } from "../blogpost/blogpost.entity.js";
 
 @Entity()
 export class Usuario extends baseEntity {
@@ -31,4 +24,6 @@ export class Usuario extends baseEntity {
   fav_circuit!: string;
   @Property({ nullable: true })
   bio!: string;
+  @OneToMany(() => Blogpost, (blogpost) => blogpost.author)
+  posts = new Collection<Blogpost>(this);
 }

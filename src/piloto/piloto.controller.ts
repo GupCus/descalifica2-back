@@ -113,5 +113,3 @@ async function remove(req: Request, res: Response) {
 }
 
 export { findAll, findOne, add, update, remove, sanitizePiloto };
-
-//Nota para la posterioridad, dejo todos los catch iguales, esto es para que en un futuro encontrar una forma de que si no existe el objeto necesario, devuelva not found. Falta implementar.
