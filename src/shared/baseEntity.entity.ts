@@ -1,11 +1,10 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 
 @Entity()
-export abstract class baseEntity{
+export abstract class baseEntity {
   @PrimaryKey()
-  id?: number
+  id?: number;
 
   @Property()
-  name!: string
-
+  name!: string;
 }

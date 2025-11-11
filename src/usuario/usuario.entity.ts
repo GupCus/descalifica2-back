@@ -4,15 +4,15 @@ import { Blogpost } from "../blogpost/blogpost.entity.js";
 
 @Entity()
 export class Usuario extends baseEntity {
-  @Property({ nullable: false, unique: true })
+  @Property({ nullable: true, unique: true })
   username?: string;
   @Property({ nullable: false })
   password_hash!: string;
-  @Property({ nullable: false })
+  @Property({ nullable: true })
   surname?: string;
   @Property({ nullable: false, unique: true })
   email!: string;
-  @Property({ nullable: false })
+  @Property({ nullable: true })
   date_of_birth?: Date;
   @Property({ nullable: true })
   fav_driver?: string;
