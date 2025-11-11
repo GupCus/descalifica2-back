@@ -5,23 +5,23 @@ import { Blogpost } from "../blogpost/blogpost.entity.js";
 @Entity()
 export class Usuario extends baseEntity {
   @Property({ nullable: false, unique: true })
-  username!: string;
+  username?: string;
   @Property({ nullable: false })
-  password!: string;
+  password_hash!: string;
   @Property({ nullable: false })
-  surname!: string;
+  surname?: string;
   @Property({ nullable: false, unique: true })
   email!: string;
   @Property({ nullable: false })
-  date_of_birth!: Date;
+  date_of_birth?: Date;
   @Property({ nullable: true })
-  fav_driver!: string;
+  fav_driver?: string;
   @Property({ nullable: true })
-  fav_team!: string;
+  fav_team?: string;
   @Property({ nullable: true })
-  fav_circuit!: string;
+  fav_circuit?: string;
   @Property({ nullable: true })
-  bio!: string;
+  bio?: string;
   @OneToMany(() => Blogpost, (blogpost) => blogpost.author)
   posts = new Collection<Blogpost>(this);
 }
