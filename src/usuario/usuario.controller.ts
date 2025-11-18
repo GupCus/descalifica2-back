@@ -90,4 +90,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeUsuario, findAll, findOne, add, update, remove };
+export { sanitizeUsuario, findAll, findOne, update, remove };
