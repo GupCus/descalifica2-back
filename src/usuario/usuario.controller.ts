@@ -55,28 +55,6 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
-//Crear un nuevo usuario
-
-async function add(req: Request, res: Response) {
-  try {
-    //generar salt
-    const salt = await bcrypt.genSalt(10);
-    //crear hash
-    req.body.sanitizedInput.password_hash = await bcrypt.hash(
-      req.body.sanitizedInput.password,
-      salt
-    );
-    const usuario = em.create(Usuario, req.body.sanitizedInput);
-    await em.flush();
-    res.status(201).json({ message: "Created", data: usuario });
-  } catch (error: any) {
-    console.error("Error creating usuario:", error);
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
-  }
-}
-
 //Actualizar un usuario existente
 
 async function update(req: Request, res: Response) {
