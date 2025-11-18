@@ -30,6 +30,7 @@
     "cors": "^2.8.5",
     "express": "4",
     "jsonwebtoken": "^9.0.2",
-    "reflect-metadata": "0.2.2"
+    "reflect-metadata": "0.2.2",
+    "validate": "^5.2.0"
   }
 }

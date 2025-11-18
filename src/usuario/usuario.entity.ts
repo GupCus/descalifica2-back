@@ -12,7 +12,7 @@ import bcrypt from "bcrypt";
 @Entity()
 export class Usuario extends baseEntity {
   @Property({ nullable: true, unique: true })
-  username?: string;
+  username!: string;
   @Property({ nullable: false })
   password!: string;
   @Property({ nullable: false })

@@ -11,6 +11,7 @@ export interface RegisterRequest {
   password: string;
   email: string;
   date_of_birth: string;
+  name: string;
 }
 
 export interface LoginResponse {
@@ -19,7 +20,6 @@ export interface LoginResponse {
     id: number;
     username: string;
     user_type: string;
-    url_photo: string;
   };
 }
 
@@ -28,7 +28,6 @@ export interface AuthenticatedRequest extends Request {
     id: number;
     username: string;
     user_type: string;
-    url_photo: string;
   };
 }
 
