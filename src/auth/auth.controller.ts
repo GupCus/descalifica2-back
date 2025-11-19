@@ -201,13 +201,14 @@ class AuthController {
       };
 
       res.status(201).json(response);
-    } catch (error) {}
+    } catch (error) {} //falta hacer el catch errro!!!!!!!!!!!!!!!!!!!!!!
   }
 
   async checkToken(req: AuthenticatedRequest, res: Response) {
     try {
       res.status(200).json({ message: "Token válido", user: req.user });
     } catch (error) {
+      7;
       console.error(`checkToken error: ${error}`);
       res.status(500).json({ message: "Internal server error." });
     }
