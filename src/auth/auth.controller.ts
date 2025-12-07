@@ -201,7 +201,7 @@ class AuthController {
       };
 
       res.status(201).json(response);
-    } catch (error) {} //falta hacer el catch errro!!!!!!!!!!!!!!!!!!!!!!
+    } catch (error) {} // TODO: falta hacer el catch errro!!!!!!!!!!!!!!!!!!!!!!
   }
 
   async checkToken(req: AuthenticatedRequest, res: Response) {
