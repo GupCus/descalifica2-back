@@ -31,6 +31,7 @@
 Sentite libre de agregar otro problema q te tuvo mal - Agus
 */
 
+import "dotenv/config";
 import "reflect-metadata";
 import express from "express";
 import cors from "cors";
@@ -47,6 +48,7 @@ import { circuitoRouter } from "./src/circuito/circuito.routes.js";
 import { usuarioRouter } from "./src/usuario/usuario.routes.js";
 import { sesionRouter } from "./src/sesion/sesion.routes.js";
 import { blogpostRouter } from "./src/blogpost/blogpost.routes.js";
+import { authRouter } from "./src/auth/auth.routes.js";
 
 const app = express();
 
@@ -70,6 +72,7 @@ app.use("/api/marcas", marcaRouter);
 app.use("/api/circuitos", circuitoRouter);
 app.use("/api/sesion", sesionRouter);
 app.use("/api/blogposts", blogpostRouter);
+app.use("/api/auth", authRouter);
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {

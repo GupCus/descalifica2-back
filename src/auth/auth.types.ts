@@ -1,4 +1,4 @@
-import Request from "express";
+import { Request } from "express";
 
 //requests de login y register
 export interface LoginRequest {

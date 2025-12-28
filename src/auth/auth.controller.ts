@@ -93,7 +93,7 @@ class AuthController {
       }: RegisterRequest = req.body;
 
       if (!username || !email || !password || !date_of_birth || !name) {
-        res.status(400).json({
+        return res.status(400).json({
           message: "Todos los campos son obligatorios.",
         });
       }
@@ -132,7 +132,7 @@ class AuthController {
         today.getMonth(),
         today.getDate()
       );
-      if (nacimiento < minimunAge) {
+      if (nacimiento > minimunAge) {
         return res.status(400).json({
           message:
             "Debes tener al menos 13 (trece) años para registrarte en este foro.",
@@ -155,6 +155,13 @@ class AuthController {
         });
       }
 
+      const secret = process.env.JWT_SECRET;
+      if (!secret) {
+        return res.status(500).json({
+          message: "Internal server error. (JWT no configurado).",
+        });
+      }
+
       const newUser = em.create(Usuario, {
         email: email,
         username: username,
@@ -167,7 +174,7 @@ class AuthController {
       await em.persistAndFlush(newUser);
 
       if (!newUser) {
-        res.status(500).json({
+        return res.status(500).json({
           message: "Ocurrió un error al crear el usuario.",
         });
       }
@@ -177,13 +184,6 @@ class AuthController {
         mail: newUser.email,
         user_type: newUser.user_type,
       };
-
-      const secret = process.env.JWT_SECRET;
-      if (!secret) {
-        return res.status(500).json({
-          message: "Internal server error. (JWT no configurado).",
-        });
-      }
 
       const token = jwt.sign(
         payload,
@@ -201,7 +201,12 @@ class AuthController {
       };
 
       res.status(201).json(response);
-    } catch (error) {} // TODO: falta hacer el catch errro!!!!!!!!!!!!!!!!!!!!!!
+    } catch (error) {
+      console.error("Error en registro:", error);
+      res.status(500).json({
+        message: "Error registrando al usuario",
+      });
+    }
   }
 
   async checkToken(req: AuthenticatedRequest, res: Response) {
