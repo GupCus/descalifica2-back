@@ -51,6 +51,7 @@ class AuthController {
         id: usuario.id,
         mail: usuario.email,
         user_type: usuario.user_type,
+        username: usuario.username,
       };
 
       const secret = process.env.JWT_SECRET;
@@ -183,6 +184,7 @@ class AuthController {
         id: newUser.id,
         mail: newUser.email,
         user_type: newUser.user_type,
+        username: newUser.username,
       };
 
       const token = jwt.sign(
@@ -211,9 +213,24 @@ class AuthController {
 
   async checkToken(req: AuthenticatedRequest, res: Response) {
     try {
-      res.status(200).json({ message: "Token válido", user: req.user });
+      // Obtener el usuario actual de la BD para verificar datos actualizados
+      const em = orm.em.fork();
+      const usuario = await em.findOne(Usuario, { id: req.user?.id });
+
+      if (!usuario) {
+        return res.status(401).json({ message: "Usuario no encontrado" });
+      }
+
+      // Devolver datos actualizados de la BD, no del token
+      res.status(200).json({
+        message: "Token válido",
+        user: {
+          id: usuario.id,
+          username: usuario.username,
+          user_type: usuario.user_type, // Valor actual de la BD
+        },
+      });
     } catch (error) {
-      7;
       console.error(`checkToken error: ${error}`);
       res.status(500).json({ message: "Internal server error." });
     }

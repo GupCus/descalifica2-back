@@ -28,6 +28,7 @@ export interface AuthenticatedRequest extends Request {
     id: number;
     username: string;
     user_type: string;
+    email: string;
   };
 }
 
@@ -37,6 +38,7 @@ export interface jwtpayload {
   username: string;
   user_type: string;
   url_photo: string;
+  email: string;
   iat?: number; // fecha de creación del token
   exp?: number; // fecha de expiración del token
 }

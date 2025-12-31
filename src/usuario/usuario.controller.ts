@@ -19,6 +19,7 @@ function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
     fav_circuit: req.body.fav_circuit,
     bio: req.body.bio,
     id: req.params.id,
+    user_type: req.body.user_type,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
