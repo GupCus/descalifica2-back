@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { upload } from "../shared/middlewares/multer.config.js";
 import {
   findAll,
   findOne,
@@ -11,6 +12,6 @@ export const usuarioRouter = Router();
 
 usuarioRouter.get("/", findAll);
 usuarioRouter.get("/:id", findOne);
-usuarioRouter.put("/:id", sanitizeUsuario, update);
+usuarioRouter.put("/:id", upload.single("avatar"), sanitizeUsuario, update);
 usuarioRouter.patch("/:id", sanitizeUsuario, update);
 usuarioRouter.delete("/:id", remove);

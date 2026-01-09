@@ -62,6 +62,12 @@ async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
+
+    // Si hay archivo, agregar la ruta al objeto sanitizado
+    if (req.file) {
+      req.body.sanitizedInput.avatar = `/uploads/avatars/${req.file.filename}`;
+    }
+
     em.assign(usuario, req.body.sanitizedInput);
     await em.flush();
     res.status(204).json({ message: "Updated" });

@@ -31,6 +31,8 @@ export class Usuario extends baseEntity {
   fav_circuit?: string;
   @Property({ nullable: true })
   bio?: string;
+  @Property({ nullable: true })
+  avatar?: string;
   @OneToMany(() => Blogpost, (blogpost) => blogpost.author)
   posts = new Collection<Blogpost>(this);
 

@@ -49,6 +49,7 @@ import { usuarioRouter } from "./src/usuario/usuario.routes.js";
 import { sesionRouter } from "./src/sesion/sesion.routes.js";
 import { blogpostRouter } from "./src/blogpost/blogpost.routes.js";
 import { authRouter } from "./src/auth/auth.routes.js";
+import { Usuario } from "./src/usuario/usuario.entity.js";
 
 const app = express();
 
@@ -80,6 +81,29 @@ app.use((_, res) => {
 });
 
 await syncSchema();
+
+async function createDefaultAdmin() {
+  const em = orm.em.fork();
+  try {
+    const adminExists = await em.findOne(Usuario, { user_type: "admin" });
+    if (!adminExists) {
+      const admin = new Usuario();
+      admin.username = "admin";
+      admin.password = "admin123";
+      admin.name = "Administrador";
+      admin.user_type = "admin";
+      admin.email = "admin@descalifica.com";
+
+      em.persist(admin);
+      await em.flush();
+      console.log("✓ Usuario admin creado por defecto");
+    }
+  } catch (error) {
+    console.error("Error al crear admin por defecto:", error);
+  }
+}
+
+await createDefaultAdmin();
 
 app.listen(3000, () => {
   console.log("Corriendo en http://localhost:3000");
