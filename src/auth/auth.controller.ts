@@ -93,9 +93,13 @@ class AuthController {
         name,
       }: RegisterRequest = req.body;
 
+      // debug!!!!!
+      console.log("Datos recibidos en register:", req.body);
+      console.log("Archivo recibido:", req.file);
+
       if (!username || !email || !password || !date_of_birth || !name) {
         return res.status(400).json({
-          message: "Todos los campos son obligatorios.",
+          message: `Todos los campos son obligatorios.`,
         });
       }
 
@@ -170,6 +174,7 @@ class AuthController {
         date_of_birth: date_of_birth,
         user_type: "user",
         name: name,
+        avatar: req.file ? `/uploads/avatars/${req.file.filename}` : undefined, // Agregar avatar si existe
       });
 
       await em.persistAndFlush(newUser);

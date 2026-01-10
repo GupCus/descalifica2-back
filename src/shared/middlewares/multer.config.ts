@@ -1,17 +1,15 @@
 import multer from "multer";
 import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../../../uploads/avatars"));
+    cb(null, path.join(process.cwd(), "uploads/avatars"));
   },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+  filename: (req: any, file, cb) => {
+    const base = (req.body?.username || "avatar").replace(/[^\w-]/g, "");
+    const unique = Date.now();
+    const ext = path.extname(file.originalname) || ".png";
+    cb(null, `${base}-${unique}${ext}`);
   },
 });
 

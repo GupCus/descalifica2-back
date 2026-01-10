@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { Usuario } from "./usuario.entity.js";
 import { orm } from "../shared/db/orm.js";
 import { NotFoundError } from "@mikro-orm/core";
-import bcrypt from "bcrypt";
 
 const em = orm.em;
 
@@ -26,6 +25,11 @@ function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
       delete req.body.sanitizedInput[key];
     }
   });
+
+  if (req.file) {
+    req.body.sanitizedInput.avatar = `/uploads/avatars/${req.file.filename}`;
+  }
+
   next();
 }
 

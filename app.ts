@@ -35,7 +35,7 @@ import "dotenv/config";
 import "reflect-metadata";
 import express from "express";
 import cors from "cors";
-import bcrypt from "bcrypt";
+import path from "path";
 import { pilotoRouter } from "./src/piloto/piloto.routes.js";
 import { escuderiaRouter } from "./src/escuderia/escuderia.routes.js";
 import { orm, syncSchema } from "./src/shared/db/orm.js";
@@ -74,6 +74,7 @@ app.use("/api/circuitos", circuitoRouter);
 app.use("/api/sesion", sesionRouter);
 app.use("/api/blogposts", blogpostRouter);
 app.use("/api/auth", authRouter);
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {
