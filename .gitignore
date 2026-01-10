@@ -2,6 +2,8 @@
 .gitignore
 /src/character/
 /src/appCharacter.ts
+uploads/avatars/*
+!uploads/avatars/.gitkeep
 
 # Logs
 logs
