@@ -31,10 +31,11 @@
 Sentite libre de agregar otro problema q te tuvo mal - Agus
 */
 
+import "dotenv/config";
 import "reflect-metadata";
 import express from "express";
 import cors from "cors";
-import bcrypt from "bcrypt";
+import path from "path";
 import { pilotoRouter } from "./src/piloto/piloto.routes.js";
 import { escuderiaRouter } from "./src/escuderia/escuderia.routes.js";
 import { orm, syncSchema } from "./src/shared/db/orm.js";
@@ -47,6 +48,8 @@ import { circuitoRouter } from "./src/circuito/circuito.routes.js";
 import { usuarioRouter } from "./src/usuario/usuario.routes.js";
 import { sesionRouter } from "./src/sesion/sesion.routes.js";
 import { blogpostRouter } from "./src/blogpost/blogpost.routes.js";
+import { authRouter } from "./src/auth/auth.routes.js";
+import { Usuario } from "./src/usuario/usuario.entity.js";
 
 const app = express();
 
@@ -70,6 +73,8 @@ app.use("/api/marcas", marcaRouter);
 app.use("/api/circuitos", circuitoRouter);
 app.use("/api/sesion", sesionRouter);
 app.use("/api/blogposts", blogpostRouter);
+app.use("/api/auth", authRouter);
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {
@@ -77,6 +82,29 @@ app.use((_, res) => {
 });
 
 await syncSchema();
+
+async function createDefaultAdmin() {
+  const em = orm.em.fork();
+  try {
+    const adminExists = await em.findOne(Usuario, { user_type: "admin" });
+    if (!adminExists) {
+      const admin = new Usuario();
+      admin.username = "admin";
+      admin.password = "admin123";
+      admin.name = "Administrador";
+      admin.user_type = "admin";
+      admin.email = "admin@descalifica.com";
+
+      em.persist(admin);
+      await em.flush();
+      console.log("✓ Usuario admin creado por defecto");
+    }
+  } catch (error) {
+    console.error("Error al crear admin por defecto:", error);
+  }
+}
+
+await createDefaultAdmin();
 
 app.listen(3000, () => {
   console.log("Corriendo en http://localhost:3000");

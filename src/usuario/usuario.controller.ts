@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import { Usuario } from "./usuario.entity.js";
 import { orm } from "../shared/db/orm.js";
 import { NotFoundError } from "@mikro-orm/core";
-import bcrypt from "bcrypt";
 
 const em = orm.em;
 
@@ -19,12 +18,18 @@ function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
     fav_circuit: req.body.fav_circuit,
     bio: req.body.bio,
     id: req.params.id,
+    user_type: req.body.user_type,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
       delete req.body.sanitizedInput[key];
     }
   });
+
+  if (req.file) {
+    req.body.sanitizedInput.avatar = `/uploads/avatars/${req.file.filename}`;
+  }
+
   next();
 }
 
@@ -55,34 +60,18 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
-//Crear un nuevo usuario
-
-async function add(req: Request, res: Response) {
-  try {
-    //generar salt
-    const salt = await bcrypt.genSalt(10);
-    //crear hash
-    req.body.sanitizedInput.password_hash = await bcrypt.hash(
-      req.body.sanitizedInput.password,
-      salt
-    );
-    const usuario = em.create(Usuario, req.body.sanitizedInput);
-    await em.flush();
-    res.status(201).json({ message: "Created", data: usuario });
-  } catch (error: any) {
-    console.error("Error creating usuario:", error);
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
-  }
-}
-
 //Actualizar un usuario existente
 
 async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
+
+    // Si hay archivo, agregar la ruta al objeto sanitizado
+    if (req.file) {
+      req.body.sanitizedInput.avatar = `/uploads/avatars/${req.file.filename}`;
+    }
+
     em.assign(usuario, req.body.sanitizedInput);
     await em.flush();
     res.status(204).json({ message: "Updated" });
@@ -112,4 +101,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeUsuario, findAll, findOne, add, update, remove };
+export { sanitizeUsuario, findAll, findOne, update, remove };

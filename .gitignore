@@ -1,5 +1,4 @@
-#LOCAL
-.gitignore
+# Local (código de pruebas local)
 /src/character/
 /src/appCharacter.ts
 
@@ -12,17 +11,24 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-#Los modulos de node y las compilaciones
+# Módulos de node y compilaciones
 node_modules
 dist
 dist-ssr
 *.local
 
-#Otros archivos de los editores y sugeridos
+# Archivos de entorno
+.env
+.env.*
+
+# Lockfiles de otros gestores de paquetes
+package-lock.json
+yarn.lock
+
+# Archivos de editores
 .vscode/*
 !.vscode/extensions.json
 !.vscode/launch.json
-
 .idea
 .DS_Store
 *.suo
@@ -30,3 +36,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# OS files
+Thumbs.db
