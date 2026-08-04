@@ -51,6 +51,7 @@ import { sesionRouter } from "./src/sesion/sesion.routes.js";
 import { blogpostRouter } from "./src/blogpost/blogpost.routes.js";
 import { authRouter } from "./src/auth/auth.routes.js";
 import { Usuario } from "./src/usuario/usuario.entity.js";
+import { nationalities } from "./src/shared/nationalities.js";
 
 const app = express();
 
@@ -75,6 +76,9 @@ app.use("/api/circuitos", circuitoRouter);
 app.use("/api/sesion", sesionRouter);
 app.use("/api/blogposts", blogpostRouter);
 app.use("/api/auth", authRouter);
+app.get("/api/nationalities", (req, res) => {
+  res.status(200).json({ message: "OK", data: nationalities });
+});
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 //Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
