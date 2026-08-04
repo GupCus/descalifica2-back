@@ -39,3 +39,7 @@ yarn.lock
 
 # OS files
 Thumbs.db
+
+# Archivos subidos por usuarios (excepto banderas pre-cargadas)
+uploads/
+!uploads/flags/

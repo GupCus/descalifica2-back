@@ -36,6 +36,7 @@ import "reflect-metadata";
 import express from "express";
 import cors from "cors";
 import path from "path";
+import multer from "multer";
 import { pilotoRouter } from "./src/piloto/piloto.routes.js";
 import { escuderiaRouter } from "./src/escuderia/escuderia.routes.js";
 import { orm, syncSchema } from "./src/shared/db/orm.js";
@@ -75,6 +76,20 @@ app.use("/api/sesion", sesionRouter);
 app.use("/api/blogposts", blogpostRouter);
 app.use("/api/auth", authRouter);
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+//Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({ message: "El archivo excede el tamaño máximo de 5MB" });
+    }
+    return res.status(400).json({ message: `Error de upload: ${err.message}` });
+  }
+  if (err.message?.includes("Tipo de archivo no permitido")) {
+    return res.status(415).json({ message: err.message });
+  }
+  next(err);
+});
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {
