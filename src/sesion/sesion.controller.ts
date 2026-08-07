@@ -18,7 +18,7 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
       ? new Date(req.body.end_time)
       : req.body.end_time,
     race: req.body.race,
-    results: req.body.results,
+    session_results: req.body.session_results,
     id: req.params.id,
   };
 
@@ -34,7 +34,11 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
-    const sesiones = await em.find(Sesion, {}, { populate: ["results"] });
+    const sesiones = await em.find(
+      Sesion,
+      {},
+      { populate: ["session_results"] },
+    );
     res.status(200).json({ message: "OK", data: sesiones });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -49,7 +53,7 @@ async function findOne(req: Request, res: Response) {
     const sesion = await em.findOneOrFail(
       Sesion,
       { id },
-      { populate: ["results"] }
+      { populate: ["session_results"] },
     );
     res.status(200).json({ message: "OK", data: sesion });
   } catch (error: any) {
@@ -66,7 +70,7 @@ async function findOne(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   try {
     const sesionData = { ...req.body.sanitizedInput };
-    const { results, ...sesionProps } = sesionData;
+    const { session_results, ...sesionProps } = sesionData;
     const sesion = em.create(Sesion, sesionProps);
 
     // Averiguar los datos que nos da la API para ver que hay que validar
