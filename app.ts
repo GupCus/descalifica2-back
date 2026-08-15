@@ -50,6 +50,7 @@ import { usuarioRouter } from "./src/usuario/usuario.routes.js";
 import { sesionRouter } from "./src/sesion/sesion.routes.js";
 import { blogpostRouter } from "./src/blogpost/blogpost.routes.js";
 import { authRouter } from "./src/auth/auth.routes.js";
+import { assetRouter } from "./src/asset/asset.routes.js";
 import { Usuario } from "./src/usuario/usuario.entity.js";
 import { nationalities } from "./src/shared/nationalities.js";
 
@@ -76,10 +77,10 @@ app.use("/api/circuitos", circuitoRouter);
 app.use("/api/sesion", sesionRouter);
 app.use("/api/blogposts", blogpostRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/assets", assetRouter);
 app.get("/api/nationalities", (req, res) => {
   res.status(200).json({ message: "OK", data: nationalities });
 });
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 //Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
