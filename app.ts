@@ -19,6 +19,7 @@
 2. Borra las carpetas /dist y node_modules
 3. Ejecuta en orden:
    - pnpm install
+   - pnpm seed
    - pnpm start:dev
 
 ¿Solución para "NODE NO ES UN COMANDO RECONOCIDO" o similar?
@@ -83,18 +84,29 @@ app.get("/api/nationalities", (req, res) => {
 });
 
 //Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  if (err instanceof multer.MulterError) {
-    if (err.code === "LIMIT_FILE_SIZE") {
-      return res.status(413).json({ message: "El archivo excede el tamaño máximo de 5MB" });
+app.use(
+  (
+    err: any,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        return res
+          .status(413)
+          .json({ message: "El archivo excede el tamaño máximo de 5MB" });
+      }
+      return res
+        .status(400)
+        .json({ message: `Error de upload: ${err.message}` });
     }
-    return res.status(400).json({ message: `Error de upload: ${err.message}` });
-  }
-  if (err.message?.includes("Tipo de archivo no permitido")) {
-    return res.status(415).json({ message: err.message });
-  }
-  next(err);
-});
+    if (err.message?.includes("Tipo de archivo no permitido")) {
+      return res.status(415).json({ message: err.message });
+    }
+    next(err);
+  },
+);
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {
