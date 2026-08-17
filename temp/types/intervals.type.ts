@@ -3,10 +3,10 @@
  * indicando la diferencia con el líder y el piloto de adelante.
  */
 export class Intervals {
-  meeting_key?: number;
-  session_key?: number;
-  driver_number?: number;
-  date?: Date | string;
-  gap_to_leader?: number;
-  interval?: number;
+  meeting_key!: number;
+  session_key!: number;
+  driver_number!: number;
+  date!: Date | string;
+  gap_to_leader!: number;
+  interval!: number;
 }

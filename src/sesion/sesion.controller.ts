@@ -6,11 +6,11 @@ import { Carrera } from "../carrera/carrera.entity.js";
 import { NotFoundError } from "@mikro-orm/core";
 
 const em = orm.em;
-
+const tipos = ["FP1","FP2","FP3","Q","SQ","Sprint","GP"];
 function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     name: req.body.name,
-    type: req.body.type,
+    type: req.body.type.toUpperCase(),
     start_time: req.body.start_time
       ? new Date(req.body.start_time)
       : req.body.start_time,
@@ -21,7 +21,9 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
     results: req.body.results,
     id: req.params.id,
   };
-
+  if (!tipos.includes(req.body.sanitizedInput.type)){
+    return res.status(400).json({ message: "Tipo de sesión inválido, solo se permiten " + tipos.join(", ") });
+  }
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
       delete req.body.sanitizedInput[key];

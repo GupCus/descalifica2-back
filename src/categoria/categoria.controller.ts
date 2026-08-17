@@ -10,13 +10,16 @@ function sanitizeCategoriaInput(
   next: NextFunction
 ) {
   req.body.sanitizedInput = {
-    name: req.body.name,
+    name: req.body.name.toUpperCase(),
     description: req.body.description,
     teams: req.body.teams,
     drivers: req.body.drivers,
     seasons: req.body.seasons,
     id: req.params.id,
   };
+  if (req.body.sanitizedInput.name !== "F1" || req.body.sanitizedInput.name !== "F2"){
+    return res.status(400).json({ message: "Categoria inválida, solo se permiten F1 y F2" });
+  }
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
       delete req.body.sanitizedInput[key];

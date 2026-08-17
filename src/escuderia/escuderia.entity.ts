@@ -21,14 +21,15 @@ export class Escuderia extends baseEntity {
   })
   drivers = new Collection<Piloto>(this);
 
-  @Property({ nullable: false })
-  fundation!: number;
+  @Property({ nullable: true })
+  fundation?: number;
 
-  @Property({ nullable: false })
-  nationality!: string;
+  @Property({ nullable: true })
+  nationality?: string;
 
-  @Property({ nullable: false })
-  engine!: string;
+  //Candidata a eliminar
+  @Property({ nullable: true })
+  engine?: string;
 
   @ManyToOne(() => Marca, { nullable: true })
   brand?: Rel<Marca>;
@@ -38,6 +39,9 @@ export class Escuderia extends baseEntity {
 
   @OneToMany(() => Temporada, (temporada) => temporada.winner_team)
   wccs = new Collection<Temporada>(this);
+
+  @Property({ nullable: true })
+  color?: string;
 }
 
 //AGUS: ¿¿¿QUE HAY DE IMPORTANTE COMO PARA PONER???

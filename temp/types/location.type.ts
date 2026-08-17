@@ -3,11 +3,11 @@
  * de un piloto en el circuito en un momento preciso.
  */
 export class Location {
-  meeting_key?: number;
-  session_key?: number;
-  driver_number?: number;
-  date?: Date | string;
-  x?: number;
-  y?: number;
-  z?: number;
+  meeting_key!: number;
+  session_key!: number;
+  driver_number!: number;
+  date!: Date | string;
+  x!: number;
+  y!: number;
+  z!: number;
 }
