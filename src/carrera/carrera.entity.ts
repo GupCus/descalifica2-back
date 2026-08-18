@@ -14,11 +14,11 @@ import { Sesion } from "../sesion/sesion.entity.js";
 
 @Entity()
 export class Carrera extends baseEntity {
-  @Property({ nullable: false })
-  start_date!: Date;
+  @Property({ nullable: true })
+  start_date?: Date;
 
-  @Property({ nullable: false })
-  end_date!: Date;
+  @Property({ nullable: true })
+  end_date?: Date;
 
   @ManyToOne(() => Circuito, { nullable: false })
   track!: Rel<Circuito>;

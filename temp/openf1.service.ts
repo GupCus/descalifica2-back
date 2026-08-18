@@ -17,9 +17,10 @@ import { Piloto } from "../src/piloto/piloto.entity.js";
 
 // Diccionarios en memoria para no consultar la base de datos en cada iteración y evitar duplicados
 const escuderiasCache = new Map<string, Escuderia>();
+const pilotosCache = new Map<string, Piloto>();
 const circuitosCache = new Map<string, Circuito>();
 const tipos = ["FP1","FP2","FP3","Q","SQ","Sprint","GP"];
-const temporadas = [2026]
+const temporadas = [2023,2024,2025,2026]
 
 const parsearTipoSesion = (sessionName: string): string => {
   switch (sessionName.trim()) {
@@ -32,6 +33,20 @@ const parsearTipoSesion = (sessionName: string): string => {
     case "Race": return "GP";
     default: return sessionName; // Por si viene algún nombre distinto
   }
+};
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const fetchF1 = async (url: string) => {
+  await delay(2000); // 2000ms aseguran un máximo de 30 requests por minuto
+  let res = await fetch(url);
+  // Bucle de reintento en caso de ser bloqueados
+  while (res.status === 429 || res.status === 403) {
+    console.log(`[API ALERTA] Límite de 30/min alcanzado. Pausa de 10 segundos...`);
+    await delay(10000);
+    res = await fetch(url);
+  }
+  return await res.json();
 };
 
 export const destruirbd_importaropenf1 = async()=>{
@@ -63,24 +78,32 @@ export const destruirbd_importaropenf1 = async()=>{
   
   //1 - Creacion pilotos y escuderías
   log("PARTE 1/2: Procesando pilotos y escuderías...");
-  const drivers = await (await fetch("https://api.openf1.org/v1/drivers")).json() as Drivers[]
+  const drivers = await fetchF1("https://api.openf1.org/v1/drivers") as Drivers[];
   for(const d of drivers){
-    let escuderia = escuderiasCache.get(d.team_name)
+    const teamName = d.team_name || "Sin Escudería";
+    let escuderia = escuderiasCache.get(teamName)
     if(!escuderia){
       escuderia = em.create(Escuderia,{
-        name:d.team_name,
-        racing_series:F1,
-        color:d.team_colour,
+        name: teamName,
+        racing_series: F1,
+        color: d.team_colour || "000000",
       })
-      escuderiasCache.set(d.team_name, escuderia);
+      escuderiasCache.set(teamName, escuderia);
     }
-    let piloto = em.create(Piloto, {
-      name: d.broadcast_name,
-      num: d.driver_number,
-      nationality: d.country_code,
-      team: escuderia,
-    })
-    em.persist(piloto);
+    const pilotoName = d.broadcast_name || d.full_name || "Desconocido";
+    let piloto = pilotosCache.get(pilotoName);
+    if (!piloto) {
+      piloto = em.create(Piloto, {
+        name: pilotoName,
+        num: d.driver_number,
+        nationality: d.country_code,
+        team: escuderia,
+        profile_image: d.headshot_url,
+        racing_series:F1,
+      });
+      pilotosCache.set(pilotoName, piloto);
+      em.persist(piloto);
+    }
   }
 
   //2 - Itera sobre cada temporada 2023-2026
@@ -88,7 +111,7 @@ export const destruirbd_importaropenf1 = async()=>{
   let indice = 1;
   for (const temporada of F1.seasons) {
     log(`  -> Año ${temporada.year} (${indice}/${F1.seasons.length})`);
-    let meetings = await(await fetch("https://api.openf1.org/v1/meetings?year=" + temporada.year)).json() as Meetings[]
+    let meetings = await fetchF1("https://api.openf1.org/v1/meetings?year=" + temporada.year) as Meetings[];
     
     // Itera sobre cada carrera de cada año
     for(const m of meetings){
@@ -99,7 +122,16 @@ export const destruirbd_importaropenf1 = async()=>{
       if(!circuito){
         log("       * Creando nuevo circuito:" + m.circuit_short_name);
         // Agregamos comprobación para evitar fallos si m.circuit_info_url no existe
-        let year = m.circuit_info_url ? (await (await fetch(m.circuit_info_url)).json()).year : null; 
+        let year = null;
+        if (m.circuit_info_url) {
+          //Parece ser que algunas url de circuitos no funcionan
+          try{
+          const circuitData = await fetchF1(m.circuit_info_url);
+          year = Array.isArray(circuitData) ? circuitData[0]?.year : circuitData?.year;
+          }catch(err){
+            year = null
+          }
+        }
         circuito = em.create(Circuito,{
           name:m.circuit_short_name,
           country:m.country_code,
@@ -120,11 +152,18 @@ export const destruirbd_importaropenf1 = async()=>{
       log("       * Obteniendo sesiones...");
 
       //Itera sobre las sesiones correspondientes a la carrera, las agrega a su arreglo
-      let sesiones = await(await fetch("https://api.openf1.org/v1/sessions?meeting_key=" + m.meeting_key)).json() as Sessions[]
+      let sesiones = await fetchF1("https://api.openf1.org/v1/sessions?meeting_key=" + m.meeting_key) as Sessions[];
+      
+      // Prevención de errores si la estructura viene extraña
+      if (!Array.isArray(sesiones)) sesiones = [];
+
       for(const s of sesiones){
         //Los resultados están en otro endpoint, ya los solicito desde acá
         //TODO: HAY QUE CAMBIAR EL FORMATO DE LOS RESULTADOS, ¿CREAR ENTIDAD RESULTADOS?
-        let resultadoscrudos = await(await fetch("https://api.openf1.org/v1/session_result?session_key=" + s.session_key)).json() as SessionResult[]
+        let resultadoscrudos = await fetchF1("https://api.openf1.org/v1/session_result?session_key=" + s.session_key) as SessionResult[];
+        
+        if (!Array.isArray(resultadoscrudos)) resultadoscrudos = [];
+
         let resultadostramitados = resultadoscrudos.map((r):[string,string] => [
           r.driver_number?.toString() ?? "unknown",
           r.duration?.toString() ?? "undefined", 

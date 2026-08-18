@@ -4,14 +4,14 @@ import { baseEntity } from "../shared/baseEntity.entity.js";
 
 @Entity()
 export class Circuito extends baseEntity {
-  @Property({ nullable: false })
-  country!: string;
+  @Property({ nullable: true })
+  country?: string;
 
-  @Property({ nullable: false })
-  length!: string;
+  @Property({ nullable: true })
+  length?: string;
 
-  @Property({ nullable: false })
-  year!: number;
+  @Property({ nullable: true })
+  year?: number;
 
   @Property({ nullable: true })
   track_map_url?: string;

@@ -14,12 +14,12 @@ import { Carrera } from "../carrera/carrera.entity.js";
 @Entity()
 export class Sesion extends baseEntity {
   @Property({ nullable: true })
-  type?: string; //ELEGIR UPPERCASE O GUIONES BAJOS PARA SEPARAR LAS PALABRAS!!!!!, GUIONES MEJOR
+  type?: string;
 
-  @Property({ nullable: false, unique: true })
-  start_time!: Date;
+  @Property({ nullable: true })
+  start_time?: Date;
 
-  @Property({ nullable: false, unique: true })
+  @Property({ nullable: true})
   end_time?: Date;
 
   // Relación con carrera DEBIL

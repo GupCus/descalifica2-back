@@ -18,7 +18,7 @@ export class Piloto extends baseEntity {
   //team!: Escuderia; DA ERROR, por ser una relacion circular. Se usa lo siguiente:
   team!: Rel<Escuderia>;
 
-  @Property({ nullable: true, unique: true })
+  @Property({ nullable: true})
   num?: number;
 
   @Property({ nullable: true })
@@ -38,7 +38,7 @@ export class Piloto extends baseEntity {
   wdcs = new Collection<Temporada>(this);
 
   @Property({ nullable: true })
-  retrato_url?: string;
+  profile_image?: string;
 
 }
 //FRAN: hay q pasarlas a español
