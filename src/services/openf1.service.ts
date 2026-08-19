@@ -15,6 +15,9 @@ import { Drivers } from './openf1.types/drivers.type.js';
 import { Escuderia } from '../escuderia/escuderia.entity.js';
 import { Piloto } from '../piloto/piloto.entity.js';
 import { EntityManager } from '@mikro-orm/mysql';
+import { Request, Response, Router } from 'express';
+import { Championship_Drivers } from './openf1.types/championship_drivers.type.js';
+import { Championship_Teams } from './openf1.types/championship_teams.type.js';
 
 const f1api = 'https://api.openf1.org/v1';
 // Diccionarios para no tener que ir almacenando todas las instancias en la bd
@@ -23,6 +26,69 @@ const escuderiasCache = new Map<string, Escuderia>();
 const pilotosCache = new Map<string, Piloto>();
 const circuitosCache = new Map<string, Circuito>();
 const temporadas = [2023, 2024, 2025, 2026];
+
+//Hay algunas URL null de retratos además de otras que no corresponden,
+//por suerte descubrimos que es bastante simple el formato de la api de los assets de formula1
+//https://www.formula1.com/content/dam/fom-website/drivers/[INICIAL_NOMBRE]/[CÓDIGO]_[Nombre]_[Apellido]/[código_en_minúsculas].png
+//Donde el código es 3 primeras letras del nombre seguidas de las 3 primeras letras del apellido
+//Ej: https://www.formula1.com/content/dam/fom-website/drivers/F/FRACOL01_Franco_Colapinto/fracol01.png
+const crearurlheadshot = (nombreyapellido: string) => {
+  let [nombre, apellido] = nombreyapellido.split(' ');
+  const urlbase = 'https://www.formula1.com/content/dam/fom-website/drivers/';
+  const primeraL = nombre.charAt(0);
+  const letrasnombre = nombre.slice(0, 3);
+  const letrasapellido = apellido.slice(0, 3);
+  apellido = apellido.charAt(0).toUpperCase() + apellido.slice(1).toLowerCase();
+  return (
+    urlbase +
+    primeraL +
+    '/' +
+    (letrasnombre + letrasapellido).toUpperCase() +
+    '01_' +
+    nombre +
+    '_' +
+    apellido +
+    '/' +
+    (letrasnombre + letrasapellido).toLowerCase() +
+    '01.png'
+  );
+};
+
+//Funcion para encontrar el mejor piloto y escudería de la temporada
+const asignarganadores = async (
+  temporada: Temporada,
+  ultimameeting: number,
+) => {
+  //Esto da un objeto con propiedad .driver_number, el cual es un campo de piloto(num), necesito buscar esa entidad piloto y asignarla a temporada.winner_driver
+  const resultadospilotos = (await fetchF1(
+    '/championship_driver?meeting_key=' + ultimameeting + '&position_current=1',
+  )) as Championship_Drivers[];
+
+  if (resultadospilotos && resultadospilotos.length > 0) {
+    // Buscar en el cache de pilotos por su número
+    const pilotoGanador = Array.from(pilotosCache.values()).find(
+      (p) => p.num === resultadospilotos[0].driver_number,
+    );
+    if (pilotoGanador) {
+      temporada.winner_driver = pilotoGanador;
+    }
+  }
+
+  //Esto da un objeto con propiedad .team_name, el cual es un campo de escuderia(name), necesito buscar esa entidad escuderia y asignarla a temporada.winner_driver
+  const resultadosescuderias = (await fetchF1(
+    '/championship_teams?meeting_key=' + ultimameeting + '&position_current=1',
+  )) as Championship_Teams[];
+
+  if (resultadosescuderias && resultadosescuderias.length > 0) {
+    // Buscar en el cache de escuderías por su nombre
+    const escuderiaGanadora = escuderiasCache.get(
+      resultadosescuderias[0].team_name,
+    );
+    if (escuderiaGanadora) {
+      temporada.winner_team = escuderiaGanadora;
+    }
+  }
+};
 
 //Adaptador para traducir a la convencion que usamos nosotros
 const adaptarTipoSesion = (sessionName: string): string => {
@@ -106,7 +172,7 @@ const CargarPilotosyEscuderias = async (em: EntityManager, F1: Categoria) => {
         num: d.driver_number,
         nationality: d.country_code,
         team: escuderia,
-        profile_image: d.headshot_url,
+        profile_image: crearurlheadshot(d.full_name),
         racing_series: F1,
       });
       pilotosCache.set(d.full_name, piloto);
@@ -119,7 +185,7 @@ const CarrerasySesionesxtemporada = async (
   em: EntityManager,
   temporada: Temporada,
 ) => {
-  let meetings = (await fetchF1(
+  const meetings = (await fetchF1(
     '/meetings?year=' + temporada.year,
   )) as Meetings[];
 
@@ -138,7 +204,7 @@ const CarrerasySesionesxtemporada = async (
       circuitosCache.set(m.circuit_short_name, circuito);
     }
 
-    let carrera = em.create(Carrera, {
+    const carrera = em.create(Carrera, {
       name: m.meeting_name,
       start_date: m.date_start,
       end_date: m.date_end,
@@ -163,12 +229,14 @@ const CarrerasySesionesxtemporada = async (
         '/session_result?session_key=' + s.session_key,
       )) as SessionResult[];
       if (!Array.isArray(resultadoscrudos)) resultadoscrudos = [];
-      let resultadostramitados = resultadoscrudos.map((r): [string, string] => [
-        r.driver_number?.toString() ?? 'undefined',
-        r.duration?.toString() ?? 'undefined',
-      ]);
+      const resultadostramitados = resultadoscrudos.map(
+        (r): [string, string] => [
+          r.driver_number?.toString() ?? 'undefined',
+          r.duration?.toString() ?? 'undefined',
+        ],
+      );
 
-      let sesion = em.create(Sesion, {
+      const sesion = em.create(Sesion, {
         name: s.session_name,
         type: adaptarTipoSesion(s.session_name),
         start_time: s.date_start,
@@ -180,12 +248,24 @@ const CarrerasySesionesxtemporada = async (
     }
     //Agrega la carrera con sus sesiones a la temporada
     temporada.races.add(carrera);
-
-    //Asignar piloto y escudería campeonas
-    //TO DO
   }
+
+  //Para encontrar el ganador necesito los puntos en la ultima carrera que ocurrió
+  //El problema era es que en 2026 la ultima carrera es una que no ocurrió aún
+  //Para esto filtramos todas las carreras por las que ya sucedieron.
+  const hoy = new Date();
+  if (hoy.getFullYear() === temporada.year) {
+    const carrerasOcurridas = meetings.filter((meeting) => {
+      const fechaCarrera = new Date(meeting.date_start);
+      return fechaCarrera < hoy;
+    });
+    return carrerasOcurridas[carrerasOcurridas.length - 1].meeting_key;
+  }
+
+  return meetings[meetings.length - 1].meeting_key;
 };
-// Funcion principal
+
+// FUNCION PRINCIPAL
 // Me abuse un poco de los log, habia que ver que pasaba
 export const destruirbd_importaropenf1 = async () => {
   const em = orm.em.fork();
@@ -202,11 +282,11 @@ export const destruirbd_importaropenf1 = async () => {
   //2 - Itera sobre cada temporada 2023-2026
   console.log('PARTE 2/2: Procesando temporadas, carreras y sesiones...');
 
-  let indice = 1;
   for (const temporada of F1.seasons) {
-    console.log('Año ' + temporada.year + `( ${indice}/${F1.seasons.length})`);
-    await CarrerasySesionesxtemporada(em, temporada);
-    indice++;
+    console.log('Año ' + temporada.year);
+    const ultimacarrera = await CarrerasySesionesxtemporada(em, temporada);
+    //Asignar piloto y escudería campeonas
+    await asignarganadores(temporada, ultimacarrera);
     // evitar que se quede sin memoria, hacemos un flush por temporada
     console.log('Guardando progreso del año' + temporada.year);
     await em.flush();
@@ -217,17 +297,23 @@ export const destruirbd_importaropenf1 = async () => {
   console.log('completada con éxito!');
 };
 
-//Temporal, para correrlo
-export const openf1service = () => {
-  console.log('Iniciando ejecución manual de la importación...');
+// Endpoint Service
 
-  destruirbd_importaropenf1()
-    .then(() => {
-      console.log('El proceso ha finalizado correctamente.');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('Hubo un error crítico durante la ejecución:', error);
-      process.exit(1);
-    });
+const openf1service = async (req: Request, res: Response) => {
+  console.log(
+    'Iniciando ejecución manual de la importación desde el endpoint...',
+  );
+
+  try {
+    destruirbd_importaropenf1();
+    res
+      .status(202)
+      .json({ message: 'Se dio inicio a la regeneración de la BD.' });
+  } catch (error: any) {
+    console.error('Hubo un error:', error);
+    res.status(500).json({ message: 'Error interno', error: error.message });
+  }
 };
+
+export const of1router = Router();
+of1router.post('/', openf1service);
