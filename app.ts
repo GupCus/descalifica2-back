@@ -50,7 +50,7 @@ import { sesionRouter } from './src/sesion/sesion.routes.js';
 import { blogpostRouter } from './src/blogpost/blogpost.routes.js';
 import { authRouter } from './src/auth/auth.routes.js';
 import { Usuario } from './src/usuario/usuario.entity.js';
-import { of1router } from './src/services/openf1.service.js';
+import { of1router } from './src/services/openf1.routes.js';
 
 const app = express();
 
@@ -75,7 +75,7 @@ app.use('/api/circuitos', circuitoRouter);
 app.use('/api/sesion', sesionRouter);
 app.use('/api/blogposts', blogpostRouter);
 app.use('/api/auth', authRouter);
-app.use('/restablecer', of1router);
+app.use('/openf1', of1router);
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 //Repuesta default para cualquier unhandled request
