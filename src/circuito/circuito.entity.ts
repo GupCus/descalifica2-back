@@ -14,5 +14,8 @@ export class Circuito extends baseEntity {
   year!: number;
 
   @Property({ nullable: true })
-  track_map_url?: string;
+  track_map_image?: string;
+
+  @Property({ nullable: true })
+  photo_image?: string;
 }

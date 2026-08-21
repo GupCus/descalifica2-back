@@ -1,8 +1,17 @@
 import { Categoria } from "./categoria.entity.js";
 import { NextFunction, Request, Response } from "express";
 import { orm } from "../shared/db/orm.js";
+import { deleteFile, buildImageUrl, getRelativePath } from "../shared/upload/upload.utils.js";
 
 const em = orm.em;
+
+function addImageUrls(req: Request, categoria: Categoria) {
+  const result = { ...categoria } as any;
+  if (categoria.logo_image) {
+    result.logo_image_url = buildImageUrl(req, categoria.logo_image);
+  }
+  return result;
+}
 
 function sanitizeCategoriaInput(
   req: Request,
@@ -28,7 +37,8 @@ function sanitizeCategoriaInput(
 async function findAll(req: Request, res: Response) {
   try {
     const categorias = await em.find(Categoria, {});
-    res.status(200).json({ message: "findAll categorías:", data: categorias });
+    const data = categorias.map(c => addImageUrls(req, c));
+    res.status(200).json({ message: "findAll categorías:", data });
   } catch (error: any) {
     res.status(500).json({ message: "Internal server error" });
   }
@@ -39,7 +49,7 @@ async function findOne(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
     const categoria = await em.findOneOrFail(Categoria, { id });
-    res.status(200).json({ data: categoria });
+    res.status(200).json({ data: addImageUrls(req, categoria) });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -48,11 +58,15 @@ async function findOne(req: Request, res: Response) {
 //add
 async function add(req: Request, res: Response) {
   try {
-    const categoria = em.create(Categoria, req.body.sanitizedInput);
+    const payload = req.body.sanitizedInput || req.body;
+    if (req.file) {
+      payload.logo_image = getRelativePath(req.file.path);
+    }
+    const categoria = em.create(Categoria, payload);
     await em.flush();
     res
       .status(201)
-      .json({ message: "categoria created succesfully", data: categoria });
+      .json({ message: "categoria created succesfully", data: addImageUrls(req, categoria) });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -62,10 +76,19 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const categoria = em.getReference(Categoria, id);
-    em.assign(categoria, req.body);
+    const categoria = await em.findOneOrFail(Categoria, { id });
+    const payload = req.body.sanitizedInput || req.body;
+    
+    if (req.file) {
+      if (categoria.logo_image) {
+        deleteFile(categoria.logo_image);
+      }
+      payload.logo_image = getRelativePath(req.file.path);
+    }
+    
+    em.assign(categoria, payload);
     await em.flush();
-    res.status(200).json({ message: "Updated succesfully", data: categoria });
+    res.status(200).json({ message: "Updated succesfully", data: addImageUrls(req, categoria) });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -75,7 +98,10 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const categoria = em.getReference(Categoria, id);
+    const categoria = await em.findOneOrFail(Categoria, { id });
+    if (categoria.logo_image) {
+      deleteFile(categoria.logo_image);
+    }
     await em.removeAndFlush(categoria);
     res.status(200).json({ message: "deleted succesfully", data: categoria });
   } catch (error: any) {
@@ -83,4 +109,49 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { sanitizeCategoriaInput, findAll, findOne, add, update, remove };
+async function uploadLogoImage(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const categoria = await em.findOneOrFail(Categoria, { id });
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+
+    if (categoria.logo_image) {
+      deleteFile(categoria.logo_image);
+    }
+
+    categoria.logo_image = getRelativePath(req.file.path);
+    await em.flush();
+
+    res.status(200).json({
+      message: "Logo image uploaded successfully",
+      data: addImageUrls(req, categoria),
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+async function deleteLogoImage(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const categoria = await em.findOneOrFail(Categoria, { id });
+
+    if (categoria.logo_image) {
+      deleteFile(categoria.logo_image);
+      categoria.logo_image = undefined;
+      await em.flush();
+    }
+
+    res.status(200).json({
+      message: "Logo image deleted successfully",
+      data: addImageUrls(req, categoria),
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+export { sanitizeCategoriaInput, findAll, findOne, add, update, remove, uploadLogoImage, deleteLogoImage };

@@ -30,6 +30,9 @@ export class Piloto extends baseEntity {
   @Property({ nullable: false })
   role!: string;
 
+  @Property({ nullable: true })
+  profile_image?: string;
+
   @ManyToOne(() => Categoria, { cascade: [Cascade.ALL], nullable: true })
   racing_series?: Rel<Categoria>;
 

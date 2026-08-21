@@ -30,6 +30,9 @@ export class Escuderia extends baseEntity {
   @Property({ nullable: false })
   engine!: string;
 
+  @Property({ nullable: true })
+  logo_image?: string;
+
   @ManyToOne(() => Marca, { nullable: true })
   brand?: Rel<Marca>;
 

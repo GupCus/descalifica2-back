@@ -26,6 +26,6 @@ export class Sesion extends baseEntity {
   @ManyToOne(() => Carrera, { nullable: false })
   race!: Rel<Carrera>;
 
-  @Property({ type: "json", nullable: true })
-  results?: [string, string][];
+  @Property({ type: "json", columnType: "longtext", nullable: true })
+  session_results?: [string, string][];
 }
