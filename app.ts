@@ -50,7 +50,7 @@ import { sesionRouter } from './src/sesion/sesion.routes.js';
 import { blogpostRouter } from './src/blogpost/blogpost.routes.js';
 import { authRouter } from './src/auth/auth.routes.js';
 import { Usuario } from './src/usuario/usuario.entity.js';
-import { of1router } from './src/services/openf1.routes.js';
+import { of1router } from './src/services/openf1/openf1.routes.js';
 
 const app = express();
 

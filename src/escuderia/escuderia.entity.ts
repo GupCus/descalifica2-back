@@ -1,5 +1,5 @@
-import { Piloto } from "../piloto/piloto.entity.js";
-import { baseEntity } from "../shared/baseEntity.entity.js";
+import { Piloto } from '../piloto/piloto.entity.js';
+import { baseEntity } from '../shared/baseEntity.entity.js';
 import {
   Cascade,
   Collection,
@@ -8,10 +8,10 @@ import {
   Property,
   ManyToOne,
   Rel,
-} from "@mikro-orm/core";
-import { Marca } from "../marca/marca.entity.js";
-import { Categoria } from "../categoria/categoria.entity.js";
-import { Temporada } from "../temporada/temporada.entity.js";
+} from '@mikro-orm/core';
+import { Marca } from '../marca/marca.entity.js';
+import { Categoria } from '../categoria/categoria.entity.js';
+import { Temporada } from '../temporada/temporada.entity.js';
 
 @Entity()
 export class Escuderia extends baseEntity {
@@ -27,10 +27,6 @@ export class Escuderia extends baseEntity {
   @Property({ nullable: true })
   nationality?: string;
 
-  //Candidata a eliminar
-  @Property({ nullable: true })
-  engine?: string;
-
   @ManyToOne(() => Marca, { nullable: true })
   brand?: Rel<Marca>;
 
@@ -42,6 +38,12 @@ export class Escuderia extends baseEntity {
 
   @Property({ nullable: true })
   color?: string;
+
+  @Property({ nullable: true })
+  engine?: string;
+
+  @Property({ nullable: true })
+  desc?: string;
 }
 
 //AGUS: ¿¿¿QUE HAY DE IMPORTANTE COMO PARA PONER???

@@ -1,21 +1,24 @@
-import { Carrera } from '../carrera/carrera.entity.js';
-import { Categoria } from '../categoria/categoria.entity.js';
-import { Circuito } from '../circuito/circuito.entity.js';
-import { Sesion } from '../sesion/sesion.entity.js';
-import { orm } from '../shared/db/orm.js';
-import { Temporada } from '../temporada/temporada.entity.js';
+import { Carrera } from '../../carrera/carrera.entity.js';
+import { Categoria } from '../../categoria/categoria.entity.js';
+import { Circuito } from '../../circuito/circuito.entity.js';
+import { Sesion } from '../../sesion/sesion.entity.js';
+import { orm } from '../../shared/db/orm.js';
+import { Temporada } from '../../temporada/temporada.entity.js';
 import { Meetings } from './openf1.types/meetings.type.js';
 import { SessionResult } from './openf1.types/session_result.type.js';
 import { Sessions } from './openf1.types/sessions.type.js';
 import { Drivers } from './openf1.types/drivers.type.js';
-import { Escuderia } from '../escuderia/escuderia.entity.js';
-import { Piloto } from '../piloto/piloto.entity.js';
+import { Escuderia } from '../../escuderia/escuderia.entity.js';
+import { Piloto } from '../../piloto/piloto.entity.js';
 import { EntityManager } from '@mikro-orm/mysql';
 import { Championship_Drivers } from './openf1.types/championship_drivers.type.js';
 import { Championship_Teams } from './openf1.types/championship_teams.type.js';
+import { Session_Result } from '../../sesion/session_result.entity.js';
 
 const f1api = 'https://api.openf1.org/v1';
 const temporadas = [2023, 2024, 2025, 2026];
+
+// FUNCIONES PARA AYUDAR A LAS OTRAS
 
 //Workaround para que no me rebote la api por exceso de intentos
 //3 req x seg y max 30 por min
@@ -33,46 +36,6 @@ const fetchF1 = async (url: string) => {
     res = await fetch(url);
   }
   return await res.json();
-};
-
-//Funcion para encontrar el mejor piloto y escudería de la temporada desde openf1
-const asignarganadores = async (
-  em: EntityManager,
-  temporada: Temporada,
-  ultimameeting: number,
-) => {
-  //Esto da un objeto con propiedad .driver_number, el cual es un campo de piloto(num), necesito buscar esa entidad piloto y asignarla a temporada.winner_driver
-  const resultadospilotos = (await fetchF1(
-    '/championship_drivers?meeting_key=' +
-      ultimameeting +
-      '&position_current=1',
-  )) as Championship_Drivers[];
-
-  if (resultadospilotos && resultadospilotos.length > 0) {
-    // Buscar en la bd de pilotos por su número
-    const pilotoGanador = await em.findOne(Piloto, {
-      num: resultadospilotos[0].driver_number,
-    });
-    if (pilotoGanador) {
-      temporada.winner_driver = pilotoGanador;
-      pilotoGanador.wdcs.add(temporada);
-    }
-  }
-  //Esto da un objeto con propiedad .team_name, el cual es un campo de escuderia(name), necesito buscar esa entidad escuderia y asignarla a temporada.winner_driver
-  const resultadosescuderias = (await fetchF1(
-    '/championship_teams?meeting_key=' + ultimameeting + '&position_current=1',
-  )) as Championship_Teams[];
-
-  if (resultadosescuderias && resultadosescuderias.length > 0) {
-    // Buscar en la bd de escuderías por su nombre
-    const escuderiaGanadora = await em.findOne(Escuderia, {
-      name: resultadosescuderias[0].team_name,
-    });
-    if (escuderiaGanadora) {
-      temporada.winner_team = escuderiaGanadora;
-      escuderiaGanadora.wccs.add(temporada);
-    }
-  }
 };
 
 //Adaptador para traducir a la convencion que usamos nosotros
@@ -109,18 +72,60 @@ const crearUrlHeadshot = (
   return url;
 };
 
+// FUNCIONES PRINCIPALES
+
+//Funcion para encontrar el mejor piloto y escudería de la temporada desde openf1
+const asignarganadores = async (
+  em: EntityManager,
+  temporada: Temporada,
+  ultimasession: number,
+) => {
+  //Esto da un objeto con propiedad .driver_number, el cual es un campo de piloto(num), necesito buscar esa entidad piloto y asignarla a temporada.winner_driver
+  const resultadospilotos = (await fetchF1(
+    '/championship_drivers?session_key=' +
+      ultimasession +
+      '&position_current=1',
+  )) as Championship_Drivers[];
+
+  if (resultadospilotos && resultadospilotos.length > 0) {
+    // Buscar en la bd de pilotos por su número
+    const pilotoGanador = await em.findOne(Piloto, {
+      num: resultadospilotos[0].driver_number,
+      season: temporada,
+    });
+    if (pilotoGanador) {
+      temporada.winner_driver = pilotoGanador;
+    }
+  }
+  //Esto da un objeto con propiedad .team_name, el cual es un campo de escuderia(name), necesito buscar esa entidad escuderia y asignarla a temporada.winner_driver
+  const resultadosescuderias = (await fetchF1(
+    '/championship_teams?session_key=' + ultimasession + '&position_current=1',
+  )) as Championship_Teams[];
+
+  if (resultadosescuderias && resultadosescuderias.length > 0) {
+    // Buscar en la bd de escuderías por su nombre
+    const escuderiaGanadora = await em.findOne(Escuderia, {
+      name: resultadosescuderias[0].team_name,
+    });
+    if (escuderiaGanadora) {
+      temporada.winner_team = escuderiaGanadora;
+      escuderiaGanadora.wccs.add(temporada);
+    }
+  }
+};
+
 //Funcion para cargar a la bd todos los pilotos que provee openf1
-//ADVERTENCIA: Los pilotos dependen de la meeting, por lo tanto nos faltaria clasificarlos por temporada tambien
+//ADVERTENCIA: Los pilotos dependen de la meeting y session, esta funcion necesita una temporada para asignarlos a esa temporada
 //Por ejemplo, max vestappen lo podes encontrar con num 1 si buscamos una meeting de 2025, aunque ahora es el 3
-//se actualizará con los que corrieron la ultima meeting por default
+//Incorpora conductores por session
 const CargarPilotosyEscuderias = async (
   em: EntityManager,
-  F1: Categoria,
-  meeting_key = 'latest',
+  temporada: Temporada,
+  session_key = 'latest',
 ) => {
   //Hace un fetch a los pilotos, busca si existe su escudería, si no existe la crea y luego crea al piloto
   const drivers = (await fetchF1(
-    '/drivers?meeting_key=' + meeting_key,
+    '/drivers?session_key=' + session_key,
   )) as Drivers[];
   for (const d of drivers) {
     //Hay algunos conductores que no tienen escudería, por defecto, los descartamos.
@@ -130,13 +135,16 @@ const CargarPilotosyEscuderias = async (
       if (!escuderia) {
         escuderia = em.create(Escuderia, {
           name: teamName,
-          racing_series: F1,
+          racing_series: temporada.racing_series,
           color: d.team_colour,
         });
       }
       em.persist(escuderia);
 
-      let piloto = await em.findOne(Piloto, { name: d.full_name });
+      let piloto = await em.findOne(Piloto, {
+        name: d.full_name,
+        season: temporada,
+      });
 
       if (!piloto) {
         piloto = em.create(Piloto, {
@@ -145,21 +153,25 @@ const CargarPilotosyEscuderias = async (
           nationality: d.country_code,
           team: escuderia,
           profile_image: crearUrlHeadshot(d.headshot_url),
-          racing_series: F1,
+          season: temporada,
+          racing_series: temporada.racing_series,
         });
         em.persist(piloto);
-      } else {
-        piloto.profile_image = crearUrlHeadshot(d.headshot_url);
       }
-      await em.flush();
     }
   }
+  await em.flush();
 };
 
+//Conseguir carreras y sesiones
 const CarrerasySesionesxtemporada = async (
   em: EntityManager,
   temporada: Temporada,
 ) => {
+  // Precargamos los pilotos para no hacer 29 millones de findone
+  let pilotos = await em.find(Piloto, { season: temporada });
+
+  //Llamada a la API
   const meetings = (await fetchF1(
     '/meetings?year=' + temporada.year,
   )) as Meetings[];
@@ -167,6 +179,7 @@ const CarrerasySesionesxtemporada = async (
   // Itera sobre cada carrera de la temporada
   for (const m of meetings) {
     console.log(`     - Carrera: ${m.circuit_short_name}`);
+
     //Revisa que exista el circuito, sino lo importa desde la api (si, valida por nombre). Finalmente, crea la carrera
     let circuito = await em.findOne(Circuito, { name: m.circuit_short_name });
     if (!circuito) {
@@ -176,6 +189,7 @@ const CarrerasySesionesxtemporada = async (
         country: m.country_code,
         track_map_url: m.circuit_image,
       });
+      em.persist(circuito);
     }
 
     const carrera = em.create(Carrera, {
@@ -186,57 +200,80 @@ const CarrerasySesionesxtemporada = async (
       track: circuito,
     });
 
-    console.log('       * Obteniendo sesiones...');
-
     //Itera sobre las sesiones correspondientes a la carrera, las agrega a su arreglo
+    console.log('       * Obteniendo sesiones...');
     let sesiones = (await fetchF1(
       '/sessions?meeting_key=' + m.meeting_key,
     )) as Sessions[];
 
     // Había algunos errores con los fetch a sesiones vacias, esto lo ataja
     if (!Array.isArray(sesiones)) sesiones = [];
-
     for (const s of sesiones) {
       //Los resultados están en otro endpoint, ya los solicito desde acá
-
-      //TODO: HAY QUE CAMBIAR EL FORMATO DE LOS RESULTADOS, ¿CREAR ENTIDAD RESULTADOS?
+      //Copié el formato de resultados de la api
       let resultadoscrudos = (await fetchF1(
         '/session_result?session_key=' + s.session_key,
       )) as SessionResult[];
       if (!Array.isArray(resultadoscrudos)) resultadoscrudos = [];
-      const resultadostramitados = resultadoscrudos.map(
-        (r): [string, string] => [
-          r.driver_number?.toString() ?? 'undefined',
-          r.duration?.toString() ?? 'undefined',
-        ],
-      );
 
+      // Crea una sesion, mapea los resultados con los pilotos
       const sesion = em.create(Sesion, {
         name: s.session_name,
         type: adaptarTipoSesion(s.session_name),
         start_time: s.date_start,
         end_time: s.date_end,
         race: carrera,
-        results: resultadostramitados,
       });
+
+      const resultadostramitados = [];
+      for (const r of resultadoscrudos) {
+        let piloto = pilotos.find((p) => p.num === r.driver_number);
+
+        // Si el piloto no está en la bd, llamamos a la carga de pilotos para esa sesion
+        // Si la api no le asigno una escuderia, seguramente lance undefined/null aunque primero lo busca
+        if (!piloto && r.driver_number) {
+          console.log(
+            `         [!] Piloto ${r.driver_number} no encontrado. Cargando pilotos de la sesión ${s.session_key}...`,
+          );
+          await CargarPilotosyEscuderias(
+            em,
+            temporada,
+            s.session_key.toString(),
+          );
+
+          // Actualizamos pilotos
+          pilotos = await em.find(Piloto, {
+            season: temporada,
+          });
+
+          // Lo volvemos a buscar
+          piloto = pilotos.find((p) => p.num === r.driver_number);
+        }
+
+        // En qualys me entrega un arreglo de resultados, solucion temporal, los convierto en strings
+        const transformarenstring = (a: any) =>
+          Array.isArray(a) ? a.toString() : a;
+
+        const resultado = em.create(Session_Result, {
+          position: r.position,
+          number_of_laps: r.number_of_laps,
+          dnf: r.dnf,
+          dns: r.dns,
+          dsq: r.dsq,
+          duration: transformarenstring(r.duration),
+          gap_to_leader: transformarenstring(r.gap_to_leader),
+          piloto: piloto,
+          session: sesion,
+        });
+        resultadostramitados.push(resultado);
+      }
+
+      sesion.session_result.add(resultadostramitados);
       carrera.sessions.add(sesion);
     }
     //Agrega la carrera con sus sesiones a la temporada
     temporada.races.add(carrera);
   }
-
-  //Para encontrar el ganador necesito los puntos en la ultima carrera que ocurrió
-  //El problema era es que en 2026 la ultima carrera es una que no ocurrió aún
-  //Para esto filtramos todas las carreras por las que ya sucedieron.
-  const hoy = new Date();
-
-  if (hoy.getFullYear() === temporada.year) {
-    const carrerasOcurridas = meetings.filter(
-      (meeting) => new Date(meeting.date_start) < hoy,
-    );
-    return carrerasOcurridas[carrerasOcurridas.length - 1].meeting_key;
-  }
-  return meetings[meetings.length - 1].meeting_key;
 };
 
 const RegenerarBDyDevolverCategoria = async (em: EntityManager) => {
@@ -254,6 +291,7 @@ const RegenerarBDyDevolverCategoria = async (em: EntityManager) => {
     });
     F1.seasons.add(nuevaTemporada);
   });
+  em.persist(F1);
   console.log('Categoría F1 y temporadas 2023-2026 creadas.');
   return F1;
 };
@@ -269,18 +307,48 @@ const destruirbd_importaropenf1 = async () => {
   // En proceso, fetchs a openf1
   console.log('Iniciando peticiones a OpenF1 API...');
 
-  //1 - Creacion pilotos y escuderías
-  console.log('PARTE 1/2: Procesando pilotos y escuderías...');
-  await CargarPilotosyEscuderias(em, F1);
-  await em.flush();
-  //2 - Itera sobre cada temporada 2023-2026
-  console.log('PARTE 2/2: Procesando temporadas, carreras y sesiones...');
+  //Itera sobre cada temporada 2023-2026
 
   for (const temporada of F1.seasons) {
     console.log('Año ' + temporada.year);
-    const ultimacarrera = await CarrerasySesionesxtemporada(em, temporada);
+
+    //Para encontrar el ganador necesito los puntos en la ultima carrera que ocurrió
+    //El problema era es que en 2026 la ultima carrera es una que no ocurrió aún
+    //Para esto hago un fetch a meetings=latest
+    const hoy = new Date();
+
+    //Tengo que conseguir la ultima session
+    const meetings = (await fetchF1(
+      '/meetings?year=' + temporada.year,
+    )) as Meetings[];
+    let ultimasesiones;
+    let ultimacarrera;
+    if (hoy.getFullYear() === temporada.year) {
+      ultimacarrera = (
+        (await fetchF1('/meetings?meeting_key=latest')) as Meetings[]
+      )[0].meeting_key;
+      ultimasesiones = (await fetchF1(
+        '/sessions?meeting_key=latest',
+      )) as Sessions[];
+    } else {
+      ultimacarrera = meetings[meetings.length - 1].meeting_key;
+      ultimasesiones = (await fetchF1(
+        '/sessions?meeting_key=' + ultimacarrera,
+      )) as Sessions[];
+    }
+    const ultimasesion = ultimasesiones[ultimasesiones.length - 1].session_key;
+
+    //1 - Creacion pilotos y escuderías
+    console.log('PARTE 1/2: Procesando pilotos y escuderías...');
+    await CargarPilotosyEscuderias(em, temporada, ultimasesion.toString());
+    await em.flush();
+
+    //2 - Creacion de carreras por temporada
+    console.log('PARTE 2/2: Procesando carreras y sesiones...');
+    await CarrerasySesionesxtemporada(em, temporada);
     //Asignar piloto y escudería campeonas
-    await asignarganadores(em, temporada, ultimacarrera);
+    await asignarganadores(em, temporada, ultimasesion);
+
     // evitar que se quede sin memoria, hacemos un flush por temporada
     console.log('Guardando progreso del año' + temporada.year);
     await em.flush();
