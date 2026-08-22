@@ -1,16 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
-import { Blogpost } from './blogpost.entity.js';
+import { ComentarioPost } from './comentario.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { NotFoundError } from '@mikro-orm/core';
 
 const em = orm.em;
 
-function sanitizeBlogpost(req: Request, res: Response, next: NextFunction) {
+function sanitizeComentario(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
-    title: req.body.title,
-    content: req.body.content,
-    author: req.body.authorID ? Number(req.body.authorID) : undefined,
     id: req.params.id,
+    content: req.body.content,
+    createdAt: req.body.createdAt,
+    author: req.body.author,
+    blogpost: req.body.blogpost,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
@@ -20,24 +21,20 @@ function sanitizeBlogpost(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-// obtener todos los blogposts
-
 async function findAll(req: Request, res: Response) {
   try {
-    const blogposts = await em.find(Blogpost, {});
-    res.status(200).json({ message: 'OK', data: blogposts });
+    const comentarios = await em.find(ComentarioPost, {});
+    res.status(200).json({ message: 'OK', data: comentarios });
   } catch (error: any) {
     res.status(500).json({ message: 'Internal server error' });
   }
 }
-
-// Obtener un blogpost por ID
 
 async function findOne(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const blogpost = await em.findOneOrFail(Blogpost, { id });
-    res.status(200).json({ message: 'OK', data: blogpost });
+    const comentario = await em.findOneOrFail(ComentarioPost, { id });
+    res.status(200).json({ message: 'OK', data: comentario });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: 'Resource not found' });
@@ -47,28 +44,24 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
-//Crear un nuevo blogpost
-
 async function add(req: Request, res: Response) {
   try {
-    const blogpost = em.create(Blogpost, req.body.sanitizedInput);
-    blogpost.name = blogpost.title.slice(0, 30);
+    const comentario = em.create(ComentarioPost, req.body.sanitizedInput);
+    comentario.name = comentario.content.slice(0, 100);
     await em.flush();
-    res.status(201).json({ message: 'Resource created', data: blogpost });
+    res.status(201).json({ message: 'Resource created', data: comentario });
   } catch (error: any) {
     res.status(500).json({ message: 'Internal server error' });
   }
 }
 
-//Actualizar un blogpost
-
 async function update(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const blogpost = await em.findOneOrFail(Blogpost, { id });
-    em.assign(blogpost, req.body.sanitizedInput);
+    const comentario = await em.findOneOrFail(ComentarioPost, { id });
+    em.assign(comentario, req.body.sanitizedInput);
     await em.flush();
-    res.status(200).json({ message: 'Resource updated', data: blogpost });
+    res.status(200).json({ message: 'Resource updated', data: comentario });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: 'Resource not found' });
@@ -77,15 +70,13 @@ async function update(req: Request, res: Response) {
     }
   }
 }
-
-//Eliminar un blogpost
 
 async function remove(req: Request, res: Response) {
   try {
     const id = Number.parseInt(req.params.id);
-    const blogpost = await em.findOneOrFail(Blogpost, { id });
-    await em.remove(blogpost).flush();
-    res.status(200).json({ message: 'Resource deleted' });
+    const comentario = await em.findOneOrFail(ComentarioPost, { id });
+    await em.removeAndFlush(comentario);
+    res.status(200).json({ message: 'Resource deleted', data: comentario });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: 'Resource not found' });
@@ -95,4 +86,4 @@ async function remove(req: Request, res: Response) {
   }
 }
 
-export { findAll, findOne, add, update, remove, sanitizeBlogpost };
+export { findAll, findOne, add, update, remove, sanitizeComentario };
