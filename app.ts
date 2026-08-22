@@ -19,6 +19,7 @@
 2. Borra las carpetas /dist y node_modules
 3. Ejecuta en orden:
    - pnpm install
+   - pnpm seed
    - pnpm start:dev
 
 ¿Solución para "NODE NO ES UN COMANDO RECONOCIDO" o similar?
@@ -36,11 +37,11 @@ import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import multer from 'multer';
 import { pilotoRouter } from './src/piloto/piloto.routes.js';
 import { escuderiaRouter } from './src/escuderia/escuderia.routes.js';
 import { orm, syncSchema } from './src/shared/db/orm.js';
 import { RequestContext } from '@mikro-orm/core';
-import { comentarioRouter } from './src/comentariopost/comentario.routes.js';
 import { categoriaRouter } from './src/categoria/categoria.routes.js';
 import { temporadaRouter } from './src/temporada/temporada.routes.js';
 import { carreraRouter } from './src/carrera/carrera.router.js';
@@ -50,7 +51,10 @@ import { usuarioRouter } from './src/usuario/usuario.routes.js';
 import { sesionRouter } from './src/sesion/sesion.routes.js';
 import { blogpostRouter } from './src/blogpost/blogpost.routes.js';
 import { authRouter } from './src/auth/auth.routes.js';
+import { assetRouter } from './src/asset/asset.routes.js';
 import { Usuario } from './src/usuario/usuario.entity.js';
+import { nationalities } from './src/shared/nationalities.js';
+import { comentarioRouter } from './src/comentariopost/comentario.routes.js';
 
 const app = express();
 
@@ -71,12 +75,40 @@ app.use('/api/categorias', categoriaRouter);
 app.use('/api/temporadas', temporadaRouter);
 app.use('/api/carreras', carreraRouter);
 app.use('/api/marcas', marcaRouter);
-app.use('/api/comentarios', comentarioRouter);
 app.use('/api/circuitos', circuitoRouter);
 app.use('/api/sesion', sesionRouter);
 app.use('/api/blogposts', blogpostRouter);
 app.use('/api/auth', authRouter);
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/api/assets', assetRouter);
+app.use('/api/comentarios', comentarioRouter);
+app.get('/api/nationalities', (req, res) => {
+  res.status(200).json({ message: 'OK', data: nationalities });
+});
+
+//Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
+app.use(
+  (
+    err: any,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res
+          .status(413)
+          .json({ message: 'El archivo excede el tamaño máximo de 5MB' });
+      }
+      return res
+        .status(400)
+        .json({ message: `Error de upload: ${err.message}` });
+    }
+    if (err.message?.includes('Tipo de archivo no permitido')) {
+      return res.status(415).json({ message: err.message });
+    }
+    next(err);
+  },
+);
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {

@@ -18,6 +18,9 @@ export class Blogpost extends baseEntity {
   @Property({ nullable: false })
   content!: string;
 
+  @Property({ nullable: true })
+  cover_image?: string;
+
   @ManyToOne(() => Usuario, { cascade: [Cascade.ALL], nullable: false })
   author!: Rel<Usuario>;
 
