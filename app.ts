@@ -51,6 +51,7 @@ import { blogpostRouter } from './src/blogpost/blogpost.routes.js';
 import { authRouter } from './src/auth/auth.routes.js';
 import { Usuario } from './src/usuario/usuario.entity.js';
 import { of1router } from './src/services/openf1/openf1.routes.js';
+import { actualizarresultados } from './src/services/openf1/openf1.service.js';
 
 const app = express();
 
@@ -107,6 +108,8 @@ async function createDefaultAdmin() {
 }
 
 await createDefaultAdmin();
+
+await actualizarresultados();
 
 app.listen(3000, () => {
   console.log('Corriendo en http://localhost:3000');

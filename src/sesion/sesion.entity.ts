@@ -17,10 +17,10 @@ export class Sesion extends baseEntity {
   type?: string;
 
   @Property({ nullable: true })
-  start_time?: Date;
+  start_time!: Date;
 
   @Property({ nullable: true })
-  end_time?: Date;
+  end_time!: Date;
 
   // Relación con carrera DEBIL
   @ManyToOne(() => Carrera, { nullable: false })

@@ -1,15 +1,25 @@
 import { Request, Response } from 'express';
 import {
-  asignarganadores,
-  CargarPilotosyEscuderias,
+  actualizarresultados,
   destruirbd_importaropenf1,
-  fetchF1,
 } from './openf1.service.js';
-import { orm } from '../../shared/db/orm.js';
-import { Meetings } from './openf1.types/meetings.type.js';
-import { Categoria } from '../../categoria/categoria.entity.js';
-import { Temporada } from '../../temporada/temporada.entity.js';
-import { Piloto } from '../../piloto/piloto.entity.js';
+
+//Luego de una sesion se deberian actualizar sus resultados
+const openf1actualizarresultadoscarrera = async (
+  req: Request,
+  res: Response,
+) => {
+  console.log('Actualizando resultados de la carrera...');
+  try {
+    await actualizarresultados(req.body.id);
+    res.status(200).json({
+      message: 'Los resultados de la carrera se han actualizado correctamente.',
+    });
+  } catch (error: any) {
+    console.error('Hubo un error:', error);
+    res.status(500).json({ message: 'Error interno', error: error.message });
+  }
+};
 
 // Funcion para restablecer toda la BD desde openf1, no le brindo un endpoint por seguridad
 const openf1restablecer = async (req: Request, res: Response) => {
@@ -25,42 +35,4 @@ const openf1restablecer = async (req: Request, res: Response) => {
   }
 };
 
-//Luego de una carrera se deberían actualizar los campeones actuales
-const openf1actualizarcampeones = async (req: Request, res: Response) => {
-  console.log('Actualizando ganadores...');
-  try {
-    const em = orm.em.fork();
-    const categorias = await em.find(Categoria, {}, { populate: ['seasons'] });
-    for (const categoria of categorias) {
-      const temporada = categoria.seasons.find((t) => t.year === 2026);
-      if (temporada) {
-        const meetings = (await fetchF1(
-          '/meetings?year=' + temporada.year,
-        )) as Meetings[];
-        let ultimameeting = meetings[meetings.length - 1].meeting_key;
-        const hoy = new Date();
-        if (hoy.getFullYear() === temporada.year) {
-          const carrerasOcurridas = meetings.filter(
-            (meeting) => new Date(meeting.date_start) < hoy,
-          );
-          if (carrerasOcurridas.length > 0) {
-            ultimameeting =
-              carrerasOcurridas[carrerasOcurridas.length - 1].meeting_key;
-          }
-        }
-        await asignarganadores(em, temporada, ultimameeting);
-      }
-    }
-
-    await em.flush();
-
-    res
-      .status(200)
-      .json({ message: 'Los campeones se han actualizado correctamente.' });
-  } catch (error: any) {
-    console.error('Hubo un error:', error);
-    res.status(500).json({ message: 'Error interno', error: error.message });
-  }
-};
-
-export { openf1actualizarcampeones, openf1restablecer };
+export { openf1actualizarresultadoscarrera };
