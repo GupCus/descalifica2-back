@@ -8,7 +8,7 @@ export const orm = await MikroORM.init({
   dbName: 'descalifica2',
   //type: 'mysql', DEPRECADO ¿Sabe el profe? -> Abajo puse la version que creo que se usa ahora
   driver: MySqlDriver,
-  clientUrl: 'mysql://dsw:dsw@localhost:3306/descalifica2',
+  clientUrl: process.env.BDLOCATION,
   highlighter: new SqlHighlighter(),
   debug:true,
 

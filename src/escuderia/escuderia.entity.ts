@@ -1,5 +1,5 @@
-import { Piloto } from "../piloto/piloto.entity.js";
-import { baseEntity } from "../shared/baseEntity.entity.js";
+import { Piloto } from '../piloto/piloto.entity.js';
+import { baseEntity } from '../shared/baseEntity.entity.js';
 import {
   Cascade,
   Collection,
@@ -8,10 +8,10 @@ import {
   Property,
   ManyToOne,
   Rel,
-} from "@mikro-orm/core";
-import { Marca } from "../marca/marca.entity.js";
-import { Categoria } from "../categoria/categoria.entity.js";
-import { Temporada } from "../temporada/temporada.entity.js";
+} from '@mikro-orm/core';
+import { Marca } from '../marca/marca.entity.js';
+import { Categoria } from '../categoria/categoria.entity.js';
+import { Temporada } from '../temporada/temporada.entity.js';
 
 @Entity()
 export class Escuderia extends baseEntity {
@@ -21,14 +21,11 @@ export class Escuderia extends baseEntity {
   })
   drivers = new Collection<Piloto>(this);
 
-  @Property({ nullable: false })
-  fundation!: number;
+  @Property({ nullable: true })
+  fundation?: number;
 
-  @Property({ nullable: false })
-  nationality!: string;
-
-  @Property({ nullable: false })
-  engine!: string;
+  @Property({ nullable: true })
+  nationality?: string;
 
   @Property({ nullable: true })
   logo_image?: string;
@@ -41,6 +38,15 @@ export class Escuderia extends baseEntity {
 
   @OneToMany(() => Temporada, (temporada) => temporada.winner_team)
   wccs = new Collection<Temporada>(this);
+
+  @Property({ nullable: true })
+  color?: string;
+
+  @Property({ nullable: true })
+  engine?: string;
+
+  @Property({ nullable: true })
+  desc?: string;
 }
 
 //AGUS: ¿¿¿QUE HAY DE IMPORTANTE COMO PARA PONER???

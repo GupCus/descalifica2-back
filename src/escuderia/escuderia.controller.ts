@@ -1,17 +1,14 @@
-import { Request, Response, NextFunction } from "express";
-import { Escuderia } from "./escuderia.entity.js";
-import { orm } from "../shared/db/orm.js";
-import { NotFoundError } from "@mikro-orm/core";
-import { deleteFile, buildImageUrl, getRelativePath } from "../shared/upload/upload.utils.js";
+import { Request, Response, NextFunction } from 'express';
+import { Escuderia } from './escuderia.entity.js';
+import { orm } from '../shared/db/orm.js';
+import { NotFoundError } from '@mikro-orm/core';
+import {
+  deleteFile,
+  buildImageUrl,
+  getRelativePath,
+} from '../shared/upload/upload.utils.js';
 
 const em = orm.em;
-
-function addImageUrls(req: Request, escuderia: Escuderia) {
-  return {
-    ...escuderia,
-    logo_image_url: buildImageUrl(req, escuderia.logo_image),
-  };
-}
 
 function sanitizeEscuderia(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
@@ -33,18 +30,85 @@ function sanitizeEscuderia(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+function addImageUrls(req: Request, escuderia: Escuderia) {
+  return {
+    ...escuderia,
+    logo_image_url: buildImageUrl(req, escuderia.logo_image),
+  };
+}
+
+async function uploadLogoImage(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const escuderia = await em.findOneOrFail(Escuderia, { id });
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image provided' });
+    }
+
+    const oldImage = escuderia.logo_image;
+    escuderia.logo_image = getRelativePath(req.file.path);
+    await em.flush();
+
+    if (oldImage) {
+      deleteFile(oldImage);
+    }
+
+    res.status(200).json({
+      message: 'Logo image uploaded successfully',
+      data: addImageUrls(req, escuderia),
+    });
+  } catch (error: any) {
+    if (req.file) {
+      deleteFile(req.file.path);
+    }
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ message: 'Resource not found' });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+}
+
+async function deleteLogoImage(req: Request, res: Response) {
+  try {
+    const id = Number.parseInt(req.params.id);
+    const escuderia = await em.findOneOrFail(Escuderia, { id });
+
+    if (escuderia.logo_image) {
+      const oldImage = escuderia.logo_image;
+      escuderia.logo_image = undefined;
+      await em.flush();
+      deleteFile(oldImage);
+    }
+
+    res.status(200).json({
+      message: 'Logo image deleted successfully',
+      data: addImageUrls(req, escuderia),
+    });
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ message: 'Resource not found' });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+}
+
 //GET ALL
 async function findAll(req: Request, res: Response) {
   try {
     const escuderias = await em.find(
       Escuderia,
       {},
-      { populate: ["drivers", "brand", "racing_series", "wccs"] }
+      { populate: ['drivers', 'brand', 'racing_series', 'wccs'] },
     );
-    const escuderiasWithUrls = escuderias.map((escuderia) => addImageUrls(req, escuderia));
-    res.status(200).json({ message: "OK", data: escuderiasWithUrls });
+    const escuderiasWithUrls = escuderias.map((escuderia) =>
+      addImageUrls(req, escuderia),
+    );
+    res.status(200).json({ message: 'OK', data: escuderiasWithUrls });
   } catch (error: any) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 
@@ -55,14 +119,14 @@ async function findOne(req: Request, res: Response) {
     const escuderia = await em.findOneOrFail(
       Escuderia,
       { id },
-      { populate: ["drivers", "brand", "racing_series"] }
+      { populate: ['drivers', 'brand', 'racing_series'] },
     );
-    res.status(200).json({ message: "OK", data: addImageUrls(req, escuderia) });
+    res.status(200).json({ message: 'OK', data: addImageUrls(req, escuderia) });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
@@ -76,17 +140,19 @@ async function add(req: Request, res: Response) {
     const escuderia = em.create(Escuderia, req.body.sanitizedInput);
     await em.flush();
 
-    await em.populate(escuderia, ["brand", "drivers"]);
+    await em.populate(escuderia, ['brand', 'drivers']);
 
-    res.status(201).json({ message: "Created", data: addImageUrls(req, escuderia) });
+    res
+      .status(201)
+      .json({ message: 'Created', data: addImageUrls(req, escuderia) });
   } catch (error: any) {
     if (req.file) {
       deleteFile(req.file.path);
     }
-    console.error("Error creating escuderia:", error);
+    console.error('Error creating escuderia:', error);
     res
       .status(500)
-      .json({ message: "Internal server error", error: error.message });
+      .json({ message: 'Internal server error', error: error.message });
   }
 }
 
@@ -109,15 +175,15 @@ async function update(req: Request, res: Response) {
       deleteFile(oldImage);
     }
 
-    res.status(204).json({ message: "Updated" });
+    res.status(204).json({ message: 'Updated' });
   } catch (error: any) {
     if (req.file) {
       deleteFile(req.file.path);
     }
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
@@ -128,80 +194,31 @@ async function remove(req: Request, res: Response) {
     const id = Number.parseInt(req.params.id);
     const escuderia = await em.findOneOrFail(Escuderia, { id });
     const imageToDelete = escuderia.logo_image;
-    
+
     await em.removeAndFlush(escuderia);
 
     if (imageToDelete) {
       deleteFile(imageToDelete);
     }
-    res.status(204).json({ message: "Deleted" });
+    res.status(204).json({ message: 'Deleted' });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
 
-async function uploadLogoImage(req: Request, res: Response) {
-  try {
-    const id = Number.parseInt(req.params.id);
-    const escuderia = await em.findOneOrFail(Escuderia, { id });
-
-    if (!req.file) {
-      return res.status(400).json({ message: "No image provided" });
-    }
-
-    const oldImage = escuderia.logo_image;
-    escuderia.logo_image = getRelativePath(req.file.path);
-    await em.flush();
-
-    if (oldImage) {
-      deleteFile(oldImage);
-    }
-
-    res.status(200).json({
-      message: "Logo image uploaded successfully",
-      data: addImageUrls(req, escuderia),
-    });
-  } catch (error: any) {
-    if (req.file) {
-      deleteFile(req.file.path);
-    }
-    if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
-    } else {
-      res.status(500).json({ message: "Internal server error" });
-    }
-  }
-}
-
-async function deleteLogoImage(req: Request, res: Response) {
-  try {
-    const id = Number.parseInt(req.params.id);
-    const escuderia = await em.findOneOrFail(Escuderia, { id });
-
-    if (escuderia.logo_image) {
-      const oldImage = escuderia.logo_image;
-      escuderia.logo_image = undefined;
-      await em.flush();
-      deleteFile(oldImage);
-    }
-
-    res.status(200).json({
-      message: "Logo image deleted successfully",
-      data: addImageUrls(req, escuderia),
-    });
-  } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
-    } else {
-      res.status(500).json({ message: "Internal server error" });
-    }
-  }
-}
-
-export { findAll, findOne, add, update, remove, sanitizeEscuderia, uploadLogoImage, deleteLogoImage };
+export {
+  findAll,
+  findOne,
+  add,
+  update,
+  remove,
+  sanitizeEscuderia,
+  uploadLogoImage,
+  deleteLogoImage,
+};
 
 //Nota para la posterioridad, dejo todos los catch iguales, esto es para que en un futuro encontrar una forma de que si no existe el objeto necesario, devuelva not found. Falta implementar.

@@ -32,28 +32,30 @@
 Sentite libre de agregar otro problema q te tuvo mal - Agus
 */
 
-import "dotenv/config";
-import "reflect-metadata";
-import express from "express";
-import cors from "cors";
-import path from "path";
-import multer from "multer";
-import { pilotoRouter } from "./src/piloto/piloto.routes.js";
-import { escuderiaRouter } from "./src/escuderia/escuderia.routes.js";
-import { orm, syncSchema } from "./src/shared/db/orm.js";
-import { RequestContext } from "@mikro-orm/core";
-import { categoriaRouter } from "./src/categoria/categoria.routes.js";
-import { temporadaRouter } from "./src/temporada/temporada.routes.js";
-import { carreraRouter } from "./src/carrera/carrera.router.js";
-import { marcaRouter } from "./src/marca/marca.router.js";
-import { circuitoRouter } from "./src/circuito/circuito.routes.js";
-import { usuarioRouter } from "./src/usuario/usuario.routes.js";
-import { sesionRouter } from "./src/sesion/sesion.routes.js";
-import { blogpostRouter } from "./src/blogpost/blogpost.routes.js";
-import { authRouter } from "./src/auth/auth.routes.js";
-import { assetRouter } from "./src/asset/asset.routes.js";
-import { Usuario } from "./src/usuario/usuario.entity.js";
-import { nationalities } from "./src/shared/nationalities.js";
+import 'dotenv/config';
+import 'reflect-metadata';
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import { pilotoRouter } from './src/piloto/piloto.routes.js';
+import { escuderiaRouter } from './src/escuderia/escuderia.routes.js';
+import { orm, syncSchema } from './src/shared/db/orm.js';
+import { RequestContext } from '@mikro-orm/core';
+import { categoriaRouter } from './src/categoria/categoria.routes.js';
+import { temporadaRouter } from './src/temporada/temporada.routes.js';
+import { carreraRouter } from './src/carrera/carrera.router.js';
+import { marcaRouter } from './src/marca/marca.router.js';
+import { circuitoRouter } from './src/circuito/circuito.routes.js';
+import { usuarioRouter } from './src/usuario/usuario.routes.js';
+import { sesionRouter } from './src/sesion/sesion.routes.js';
+import { blogpostRouter } from './src/blogpost/blogpost.routes.js';
+import { authRouter } from './src/auth/auth.routes.js';
+import { Usuario } from './src/usuario/usuario.entity.js';
+import { of1router } from './src/services/openf1/openf1.routes.js';
+import { actualizarresultados } from './src/services/openf1/openf1.service.js';
+import multer from 'multer';
+import { assetRouter } from './src/asset/asset.routes.js';
+import { nationalities } from './src/shared/nationalities.js';
 
 const app = express();
 
@@ -67,20 +69,22 @@ app.use((req, res, next) => {
 });
 
 //Handler de routeo
-app.use("/api/usuarios", usuarioRouter);
-app.use("/api/pilotos", pilotoRouter);
-app.use("/api/escuderias", escuderiaRouter);
-app.use("/api/categorias", categoriaRouter);
-app.use("/api/temporadas", temporadaRouter);
-app.use("/api/carreras", carreraRouter);
-app.use("/api/marcas", marcaRouter);
-app.use("/api/circuitos", circuitoRouter);
-app.use("/api/sesion", sesionRouter);
-app.use("/api/blogposts", blogpostRouter);
-app.use("/api/auth", authRouter);
-app.use("/api/assets", assetRouter);
-app.get("/api/nationalities", (req, res) => {
-  res.status(200).json({ message: "OK", data: nationalities });
+app.use('/api/usuarios', usuarioRouter);
+app.use('/api/pilotos', pilotoRouter);
+app.use('/api/escuderias', escuderiaRouter);
+app.use('/api/categorias', categoriaRouter);
+app.use('/api/temporadas', temporadaRouter);
+app.use('/api/carreras', carreraRouter);
+app.use('/api/marcas', marcaRouter);
+app.use('/api/circuitos', circuitoRouter);
+app.use('/api/sesion', sesionRouter);
+app.use('/api/blogposts', blogpostRouter);
+app.use('/api/auth', authRouter);
+app.use('/openf1', of1router);
+app.use('/api/assets', assetRouter);
+
+app.get('/api/nationalities', (req, res) => {
+  res.status(200).json({ message: 'OK', data: nationalities });
 });
 
 //Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
@@ -92,16 +96,16 @@ app.use(
     next: express.NextFunction,
   ) => {
     if (err instanceof multer.MulterError) {
-      if (err.code === "LIMIT_FILE_SIZE") {
+      if (err.code === 'LIMIT_FILE_SIZE') {
         return res
           .status(413)
-          .json({ message: "El archivo excede el tamaño máximo de 5MB" });
+          .json({ message: 'El archivo excede el tamaño máximo de 5MB' });
       }
       return res
         .status(400)
         .json({ message: `Error de upload: ${err.message}` });
     }
-    if (err.message?.includes("Tipo de archivo no permitido")) {
+    if (err.message?.includes('Tipo de archivo no permitido')) {
       return res.status(415).json({ message: err.message });
     }
     next(err);
@@ -110,7 +114,7 @@ app.use(
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {
-  res.status(404).send({ message: "Recurso no encontrado." });
+  res.status(404).send({ message: 'Recurso no encontrado.' });
 });
 
 await syncSchema();
@@ -118,26 +122,28 @@ await syncSchema();
 async function createDefaultAdmin() {
   const em = orm.em.fork();
   try {
-    const adminExists = await em.findOne(Usuario, { user_type: "admin" });
+    const adminExists = await em.findOne(Usuario, { user_type: 'admin' });
     if (!adminExists) {
       const admin = new Usuario();
-      admin.username = "admin";
-      admin.password = "admin123";
-      admin.name = "Administrador";
-      admin.user_type = "admin";
-      admin.email = "admin@descalifica.com";
+      admin.username = 'admin';
+      admin.password = 'admin123';
+      admin.name = 'Administrador';
+      admin.user_type = 'admin';
+      admin.email = 'admin@descalifica.com';
 
       em.persist(admin);
       await em.flush();
-      console.log("✓ Usuario admin creado por defecto");
+      console.log('✓ Usuario admin creado por defecto');
     }
   } catch (error) {
-    console.error("Error al crear admin por defecto:", error);
+    console.error('Error al crear admin por defecto:', error);
   }
 }
 
 await createDefaultAdmin();
 
+await actualizarresultados();
+
 app.listen(3000, () => {
-  console.log("Corriendo en http://localhost:3000");
+  console.log('Corriendo en http://localhost:3000');
 });
