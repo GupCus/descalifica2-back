@@ -87,6 +87,17 @@ app.get('/api/nationalities', (req, res) => {
   res.status(200).json({ message: 'OK', data: nationalities });
 });
 
+app.get('/api/nationalities/:code', (req, res) => {
+  const code = req.params.code.toUpperCase();
+  const nationality = nationalities.find((n) => n.code === code);
+
+  if (nationality) {
+    res.status(200).json({ message: 'OK', data: nationality });
+  } else {
+    res.status(404).json({ message: 'Nacionalidad no encontrada' });
+  }
+});
+
 //Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
 app.use(
   (
