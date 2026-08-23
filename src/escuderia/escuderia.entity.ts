@@ -27,6 +27,9 @@ export class Escuderia extends baseEntity {
   @Property({ nullable: true })
   nationality?: string;
 
+  @Property({ nullable: true })
+  logo_image?: string;
+
   @ManyToOne(() => Marca, { nullable: true })
   brand?: Rel<Marca>;
 

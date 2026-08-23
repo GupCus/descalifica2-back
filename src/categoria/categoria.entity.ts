@@ -17,6 +17,9 @@ export class Categoria extends baseEntity {
   @Property({ nullable: true })
   description?: string;
 
+  @Property({ nullable: true })
+  logo_image?: string;
+
   @OneToMany(() => Piloto, (piloto) => piloto.racing_series, {
     cascade: [Cascade.ALL],
     nullable: true,

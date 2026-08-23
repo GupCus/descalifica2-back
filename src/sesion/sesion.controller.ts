@@ -18,16 +18,13 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
       ? new Date(req.body.end_time)
       : req.body.end_time,
     race: req.body.race,
-    results: req.body.results,
+    session_results: req.body.session_results,
     id: req.params.id,
   };
   if (!tipos.includes(req.body.sanitizedInput.type)) {
-    return res
-      .status(400)
-      .json({
-        message:
-          'Tipo de sesión inválido, solo se permiten ' + tipos.join(', '),
-      });
+    return res.status(400).json({
+      message: 'Tipo de sesión inválido, solo se permiten ' + tipos.join(', '),
+    });
   }
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
@@ -77,7 +74,7 @@ async function findOne(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   try {
     const sesionData = { ...req.body.sanitizedInput };
-    const { results, ...sesionProps } = sesionData;
+    const { session_results, ...sesionProps } = sesionData;
     const sesion = em.create(Sesion, sesionProps);
 
     // Averiguar los datos que nos da la API para ver que hay que validar

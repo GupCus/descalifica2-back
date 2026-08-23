@@ -19,6 +19,7 @@
 2. Borra las carpetas /dist y node_modules
 3. Ejecuta en orden:
    - pnpm install
+   - pnpm seed
    - pnpm start:dev
 
 ¿Solución para "NODE NO ES UN COMANDO RECONOCIDO" o similar?
@@ -52,6 +53,9 @@ import { authRouter } from './src/auth/auth.routes.js';
 import { Usuario } from './src/usuario/usuario.entity.js';
 import { of1router } from './src/services/openf1/openf1.routes.js';
 import { actualizarresultados } from './src/services/openf1/openf1.service.js';
+import multer from 'multer';
+import { assetRouter } from './src/asset/asset.routes.js';
+import { nationalities } from './src/shared/nationalities.js';
 
 const app = express();
 
@@ -77,7 +81,36 @@ app.use('/api/sesion', sesionRouter);
 app.use('/api/blogposts', blogpostRouter);
 app.use('/api/auth', authRouter);
 app.use('/openf1', of1router);
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/api/assets', assetRouter);
+
+app.get('/api/nationalities', (req, res) => {
+  res.status(200).json({ message: 'OK', data: nationalities });
+});
+
+//Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
+app.use(
+  (
+    err: any,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res
+          .status(413)
+          .json({ message: 'El archivo excede el tamaño máximo de 5MB' });
+      }
+      return res
+        .status(400)
+        .json({ message: `Error de upload: ${err.message}` });
+    }
+    if (err.message?.includes('Tipo de archivo no permitido')) {
+      return res.status(415).json({ message: err.message });
+    }
+    next(err);
+  },
+);
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {
