@@ -22,6 +22,7 @@ function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
     fav_team: req.body.fav_team,
     fav_circuit: req.body.fav_circuit,
     bio: req.body.bio,
+    telegram_username: req.body.telegram_username,
     id: req.params.id,
     user_type: req.body.user_type,
   };

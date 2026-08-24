@@ -64,7 +64,7 @@ class AuthController {
       const token = jwt.sign(
         payload,
         secret as any,
-        { expiresIn: process.env.EXPIRA_TOKEN || "7d" } as any
+        { expiresIn: process.env.EXPIRA_TOKEN || "7d" } as any,
       );
 
       const response: LoginResponse = {
@@ -91,6 +91,7 @@ class AuthController {
         password,
         date_of_birth,
         name,
+        telegram_username,
       }: RegisterRequest = req.body;
 
       // debug!!!!!
@@ -100,6 +101,17 @@ class AuthController {
       if (!username || !email || !password || !date_of_birth || !name) {
         return res.status(400).json({
           message: `Todos los campos son obligatorios.`,
+        });
+      }
+
+      // validar que telegram_user no tenga espacios
+      if (
+        telegram_username !== undefined &&
+        telegram_username !== null &&
+        telegram_username.trim() !== telegram_username
+      ) {
+        return res.status(400).json({
+          message: "El username de Telegram no debe contener espacios.",
         });
       }
 
@@ -135,7 +147,7 @@ class AuthController {
       const minimunAge = new Date(
         today.getFullYear() - 13,
         today.getMonth(),
-        today.getDate()
+        today.getDate(),
       );
       if (nacimiento > minimunAge) {
         return res.status(400).json({
@@ -174,6 +186,7 @@ class AuthController {
         date_of_birth: date_of_birth,
         user_type: "user",
         name: name,
+        telegram_username: telegram_username,
         avatar: req.file ? `/uploads/avatars/${req.file.filename}` : undefined, // Agregar avatar si existe
       });
 
@@ -195,7 +208,7 @@ class AuthController {
       const token = jwt.sign(
         payload,
         secret as any,
-        { expiresIn: process.env.EXPIRA_TOKEN || "7d" } as any
+        { expiresIn: process.env.EXPIRA_TOKEN || "7d" } as any,
       );
 
       const response: LoginResponse = {
