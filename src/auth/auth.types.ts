@@ -12,6 +12,7 @@ export interface RegisterRequest {
   email: string;
   date_of_birth: string;
   name: string;
+  telegram_username?: string;
 }
 
 export interface LoginResponse {
