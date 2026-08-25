@@ -1,5 +1,5 @@
-import { Piloto } from '../piloto/piloto.entity.js';
-import { baseEntity } from '../shared/baseEntity.entity.js';
+import { Piloto } from "../piloto/piloto.entity.js";
+import { baseEntity } from "../shared/baseEntity.entity.js";
 import {
   Cascade,
   Collection,
@@ -8,10 +8,10 @@ import {
   Property,
   ManyToOne,
   Rel,
-} from '@mikro-orm/core';
-import { Marca } from '../marca/marca.entity.js';
-import { Categoria } from '../categoria/categoria.entity.js';
-import { Temporada } from '../temporada/temporada.entity.js';
+} from "@mikro-orm/core";
+import { Marca } from "../marca/marca.entity.js";
+import { Categoria } from "../categoria/categoria.entity.js";
+import { Temporada } from "../temporada/temporada.entity.js";
 
 @Entity()
 export class Escuderia extends baseEntity {
@@ -29,6 +29,9 @@ export class Escuderia extends baseEntity {
 
   @Property({ nullable: true })
   logo_image?: string;
+
+  @Property({ nullable: true })
+  car_image?: string;
 
   @ManyToOne(() => Marca, { nullable: true })
   brand?: Rel<Marca>;
