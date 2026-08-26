@@ -42,5 +42,3 @@ export class Escuderia extends baseEntity {
   @OneToMany(() => Temporada, (temporada) => temporada.winner_team)
   wccs = new Collection<Temporada>(this);
 }
-
-//AGUS: ¿¿¿QUE HAY DE IMPORTANTE COMO PARA PONER???

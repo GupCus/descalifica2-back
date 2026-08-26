@@ -7,8 +7,6 @@ import {
   buildImageUrl,
   getRelativePath,
 } from '../shared/upload/upload.utils.js';
-const em = orm.em;
-
 function sanitizeBlogpost(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     title: req.body.title,
@@ -36,6 +34,7 @@ function addImageUrls(req: Request, blogpost: Blogpost) {
 
 async function findAll(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const blogposts = await em.find(Blogpost, {});
     const data = blogposts.map((b) => addImageUrls(req, b));
     res.status(200).json({ message: 'OK', data });
@@ -48,6 +47,7 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const blogpost = await em.findOneOrFail(Blogpost, { id });
     res.status(200).json({ message: 'OK', data: addImageUrls(req, blogpost) });
@@ -64,6 +64,7 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     if (req.file) {
       req.body.sanitizedInput.cover_image = getRelativePath(req.file.path);
     }
@@ -74,14 +75,16 @@ async function add(req: Request, res: Response) {
       .status(201)
       .json({ message: 'Resource created', data: addImageUrls(req, blogpost) });
   } catch (error: any) {
+    console.error('Error creating blogpost:', error);
     res.status(500).json({ message: 'Internal server error' });
-  }
+}
 }
 
 //Actualizar un blogpost
 
 async function update(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const blogpost = await em.findOneOrFail(Blogpost, { id });
     if (req.file) {
@@ -108,8 +111,9 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
-    const blogpost = await em.findOneOrFail(Blogpost, { id });
+    const blogpost = await em.findOneOrFail(Blogpost, { id }, { populate: ['comentarios'] });
     if (blogpost.cover_image) {
       deleteFile(blogpost.cover_image);
     }
@@ -126,6 +130,7 @@ async function remove(req: Request, res: Response) {
 
 async function uploadCoverImage(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const blogpost = await em.findOneOrFail(Blogpost, { id });
 
@@ -155,6 +160,7 @@ async function uploadCoverImage(req: Request, res: Response) {
 
 async function deleteCoverImage(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const blogpost = await em.findOneOrFail(Blogpost, { id });
 

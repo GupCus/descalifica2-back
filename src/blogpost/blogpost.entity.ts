@@ -15,14 +15,17 @@ export class Blogpost extends baseEntity {
   @Property({ nullable: false })
   title!: string;
 
-  @Property({ nullable: false })
+  @Property({ nullable: false , type: 'text' })
   content!: string;
 
   @Property({ nullable: true })
   cover_image?: string;
 
-  @ManyToOne(() => Usuario, { cascade: [Cascade.ALL], nullable: false })
+  @ManyToOne(() => Usuario, { nullable: false })
   author!: Rel<Usuario>;
+
+  @Property({ nullable: false })
+  created_at: Date = new Date();
 
   @OneToMany(() => ComentarioPost, (comentario) => comentario.blogpost, {
     cascade: [Cascade.ALL],
