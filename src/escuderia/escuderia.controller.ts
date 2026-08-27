@@ -21,6 +21,8 @@ function sanitizeEscuderia(req: Request, res: Response, next: NextFunction) {
     racing_series: req.body.racing_series,
     wccs: req.body.wccs,
     brand: req.body.brand ? Number(req.body.brand) : undefined,
+    color: req.body.color,
+    desc: req.body.desc,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
