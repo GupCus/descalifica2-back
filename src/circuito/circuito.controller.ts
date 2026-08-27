@@ -20,7 +20,8 @@ function sanitizeCircuitoInput(
     country: req.body.country,
     length: req.body.length,
     year: req.body.year,
-    track_map_image: req.body.track_map_image,
+    track_map_url: req.body.track_map_url,
+    photo_image: req.body.photo_image,
     id: req.params.id,
   };
 
