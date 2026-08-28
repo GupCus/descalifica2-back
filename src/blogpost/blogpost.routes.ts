@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { findAll, findOne, add, update, remove, sanitizeBlogpost, uploadCoverImage, deleteCoverImage } from "./blogpost.controller.js";
+import { findAll, findOne, findSuggested, add, update, remove, sanitizeBlogpost, uploadCoverImage, deleteCoverImage } from "./blogpost.controller.js";
 import { uploadImage, uploadImageOptional } from "../shared/upload/upload.middleware.js";
 
 export const blogpostRouter = Router()
 
   blogpostRouter.get('/', findAll)
+  blogpostRouter.get('/suggested/:userId', findSuggested)
   blogpostRouter.get('/:id', findOne)
   blogpostRouter.post('/', ...uploadImageOptional("blogposts", "covers"), sanitizeBlogpost, add)
   blogpostRouter.put('/:id', ...uploadImageOptional("blogposts", "covers"), sanitizeBlogpost, update)
