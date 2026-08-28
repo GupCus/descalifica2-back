@@ -9,34 +9,51 @@ import {
   getRelativePath,
 } from '../shared/upload/upload.utils.js';
 
-const em = orm.em;
-
 function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
-  req.body.sanitizedInput = {
-    username: req.body.username,
-    password: req.body.password,
-    name: req.body.name,
-    surname: req.body.surname,
-    email: req.body.email,
-    date_of_birth: req.body.date_of_birth,
-    fav_driver: req.body.fav_driver,
-    fav_team: req.body.fav_team,
-    fav_circuit: req.body.fav_circuit,
-    bio: req.body.bio,
-    telegram_username: req.body.telegram_username,
-    id: req.params.id,
-    user_type: req.body.user_type,
-  };
-  Object.keys(req.body.sanitizedInput).forEach((key) => {
-    if (req.body.sanitizedInput[key] === undefined) {
-      delete req.body.sanitizedInput[key];
-    }
-  });
+  const sanitized: Record<string, any> = {};
 
-  if (req.file) {
-    req.body.sanitizedInput.avatar = getRelativePath(req.file.path);
+  if (req.body.username !== undefined) sanitized.username = req.body.username.trim();
+  if (req.body.password !== undefined && req.body.password.length > 0) sanitized.password = req.body.password;
+  if (req.body.name !== undefined) sanitized.name = req.body.name.trim();
+  if (req.body.surname !== undefined) sanitized.surname = req.body.surname.trim() || null;
+  if (req.body.email !== undefined) sanitized.email = req.body.email.trim();
+  
+  if (req.body.date_of_birth !== undefined) {
+    if (req.body.date_of_birth && String(req.body.date_of_birth).trim() !== "") {
+      const d = new Date(req.body.date_of_birth);
+      sanitized.date_of_birth = isNaN(d.getTime()) ? null : d;
+    } else {
+      sanitized.date_of_birth = null;
+    }
   }
 
+  if (req.body.fav_driver !== undefined) sanitized.fav_driver = req.body.fav_driver.trim() || null;
+  if (req.body.fav_team !== undefined) sanitized.fav_team = req.body.fav_team.trim() || null;
+  if (req.body.fav_circuit !== undefined) sanitized.fav_circuit = req.body.fav_circuit.trim() || null;
+  if (req.body.bio !== undefined) sanitized.bio = req.body.bio.trim() || null;
+  
+  if (req.body.telegram_username !== undefined) {
+    const rawTg = String(req.body.telegram_username).trim();
+    if (rawTg.length > 0) {
+      const cleanTg = rawTg.replace(/^@/, "");
+      if (/\s/.test(cleanTg)) {
+        return res.status(400).json({
+          message: "El usuario de Telegram no debe contener espacios.",
+        });
+      }
+      sanitized.telegram_username = cleanTg;
+    } else {
+      sanitized.telegram_username = null;
+    }
+  }
+
+  if (req.body.user_type !== undefined) sanitized.user_type = req.body.user_type;
+
+  if (req.file) {
+    sanitized.avatar = getRelativePath(req.file.path);
+  }
+
+  req.body.sanitizedInput = sanitized;
   next();
 }
 
@@ -49,6 +66,7 @@ function addImageUrls(req: Request, usuario: Usuario) {
 }
 
 async function uploadAvatar(req: Request, res: Response) {
+  const em = orm.em.fork();
   try {
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
@@ -77,6 +95,7 @@ async function uploadAvatar(req: Request, res: Response) {
 }
 
 async function deleteAvatar(req: Request, res: Response) {
+  const em = orm.em.fork();
   try {
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
@@ -101,6 +120,7 @@ async function deleteAvatar(req: Request, res: Response) {
 
 // obtener todos los usuarios
 async function findAll(req: Request, res: Response) {
+  const em = orm.em.fork();
   try {
     const usuarios = await em.find(Usuario, {});
     const usuariosWithUrls = usuarios.map((u) => addImageUrls(req, u));
@@ -113,6 +133,7 @@ async function findAll(req: Request, res: Response) {
 // Obtener un usuario por ID
 
 async function findOne(req: Request, res: Response) {
+  const em = orm.em.fork();
   try {
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
@@ -129,6 +150,7 @@ async function findOne(req: Request, res: Response) {
 //Actualizar un usuario existente
 
 async function update(req: Request, res: Response) {
+  const em = orm.em.fork();
   try {
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
@@ -147,14 +169,17 @@ async function update(req: Request, res: Response) {
       req.body.sanitizedInput.avatar = getRelativePath(req.file.path);
     }
 
+    delete req.body.sanitizedInput.id;
+
     em.assign(usuario, req.body.sanitizedInput);
     await em.flush();
-    res.status(204).json({ message: 'Updated' });
+    res.status(200).json({ message: 'Updated', data: addImageUrls(req, usuario) });
   } catch (error: any) {
+    console.error('Error in update usuario:', error);
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: 'Internal server error' });
+      res.status(500).json({ message: error.message || 'Internal server error' });
     }
   }
 }
@@ -162,6 +187,7 @@ async function update(req: Request, res: Response) {
 //Eliminar un usuario
 
 async function remove(req: Request, res: Response) {
+  const em = orm.em.fork();
   try {
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });

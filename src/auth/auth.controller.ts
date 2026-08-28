@@ -91,7 +91,12 @@ class AuthController {
         password,
         date_of_birth,
         name,
+        surname,
         telegram_username,
+        fav_driver,
+        fav_team,
+        fav_circuit,
+        bio,
       }: RegisterRequest = req.body;
 
       // debug!!!!!
@@ -105,14 +110,13 @@ class AuthController {
       }
 
       // validar que telegram_user no tenga espacios
-      if (
-        telegram_username !== undefined &&
-        telegram_username !== null &&
-        telegram_username.trim() !== telegram_username
-      ) {
-        return res.status(400).json({
-          message: "El username de Telegram no debe contener espacios.",
-        });
+      if (telegram_username) {
+        const cleanTg = String(telegram_username).trim().replace(/^@/, "");
+        if (/\s/.test(cleanTg)) {
+          return res.status(400).json({
+            message: "El username de Telegram no debe contener espacios.",
+          });
+        }
       }
 
       //verificar que el mail sea válido.
@@ -186,7 +190,12 @@ class AuthController {
         date_of_birth: date_of_birth,
         user_type: "user",
         name: name,
-        telegram_username: telegram_username,
+        surname: surname?.trim() || undefined,
+        telegram_username: telegram_username?.trim() || undefined,
+        fav_driver: fav_driver?.trim() || undefined,
+        fav_team: fav_team?.trim() || undefined,
+        fav_circuit: fav_circuit?.trim() || undefined,
+        bio: bio?.trim() || undefined,
         avatar: req.file ? `/uploads/avatars/${req.file.filename}` : undefined, // Agregar avatar si existe
       });
 
