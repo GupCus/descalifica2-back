@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Usuario } from './usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { NotFoundError } from '@mikro-orm/core';
+import bcrypt from 'bcrypt';
 import {
   deleteFile,
   buildImageUrl,
@@ -132,7 +133,13 @@ async function update(req: Request, res: Response) {
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
 
-    // Si hay archivo, agregar la ruta al objeto sanitizado
+    if (req.body.sanitizedInput.password) {
+      req.body.sanitizedInput.password = await bcrypt.hash(
+        req.body.sanitizedInput.password,
+        12
+      );
+    }
+
     if (req.file) {
       if (usuario.avatar) {
         deleteFile(usuario.avatar);
