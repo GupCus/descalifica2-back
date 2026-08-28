@@ -3,13 +3,12 @@ import { ComentarioPost } from './comentario.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { NotFoundError } from '@mikro-orm/core';
 
-const em = orm.em;
 
 function sanitizeComentario(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     id: req.params.id,
     content: req.body.content,
-    createdAt: req.body.createdAt,
+    createdAt: Date.now(),
     author: req.body.author,
     blogpost: req.body.blogpost,
   };
@@ -23,6 +22,7 @@ function sanitizeComentario(req: Request, res: Response, next: NextFunction) {
 
 async function findAll(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const comentarios = await em.find(ComentarioPost, {});
     res.status(200).json({ message: 'OK', data: comentarios });
   } catch (error: any) {
@@ -32,6 +32,7 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const comentario = await em.findOneOrFail(ComentarioPost, { id });
     res.status(200).json({ message: 'OK', data: comentario });
@@ -46,8 +47,8 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const comentario = em.create(ComentarioPost, req.body.sanitizedInput);
-    comentario.name = comentario.content.slice(0, 100);
     await em.flush();
     res.status(201).json({ message: 'Resource created', data: comentario });
   } catch (error: any) {
@@ -57,6 +58,7 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const comentario = await em.findOneOrFail(ComentarioPost, { id });
     em.assign(comentario, req.body.sanitizedInput);
@@ -73,6 +75,7 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const comentario = await em.findOneOrFail(ComentarioPost, { id });
     await em.removeAndFlush(comentario);

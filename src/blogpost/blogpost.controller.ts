@@ -7,6 +7,7 @@ import {
   buildImageUrl,
   getRelativePath,
 } from '../shared/upload/upload.utils.js';
+
 function sanitizeBlogpost(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     title: req.body.title,
@@ -69,7 +70,6 @@ async function add(req: Request, res: Response) {
       req.body.sanitizedInput.cover_image = getRelativePath(req.file.path);
     }
     const blogpost = em.create(Blogpost, req.body.sanitizedInput);
-    blogpost.name = blogpost.title.slice(0, 30);
     await em.flush();
     res
       .status(201)

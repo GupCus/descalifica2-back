@@ -5,13 +5,16 @@ import {
   Rel,
   Cascade,
   OneToMany,
+  PrimaryKey,
 } from '@mikro-orm/core';
 import { baseEntity } from '../shared/baseEntity.entity.js';
 import { Usuario } from '../usuario/usuario.entity.js';
 import { ComentarioPost } from '../comentariopost/comentario.entity.js';
 
 @Entity()
-export class Blogpost extends baseEntity {
+export class Blogpost{
+  @PrimaryKey()
+  id?: number;
   @Property({ nullable: false })
   title!: string;
 
