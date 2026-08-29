@@ -8,6 +8,7 @@ import {
 import { Request, Response } from "express";
 import { Usuario } from "../usuario/usuario.entity.js";
 import jwt from "jsonwebtoken";
+import { getRelativePath, buildImageUrl } from "../shared/upload/upload.utils.js";
 
 function isValidEmail(email: string): boolean {
   return /.+@.+\..+/.test(email);
@@ -64,7 +65,7 @@ class AuthController {
       const token = jwt.sign(
         payload,
         secret as any,
-        { expiresIn: process.env.EXPIRA_TOKEN || "7d" } as any
+        { expiresIn: process.env.EXPIRA_TOKEN || "7d" } as any,
       );
 
       const response: LoginResponse = {
@@ -135,7 +136,7 @@ class AuthController {
       const minimunAge = new Date(
         today.getFullYear() - 13,
         today.getMonth(),
-        today.getDate()
+        today.getDate(),
       );
       if (nacimiento > minimunAge) {
         return res.status(400).json({
@@ -174,7 +175,7 @@ class AuthController {
         date_of_birth: date_of_birth,
         user_type: "user",
         name: name,
-        avatar: req.file ? `/uploads/avatars/${req.file.filename}` : undefined, // Agregar avatar si existe
+        avatar: req.file ? getRelativePath(req.file.path) : undefined, // Agregar avatar si existe
       });
 
       await em.persistAndFlush(newUser);
@@ -195,7 +196,7 @@ class AuthController {
       const token = jwt.sign(
         payload,
         secret as any,
-        { expiresIn: process.env.EXPIRA_TOKEN || "7d" } as any
+        { expiresIn: process.env.EXPIRA_TOKEN || "7d" } as any,
       );
 
       const response: LoginResponse = {
@@ -233,6 +234,7 @@ class AuthController {
           id: usuario.id,
           username: usuario.username,
           user_type: usuario.user_type, // Valor actual de la BD
+          avatar: usuario.avatar ? usuario.avatar : null,
         },
       });
     } catch (error) {
