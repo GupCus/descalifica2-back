@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryKey,
 } from '@mikro-orm/core';
+import { baseEntity } from '../shared/baseEntity.entity.js';
 import { Usuario } from '../usuario/usuario.entity.js';
 import { ComentarioPost } from '../comentariopost/comentario.entity.js';
 
@@ -22,9 +23,6 @@ export class Blogpost{
 
   @Property({ nullable: true })
   cover_image?: string;
-
-  @Property({ type: 'json', nullable: true })
-  tags?: string[];
 
   @ManyToOne(() => Usuario, { nullable: false })
   author!: Rel<Usuario>;
