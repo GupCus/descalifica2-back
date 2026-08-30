@@ -56,6 +56,7 @@ import { actualizarresultados } from './src/services/openf1/openf1.service.js';
 import multer from 'multer';
 import { assetRouter } from './src/asset/asset.routes.js';
 import { nationalities } from './src/shared/nationalities.js';
+import { comentarioRouter } from './src/comentariopost/comentario.routes.js';
 
 const app = express();
 
@@ -82,6 +83,7 @@ app.use('/api/blogposts', blogpostRouter);
 app.use('/api/auth', authRouter);
 app.use('/openf1', of1router);
 app.use('/api/assets', assetRouter);
+app.use('/api/comentarios', comentarioRouter);
 
 app.get('/api/nationalities', (req, res) => {
   res.status(200).json({ message: 'OK', data: nationalities });

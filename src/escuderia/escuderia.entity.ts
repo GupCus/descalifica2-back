@@ -51,5 +51,3 @@ export class Escuderia extends baseEntity {
   @Property({ nullable: true })
   desc?: string;
 }
-
-//AGUS: ¿¿¿QUE HAY DE IMPORTANTE COMO PARA PONER???

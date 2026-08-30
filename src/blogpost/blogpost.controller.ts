@@ -1,19 +1,19 @@
-import { Request, Response, NextFunction } from "express";
-import { Blogpost } from "./blogpost.entity.js";
-import { orm } from "../shared/db/orm.js";
-import { NotFoundError } from "@mikro-orm/core";
+import { Request, Response, NextFunction } from 'express';
+import { Blogpost } from './blogpost.entity.js';
+import { orm } from '../shared/db/orm.js';
+import { NotFoundError } from '@mikro-orm/core';
 import {
   deleteFile,
   buildImageUrl,
   getRelativePath,
-} from "../shared/upload/upload.utils.js";
-const em = orm.em;
+} from '../shared/upload/upload.utils.js';
 
 function sanitizeBlogpost(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
-    name: req.body.name,
+    title: req.body.title,
     content: req.body.content,
     author: req.body.authorID ? Number(req.body.authorID) : undefined,
+    created_at: Date.now(),
     id: req.params.id,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -36,11 +36,12 @@ function addImageUrls(req: Request, blogpost: Blogpost) {
 
 async function findAll(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const blogposts = await em.find(Blogpost, {});
     const data = blogposts.map((b) => addImageUrls(req, b));
-    res.status(200).json({ message: "OK", data });
+    res.status(200).json({ message: 'OK', data });
   } catch (error: any) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 
@@ -48,14 +49,15 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const blogpost = await em.findOneOrFail(Blogpost, { id });
-    res.status(200).json({ message: "OK", data: addImageUrls(req, blogpost) });
+    res.status(200).json({ message: 'OK', data: addImageUrls(req, blogpost) });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
@@ -64,6 +66,7 @@ async function findOne(req: Request, res: Response) {
 
 async function add(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     if (req.file) {
       req.body.sanitizedInput.cover_image = getRelativePath(req.file.path);
     }
@@ -71,9 +74,10 @@ async function add(req: Request, res: Response) {
     await em.flush();
     res
       .status(201)
-      .json({ message: "Resource created", data: addImageUrls(req, blogpost) });
+      .json({ message: 'Resource created', data: addImageUrls(req, blogpost) });
   } catch (error: any) {
-    res.status(500).json({ message: "Internal server error" });
+    console.error('Error creating blogpost:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 
@@ -81,6 +85,7 @@ async function add(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const blogpost = await em.findOneOrFail(Blogpost, { id });
     if (req.file) {
@@ -93,12 +98,12 @@ async function update(req: Request, res: Response) {
     await em.flush();
     res
       .status(200)
-      .json({ message: "Resource updated", data: addImageUrls(req, blogpost) });
+      .json({ message: 'Resource updated', data: addImageUrls(req, blogpost) });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
@@ -107,29 +112,35 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
-    const blogpost = await em.findOneOrFail(Blogpost, { id });
+    const blogpost = await em.findOneOrFail(
+      Blogpost,
+      { id },
+      { populate: ['comentarios'] },
+    );
     if (blogpost.cover_image) {
       deleteFile(blogpost.cover_image);
     }
     await em.remove(blogpost).flush();
-    res.status(200).json({ message: "Resource deleted" });
+    res.status(200).json({ message: 'Resource deleted' });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
 
 async function uploadCoverImage(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const blogpost = await em.findOneOrFail(Blogpost, { id });
 
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded" });
+      return res.status(400).json({ message: 'No file uploaded' });
     }
 
     if (blogpost.cover_image) {
@@ -140,20 +151,21 @@ async function uploadCoverImage(req: Request, res: Response) {
     await em.flush();
 
     res.status(200).json({
-      message: "Cover image uploaded successfully",
+      message: 'Cover image uploaded successfully',
       data: addImageUrls(req, blogpost),
     });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
 
 async function deleteCoverImage(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const blogpost = await em.findOneOrFail(Blogpost, { id });
 
@@ -164,14 +176,14 @@ async function deleteCoverImage(req: Request, res: Response) {
     }
 
     res.status(200).json({
-      message: "Cover image deleted successfully",
+      message: 'Cover image deleted successfully',
       data: addImageUrls(req, blogpost),
     });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
