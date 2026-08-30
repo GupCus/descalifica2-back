@@ -13,6 +13,7 @@ function sanitizeBlogpost(req: Request, res: Response, next: NextFunction) {
     title: req.body.title,
     content: req.body.content,
     author: req.body.authorID ? Number(req.body.authorID) : undefined,
+    created_at: Date.now(),
     id: req.params.id,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -77,7 +78,7 @@ async function add(req: Request, res: Response) {
   } catch (error: any) {
     console.error('Error creating blogpost:', error);
     res.status(500).json({ message: 'Internal server error' });
-}
+  }
 }
 
 //Actualizar un blogpost
@@ -113,7 +114,11 @@ async function remove(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
-    const blogpost = await em.findOneOrFail(Blogpost, { id }, { populate: ['comentarios'] });
+    const blogpost = await em.findOneOrFail(
+      Blogpost,
+      { id },
+      { populate: ['comentarios'] },
+    );
     if (blogpost.cover_image) {
       deleteFile(blogpost.cover_image);
     }
