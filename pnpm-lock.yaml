@@ -44,6 +44,9 @@ importers:
       validate:
         specifier: ^5.2.0
         version: 5.2.0
+      validator:
+        specifier: ^13.15.35
+        version: 13.15.35
     devDependencies:
       '@types/cors':
         specifier: ^2.8.19
@@ -60,6 +63,9 @@ importers:
       '@types/node':
         specifier: ^24.0.3
         version: 24.0.3
+      '@types/validator':
+        specifier: ^13.15.10
+        version: 13.15.10
       tsc-watch:
         specifier: 6.0.4
         version: 6.0.4(typescript@5.1.3)
@@ -161,6 +167,9 @@ packages:
 
   '@types/serve-static@1.15.8':
     resolution: {integrity: sha512-roei0UY3LhpOJvjbIP6ZZFngyLKl5dskOtDhxY5THRSpO+ZI+nzJ+m5yUMzGrp89YRa7lvknKkMYjqQFGwA7Sg==}
+
+  '@types/validator@13.15.10':
+    resolution: {integrity: sha512-T8L6i7wCuyoK8A/ZeLYt1+q0ty3Zb9+qbSSvrIVitzT3YjZqkTZ40IbRsPanlB4h1QB3JVL1SYCdR6ngtFYcuA==}
 
   accepts@1.3.8:
     resolution: {integrity: sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw==}
@@ -880,6 +889,10 @@ packages:
     resolution: {integrity: sha512-pVADd6GfDT7bALYvvzhfHnfmxCDem2bG7lGY3mwHzY7ktMH/SaczoF+eKkGokQEdGKozkJvyuOiSfQEHXp4zIA==}
     engines: {node: '>=7.6'}
 
+  validator@13.15.35:
+    resolution: {integrity: sha512-TQ5pAGhd5whStmqWvYF4OjQROlmv9SMFVt37qoCBdqRffuuklWYQlCNnEs2ZaIBD1kZRNnikiZOS1eqgkar0iw==}
+    engines: {node: '>= 0.10'}
+
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
@@ -1018,6 +1031,8 @@ snapshots:
       '@types/http-errors': 2.0.5
       '@types/node': 24.0.3
       '@types/send': 0.17.5
+
+  '@types/validator@13.15.10': {}
 
   accepts@1.3.8:
     dependencies:
@@ -1714,6 +1729,8 @@ snapshots:
       '@eivifj/dot': 1.0.3
       component-type: 1.2.1
       typecast: 0.0.1
+
+  validator@13.15.35: {}
 
   vary@1.1.2: {}
 

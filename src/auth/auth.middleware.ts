@@ -1,20 +1,20 @@
-import { AuthenticatedRequest, jwtpayload } from "./auth.types.js";
-import { Response, Request, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { AuthenticatedRequest, jwtpayload } from './auth.types.js';
+import { Response, Request, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 
 export const authenticateToken = (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const authHeader = req.headers.authorization as string;
-    const token = authHeader && authHeader.split(" ")[1];
+    const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
       return res.status(401).json({
-        message: "Token requerido.",
-        error: "NO_TOKEN",
+        message: 'Token requerido.',
+        error: 'NO_TOKEN',
       });
     }
 
@@ -23,29 +23,29 @@ export const authenticateToken = (
       process.env.JWT_SECRET as string,
       (err: any, decoded: any) => {
         if (err) {
-          if (err.name === "TokenExpiredError") {
+          if (err.name === 'TokenExpiredError') {
             return res.status(403).json({
-              message: "Token expirado :(",
-              error: "TOKEN_EXPIRED",
+              message: 'Token expirado :(',
+              error: 'TOKEN_EXPIRED',
             });
           }
 
           return res.status(403).json({
-            message: "Invalid token.",
-            error: "INVALID_TOKEN",
+            message: 'Invalid token.',
+            error: 'INVALID_TOKEN',
           });
         }
 
         req.user = decoded as jwtpayload;
         next();
-      }
+      },
     );
   } catch (error) {
     console.error(
-      "Error en auth middleware: ",
+      'Error en auth middleware: ',
       res.status(500).json({
-        message: "Internal server error",
-      })
+        message: 'Internal server error',
+      }),
     );
   }
 };
@@ -54,15 +54,15 @@ export const authenticateToken = (
 export const authenticateAdmin = (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   authenticateToken(req, res, () => {
-    if (req.user?.user_type === "admin") {
+    if (req.user?.user_type === 'admin') {
       return next();
     }
     return res.status(403).json({
-      message: "Sólo administradores.",
-      error: "ACCESS_NOT_GRANTED",
+      message: 'Sólo administradores.',
+      error: 'ACCESS_NOT_GRANTED',
     });
   });
 };
@@ -71,15 +71,15 @@ export const authenticateAdmin = (
 export const authenticateCliente = (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   authenticateToken(req, res, () => {
-    if (req.user?.user_type === "cliente") {
+    if (req.user?.user_type === 'cliente') {
       return next();
     }
     return res.status(403).json({
-      message: "Acceso para clientes.",
-      error: "ACCESS_NOT_GRANTED",
+      message: 'Acceso para clientes.',
+      error: 'ACCESS_NOT_GRANTED',
     });
   });
 };

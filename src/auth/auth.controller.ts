@@ -1,17 +1,18 @@
-import { orm } from "../shared/db/orm.js";
+import { orm } from '../shared/db/orm.js';
 import {
   AuthenticatedRequest,
   LoginRequest,
   LoginResponse,
   RegisterRequest,
-} from "./auth.types.js";
-import { Request, Response } from "express";
-import { Usuario } from "../usuario/usuario.entity.js";
-import jwt from "jsonwebtoken";
-
-function isValidEmail(email: string): boolean {
-  return /.+@.+\..+/.test(email);
-}
+} from './auth.types.js';
+import { Request, Response } from 'express';
+import { Usuario } from '../usuario/usuario.entity.js';
+import jwt from 'jsonwebtoken';
+import {
+  getRelativePath,
+  buildImageUrl,
+} from '../shared/upload/upload.utils.js';
+import validator from 'validator';
 
 class AuthController {
   async login(req: Request, res: Response) {
@@ -20,7 +21,7 @@ class AuthController {
 
       if (!mail || !password) {
         return res.status(400).json({
-          message: "Por favor complete todos los campos.",
+          message: 'Por favor complete todos los campos.',
         });
       }
 
@@ -29,7 +30,7 @@ class AuthController {
 
       if (!usuario) {
         return res.status(401).json({
-          message: "El usuario no existe.",
+          message: 'El usuario no existe.',
         });
       }
 
@@ -37,13 +38,13 @@ class AuthController {
 
       if (!isPasswordCorrect) {
         return res.status(401).json({
-          message: "Contraseña incorrecta.",
+          message: 'Contraseña incorrecta.',
         });
       }
 
       if (!usuario.id) {
         return res.status(500).json({
-          message: "Internal server error.",
+          message: 'Internal server error.',
         });
       }
 
@@ -57,14 +58,14 @@ class AuthController {
       const secret = process.env.JWT_SECRET;
       if (!secret) {
         return res.status(500).json({
-          message: "Internal server error. (JWT no configurado).",
+          message: 'Internal server error. (JWT no configurado).',
         });
       }
 
       const token = jwt.sign(
         payload,
         secret as any,
-        { expiresIn: process.env.EXPIRA_TOKEN || "7d" } as any,
+        { expiresIn: process.env.EXPIRA_TOKEN || '7d' } as any,
       );
 
       const response: LoginResponse = {
@@ -79,7 +80,7 @@ class AuthController {
       res.status(200).json(response);
     } catch (error) {
       console.error(`ERROR LOGIN: ${error}`);
-      res.status(500).json({ message: "Internal server error (¯_(ツ)_/¯)" });
+      res.status(500).json({ message: 'Internal server error (¯_(ツ)_/¯)' });
     }
   }
 
@@ -100,8 +101,8 @@ class AuthController {
       }: RegisterRequest = req.body;
 
       // debug!!!!!
-      console.log("Datos recibidos en register:", req.body);
-      console.log("Archivo recibido:", req.file);
+      console.log('Datos recibidos en register:', req.body);
+      console.log('Archivo recibido:', req.file);
 
       if (!username || !email || !password || !date_of_birth || !name) {
         return res.status(400).json({
@@ -111,31 +112,30 @@ class AuthController {
 
       // validar que telegram_user no tenga espacios
       if (telegram_username) {
-        const cleanTg = String(telegram_username).trim().replace(/^@/, "");
-        if (/\s/.test(cleanTg)) {
+        if (/\s/.test(telegram_username.trim())) {
           return res.status(400).json({
-            message: "El username de Telegram no debe contener espacios.",
+            message: 'El username de Telegram no debe contener espacios.',
           });
         }
       }
 
       //verificar que el mail sea válido.
-      if (!isValidEmail(email)) {
+      if (!validator.isEmail(email)) {
         return res.status(400).json({
-          message: "Introduzca un mail válido.",
+          message: 'Introduzca un mail válido.',
         });
       }
 
       //validación de longitud de contraseña y usuario
       if (password.length < 6) {
         return res.status(400).json({
-          message: "La contraseña requiere al menos 6 caracteres.",
+          message: 'La contraseña requiere al menos 6 caracteres.',
         });
       }
 
       if (username.length < 6) {
         return res.status(400).json({
-          message: "El nombre de usuario debe tener al menos 6 caracteres.",
+          message: 'El nombre de usuario debe tener al menos 6 caracteres.',
         });
       }
 
@@ -144,7 +144,7 @@ class AuthController {
 
       if (isNaN(nacimiento.getTime())) {
         return res.status(400).json({
-          message: "Fecha de nacimiento mal escrita (AAAA/MM/DD).",
+          message: 'Fecha de nacimiento mal escrita (AAAA/MM/DD).',
         });
       }
       const today = new Date();
@@ -156,7 +156,7 @@ class AuthController {
       if (nacimiento > minimunAge) {
         return res.status(400).json({
           message:
-            "Debes tener al menos 13 (trece) años para registrarte en este foro.",
+            'Debes tener al menos 13 (trece) años para registrarte en este foro.',
         });
       }
 
@@ -165,21 +165,21 @@ class AuthController {
       const existeUsuarioMail = await em.findOne(Usuario, { email: email });
       if (existeUsuarioMail) {
         return res.status(409).json({
-          message: "El correo provisto ya está registrado.",
+          message: 'El correo provisto ya está registrado.',
         });
       }
 
       const existeUsername = await em.findOne(Usuario, { username: username });
       if (existeUsername) {
         return res.status(409).json({
-          message: "El nombre de usuario ya está en uso.",
+          message: 'El nombre de usuario ya está en uso.',
         });
       }
 
       const secret = process.env.JWT_SECRET;
       if (!secret) {
         return res.status(500).json({
-          message: "Internal server error. (JWT no configurado).",
+          message: 'Internal server error. (JWT no configurado).',
         });
       }
 
@@ -188,7 +188,7 @@ class AuthController {
         username: username,
         password: password,
         date_of_birth: date_of_birth,
-        user_type: "user",
+        user_type: 'user',
         name: name,
         surname: surname?.trim() || undefined,
         telegram_username: telegram_username?.trim() || undefined,
@@ -203,7 +203,7 @@ class AuthController {
 
       if (!newUser) {
         return res.status(500).json({
-          message: "Ocurrió un error al crear el usuario.",
+          message: 'Ocurrió un error al crear el usuario.',
         });
       }
 
@@ -217,7 +217,7 @@ class AuthController {
       const token = jwt.sign(
         payload,
         secret as any,
-        { expiresIn: process.env.EXPIRA_TOKEN || "7d" } as any,
+        { expiresIn: process.env.EXPIRA_TOKEN || '7d' } as any,
       );
 
       const response: LoginResponse = {
@@ -231,9 +231,9 @@ class AuthController {
 
       res.status(201).json(response);
     } catch (error) {
-      console.error("Error en registro:", error);
+      console.error('Error en registro:', error);
       res.status(500).json({
-        message: "Error registrando al usuario",
+        message: 'Error registrando al usuario',
       });
     }
   }
@@ -245,21 +245,22 @@ class AuthController {
       const usuario = await em.findOne(Usuario, { id: req.user?.id });
 
       if (!usuario) {
-        return res.status(401).json({ message: "Usuario no encontrado" });
+        return res.status(401).json({ message: 'Usuario no encontrado' });
       }
 
       // Devolver datos actualizados de la BD, no del token
       res.status(200).json({
-        message: "Token válido",
+        message: 'Token válido',
         user: {
           id: usuario.id,
           username: usuario.username,
           user_type: usuario.user_type, // Valor actual de la BD
+          avatar: usuario.avatar ? usuario.avatar : null,
         },
       });
     } catch (error) {
       console.error(`checkToken error: ${error}`);
-      res.status(500).json({ message: "Internal server error." });
+      res.status(500).json({ message: 'Internal server error.' });
     }
   }
 }

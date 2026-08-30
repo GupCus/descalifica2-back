@@ -4,10 +4,11 @@ import {
   Entity,
   OneToMany,
   Property,
-} from "@mikro-orm/core";
-import { baseEntity } from "../shared/baseEntity.entity.js";
-import { Blogpost } from "../blogpost/blogpost.entity.js";
-import bcrypt from "bcrypt";
+} from '@mikro-orm/core';
+import { baseEntity } from '../shared/baseEntity.entity.js';
+import { Blogpost } from '../blogpost/blogpost.entity.js';
+import bcrypt from 'bcrypt';
+import { ComentarioPost } from '../comentariopost/comentario.entity.js';
 
 @Entity()
 export class Usuario extends baseEntity {
@@ -37,6 +38,8 @@ export class Usuario extends baseEntity {
   telegram_username?: string;
   @OneToMany(() => Blogpost, (blogpost) => blogpost.author)
   posts = new Collection<Blogpost>(this);
+  @OneToMany(() => ComentarioPost, (comentario) => comentario.author)
+  comentarios = new Collection<ComentarioPost>(this);
 
   @BeforeCreate()
   async hash_password_create() {
