@@ -83,3 +83,28 @@ export const authenticateCliente = (
     });
   });
 };
+
+export const authorizeSelfOrAdmin = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  authenticateToken(req, res, () => {
+    const targetId = Number.parseInt(req.params.id);
+    const isAdmin = req.user?.user_type === "admin";
+    const isSelf = req.user?.id != null && req.user.id === targetId;
+
+    if (!isAdmin && !isSelf) {
+      return res.status(403).json({
+        message: "Solo podés editar tu propio perfil.",
+        error: "ACCESS_NOT_GRANTED",
+      });
+    }
+
+    if (!isAdmin && req.body?.user_type !== undefined) {
+      delete req.body.user_type;
+    }
+
+    next();
+  });
+};

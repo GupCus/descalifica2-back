@@ -34,6 +34,8 @@ export class Usuario extends baseEntity {
   bio?: string;
   @Property({ nullable: true })
   avatar?: string;
+  @Property({ nullable: true, unique: true })
+  telegram_username?: string;
   @OneToMany(() => Blogpost, (blogpost) => blogpost.author)
   posts = new Collection<Blogpost>(this);
   @OneToMany(() => ComentarioPost, (comentario) => comentario.author)
