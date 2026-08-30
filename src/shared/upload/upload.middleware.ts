@@ -4,9 +4,9 @@ import { upload } from "./multer.config.js";
 /**
  * Middleware que setea la ruta de destino para el upload
  */
-function setUploadPath(entityFolder: string, subfolder: string) {
+export function setUploadPath(entityFolder: string, subfolder: string = "") {
   return (req: Request, res: Response, next: NextFunction) => {
-    (req as any)._uploadPath = `${entityFolder}/${subfolder}`;
+    (req as any)._uploadPath = subfolder ? `${entityFolder}/${subfolder}` : entityFolder;
     next();
   };
 }

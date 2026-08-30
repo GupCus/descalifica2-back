@@ -1,4 +1,4 @@
 allowBuilds:
-  bcrypt: false
+  bcrypt: true
 ignoredBuiltDependencies:
   - bcrypt

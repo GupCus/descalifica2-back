@@ -37,7 +37,6 @@ import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import multer from 'multer';
 import { pilotoRouter } from './src/piloto/piloto.routes.js';
 import { escuderiaRouter } from './src/escuderia/escuderia.routes.js';
 import { orm, syncSchema } from './src/shared/db/orm.js';
@@ -51,8 +50,11 @@ import { usuarioRouter } from './src/usuario/usuario.routes.js';
 import { sesionRouter } from './src/sesion/sesion.routes.js';
 import { blogpostRouter } from './src/blogpost/blogpost.routes.js';
 import { authRouter } from './src/auth/auth.routes.js';
-import { assetRouter } from './src/asset/asset.routes.js';
 import { Usuario } from './src/usuario/usuario.entity.js';
+import { of1router } from './src/services/openf1/openf1.routes.js';
+import { actualizarresultados } from './src/services/openf1/openf1.service.js';
+import multer from 'multer';
+import { assetRouter } from './src/asset/asset.routes.js';
 import { nationalities } from './src/shared/nationalities.js';
 import { comentarioRouter } from './src/comentariopost/comentario.routes.js';
 
@@ -79,10 +81,23 @@ app.use('/api/circuitos', circuitoRouter);
 app.use('/api/sesion', sesionRouter);
 app.use('/api/blogposts', blogpostRouter);
 app.use('/api/auth', authRouter);
+app.use('/openf1', of1router);
 app.use('/api/assets', assetRouter);
 app.use('/api/comentarios', comentarioRouter);
+
 app.get('/api/nationalities', (req, res) => {
   res.status(200).json({ message: 'OK', data: nationalities });
+});
+
+app.get('/api/nationalities/:code', (req, res) => {
+  const code = req.params.code.toUpperCase();
+  const nationality = nationalities.find((n) => n.code === code);
+
+  if (nationality) {
+    res.status(200).json({ message: 'OK', data: nationality });
+  } else {
+    res.status(404).json({ message: 'Nacionalidad no encontrada' });
+  }
 });
 
 //Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
@@ -139,6 +154,8 @@ async function createDefaultAdmin() {
 }
 
 await createDefaultAdmin();
+
+await actualizarresultados();
 
 app.listen(3000, () => {
   console.log('Corriendo en http://localhost:3000');

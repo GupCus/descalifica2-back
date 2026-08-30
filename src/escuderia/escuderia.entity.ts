@@ -21,17 +21,17 @@ export class Escuderia extends baseEntity {
   })
   drivers = new Collection<Piloto>(this);
 
-  @Property({ nullable: false })
-  fundation!: number;
+  @Property({ nullable: true })
+  fundation?: number;
 
-  @Property({ nullable: false })
-  nationality!: string;
-
-  @Property({ nullable: false })
-  engine!: string;
+  @Property({ nullable: true })
+  nationality?: string;
 
   @Property({ nullable: true })
   logo_image?: string;
+
+  @Property({ nullable: true })
+  car_image?: string;
 
   @ManyToOne(() => Marca, { nullable: true })
   brand?: Rel<Marca>;
@@ -41,4 +41,13 @@ export class Escuderia extends baseEntity {
 
   @OneToMany(() => Temporada, (temporada) => temporada.winner_team)
   wccs = new Collection<Temporada>(this);
+
+  @Property({ nullable: true })
+  color?: string;
+
+  @Property({ nullable: true })
+  engine?: string;
+
+  @Property({ nullable: true })
+  desc?: string;
 }

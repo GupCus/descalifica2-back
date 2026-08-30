@@ -7,7 +7,7 @@ import { Sesion } from "../sesion/sesion.entity.js";
 const em = orm.em;
 function sanitizeCarrera(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
-    id: req.body.id,
+    id: req.params.id,
     name: req.body.name,
     start_date: req.body.start_date ? new Date(req.body.start_date) : undefined,
     end_date: req.body.end_date ? new Date(req.body.end_date) : undefined,
@@ -29,8 +29,15 @@ async function findAll(req: Request, res: Response) {
       Carrera,
       {},
       {
-        populate: ["track", "season", "sessions", "season.racing_series"],
-      }
+        populate: [
+          "track",
+          "season",
+          "sessions",
+          "season.racing_series",
+          "sessions.session_result",
+          "sessions.session_result.piloto",
+        ],
+      },
     );
     res.status(200).json({ message: "OK", data: carreras });
   } catch (error: any) {
@@ -44,8 +51,14 @@ async function findOne(req: Request, res: Response) {
       Carrera,
       { id },
       {
-        populate: ["track", "season", "sessions"],
-      }
+        populate: [
+          "track",
+          "season",
+          "sessions",
+          "sessions.session_result",
+          "sessions.session_result.piloto",
+        ],
+      },
     );
     res.status(200).json({ message: "OK", data: carrera });
   } catch (error: any) {

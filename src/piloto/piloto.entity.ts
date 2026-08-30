@@ -18,26 +18,30 @@ export class Piloto extends baseEntity {
   //team!: Escuderia; DA ERROR, por ser una relacion circular. Se usa lo siguiente:
   team!: Rel<Escuderia>;
 
-  @Property({ nullable: false, unique: false })
-  num!: number;
+  @Property({ nullable: true })
+  num?: number;
 
-  @Property({ nullable: false })
-  nationality!: string;
+  @Property({ nullable: true })
+  nationality?: string;
 
   @Property({ nullable: true })
   birth_date?: Date;
 
-  @Property({ nullable: false })
-  role!: string;
+  @ManyToOne(() => Categoria, { cascade: [Cascade.ALL], nullable: true })
+  racing_series?: Categoria;
 
   @Property({ nullable: true })
   profile_image?: string;
 
-  @ManyToOne(() => Categoria, { cascade: [Cascade.ALL], nullable: true })
-  racing_series?: Rel<Categoria>;
+  @ManyToOne(() => Temporada, { cascade: [Cascade.ALL], nullable: true })
+  season?: Temporada;
 
+  // CANDIDATO A ELIMINAR
+  @Property({ nullable: true })
+  role?: string;
+
+  /* ELIMINADO 
   @OneToMany(() => Temporada, (temporada) => temporada.winner_driver)
   wdcs = new Collection<Temporada>(this);
+  */
 }
-//FRAN: hay q pasarlas a español
-//AGUS: me gustan mas en inglés estas cosas
