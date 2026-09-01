@@ -1,3 +1,4 @@
+import { authenticateAdmin } from '../auth/auth.middleware.js';
 import { Router } from "express";
 import {
   findAll,
@@ -18,31 +19,27 @@ export const pilotoRouter = Router();
 
 pilotoRouter.get("/", findAll);
 pilotoRouter.get("/:id", findOne);
-pilotoRouter.post(
-  "/",
+pilotoRouter.post("/", authenticateAdmin,
   ...uploadImageOptional("pilotos", "profile"),
   sanitizePiloto,
   add,
 );
-pilotoRouter.put(
-  "/:id",
+pilotoRouter.put("/:id", authenticateAdmin,
   ...uploadImageOptional("pilotos", "profile"),
   sanitizePiloto,
   update,
 );
-pilotoRouter.patch(
-  "/:id",
+pilotoRouter.patch("/:id", authenticateAdmin,
   ...uploadImageOptional("pilotos", "profile"),
   sanitizePiloto,
   update,
 );
 
 // Upload dedicado de imagen de perfil
-pilotoRouter.patch(
-  "/:id/portrait-image",
+pilotoRouter.patch("/:id/portrait-image", authenticateAdmin,
   ...uploadImage("pilotos", "profile"),
   uploadProfileImage,
 );
-pilotoRouter.delete("/:id/portrait-image", deleteProfileImage);
+pilotoRouter.delete("/:id/portrait-image", authenticateAdmin, deleteProfileImage);
 
-pilotoRouter.delete("/:id", remove);
+pilotoRouter.delete("/:id", authenticateAdmin, remove);

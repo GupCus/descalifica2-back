@@ -1,3 +1,4 @@
+import { authenticateAdmin } from '../auth/auth.middleware.js';
 import { Router } from "express";
 import {
   findAll,
@@ -20,38 +21,33 @@ export const escuderiaRouter = Router();
 
 escuderiaRouter.get("/", findAll);
 escuderiaRouter.get("/:id", findOne);
-escuderiaRouter.post(
-  "/",
+escuderiaRouter.post("/", authenticateAdmin,
   ...uploadImageOptional("escuderias", "logos"),
   sanitizeEscuderia,
   add,
 );
-escuderiaRouter.put(
-  "/:id",
+escuderiaRouter.put("/:id", authenticateAdmin,
   ...uploadImageOptional("escuderias", "logos"),
   sanitizeEscuderia,
   update,
 );
-escuderiaRouter.patch(
-  "/:id",
+escuderiaRouter.patch("/:id", authenticateAdmin,
   ...uploadImageOptional("escuderias", "logos"),
   sanitizeEscuderia,
   update,
 );
 
 // Upload dedicado de logo
-escuderiaRouter.patch(
-  "/:id/logo-image",
+escuderiaRouter.patch("/:id/logo-image", authenticateAdmin,
   ...uploadImage("escuderias", "logos"),
   uploadLogoImage,
 );
-escuderiaRouter.delete("/:id/logo-image", deleteLogoImage);
+escuderiaRouter.delete("/:id/logo-image", authenticateAdmin, deleteLogoImage);
 
-escuderiaRouter.patch(
-  "/:id/car-image",
+escuderiaRouter.patch("/:id/car-image", authenticateAdmin,
   ...uploadImage("escuderias", "autos"),
   uploadCarImage,
 );
-escuderiaRouter.delete("/:id/car-image", deleteCarImage);
+escuderiaRouter.delete("/:id/car-image", authenticateAdmin, deleteCarImage);
 
-escuderiaRouter.delete("/:id", remove);
+escuderiaRouter.delete("/:id", authenticateAdmin, remove);
