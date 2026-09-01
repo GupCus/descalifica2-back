@@ -55,6 +55,8 @@ import { assetRouter } from './src/asset/asset.routes.js';
 import { Usuario } from './src/usuario/usuario.entity.js';
 import { nationalities } from './src/shared/nationalities.js';
 import { comentarioRouter } from './src/comentariopost/comentario.routes.js';
+import { of1router } from './src/services/openf1/openf1.routes.js';
+import { actualizarresultados } from './src/services/openf1/openf1.service.js';
 
 const app = express();
 
@@ -83,6 +85,18 @@ app.use('/api/assets', assetRouter);
 app.use('/api/comentarios', comentarioRouter);
 app.get('/api/nationalities', (req, res) => {
   res.status(200).json({ message: 'OK', data: nationalities });
+});
+app.use('/openf1', of1router);
+
+app.get('/api/nationalities/:code', (req, res) => {
+  const code = req.params.code.toUpperCase();
+  const nationality = nationalities.find((n) => n.code === code);
+
+  if (nationality) {
+    res.status(200).json({ message: 'OK', data: nationality });
+  } else {
+    res.status(404).json({ message: 'Nacionalidad no encontrada' });
+  }
 });
 
 //Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
@@ -139,6 +153,8 @@ async function createDefaultAdmin() {
 }
 
 await createDefaultAdmin();
+
+await actualizarresultados();
 
 app.listen(3000, () => {
   console.log('Corriendo en http://localhost:3000');

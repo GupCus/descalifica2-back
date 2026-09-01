@@ -41,5 +41,4 @@ yarn.lock
 Thumbs.db
 
 # Archivos subidos por usuarios (excepto banderas pre-cargadas)
-uploads/
-!uploads/flags/
+uploads/users/

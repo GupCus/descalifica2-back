@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Blogpost } from './blogpost.entity.js';
-import {Usuario} from '../usuario/usuario.entity.js';
+import { Usuario } from '../usuario/usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
 import { NotFoundError } from '@mikro-orm/core';
 import {
@@ -10,7 +10,7 @@ import {
 } from '../shared/upload/upload.utils.js';
 
 function sanitizeBlogpost(req: Request, res: Response, next: NextFunction) {
-    // Parsear tags: puede venir como string JSON (form-data/multer) o como array (JSON)
+  // Parsear tags: puede venir como string JSON (form-data/multer) o como array (JSON)
   let tags = req.body.tags;
   if (typeof tags === 'string') {
     try {
@@ -20,7 +20,9 @@ function sanitizeBlogpost(req: Request, res: Response, next: NextFunction) {
     }
   }
   if (Array.isArray(tags)) {
-    tags = tags.map((t: string) => String(t).trim().toLowerCase()).filter((t: string) => t.length > 0);
+    tags = tags
+      .map((t: string) => String(t).trim().toLowerCase())
+      .filter((t: string) => t.length > 0);
   } else {
     tags = undefined;
   }
@@ -228,14 +230,16 @@ async function findSuggested(req: Request, res: Response) {
     const scored = blogposts
       .map((bp) => {
         const matches = (bp.tags ?? []).filter((tag) =>
-          userInterests.includes(tag)
+          userInterests.includes(tag),
         ).length;
         return { blogpost: bp, matches };
       })
       .filter((item) => item.matches > 0)
       .sort((a, b) => {
         if (b.matches !== a.matches) return b.matches - a.matches;
-        return b.blogpost.created_at.getTime() - a.blogpost.created_at.getTime();
+        return (
+          b.blogpost.created_at.getTime() - a.blogpost.created_at.getTime()
+        );
       });
 
     const data = scored.map((item) => ({
