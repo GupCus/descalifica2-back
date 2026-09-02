@@ -229,9 +229,14 @@ async function findSuggested(req: Request, res: Response) {
 
     const scored = blogposts
       .map((bp) => {
-        const matches = (bp.tags ?? []).filter((tag) =>
-          userInterests.includes(tag),
-        ).length;
+        const matches = (bp.tags ?? []).filter((tag) => {
+          const normalizedTag = tag.trim().toLowerCase();
+          return userInterests.some(
+            (interest) =>
+              normalizedTag.includes(interest) ||
+              interest.includes(normalizedTag),
+          );
+        }).length;
         return { blogpost: bp, matches };
       })
       .filter((item) => item.matches > 0)
