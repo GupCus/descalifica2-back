@@ -8,8 +8,6 @@ import {
   getRelativePath,
 } from '../shared/upload/upload.utils.js';
 
-const em = orm.em;
-
 function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
   req.body.sanitizedInput = {
     username: req.body.username,
@@ -48,6 +46,7 @@ function addImageUrls(req: Request, usuario: Usuario) {
 
 async function uploadAvatar(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
 
@@ -76,6 +75,7 @@ async function uploadAvatar(req: Request, res: Response) {
 
 async function deleteAvatar(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
 
@@ -100,6 +100,7 @@ async function deleteAvatar(req: Request, res: Response) {
 // obtener todos los usuarios
 async function findAll(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const usuarios = await em.find(Usuario, {});
     const usuariosWithUrls = usuarios.map((u) => addImageUrls(req, u));
     res.status(200).json({ message: 'OK', data: usuariosWithUrls });
@@ -112,6 +113,7 @@ async function findAll(req: Request, res: Response) {
 
 async function findOne(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
     res.status(200).json({ message: 'OK', data: addImageUrls(req, usuario) });
@@ -128,6 +130,7 @@ async function findOne(req: Request, res: Response) {
 
 async function update(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
 
@@ -155,6 +158,7 @@ async function update(req: Request, res: Response) {
 
 async function remove(req: Request, res: Response) {
   try {
+    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
 
