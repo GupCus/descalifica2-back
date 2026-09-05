@@ -157,6 +157,7 @@ await createDefaultAdmin();
 
 await actualizarresultados();
 
-app.listen(3000, () => {
-  console.log('Corriendo en http://localhost:3000');
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Corriendo en puerto ${port}`);
 });
