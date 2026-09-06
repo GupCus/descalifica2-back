@@ -17,9 +17,9 @@
    - Si no teenes commits locales: git restore .
    - Si tenes commits locales: git fetch y git reset --hard
 2. Borra las carpetas /dist y node_modules
-3. Ejecuta en orden:
+3. ACORDATE DE CHEQUEAR SI TENES .ENV AL DIA !!!!
+4. Ejecuta en orden:
    - pnpm install
-   - pnpm seed
    - pnpm start:dev
 
 ¿Solución para "NODE NO ES UN COMANDO RECONOCIDO" o similar?
@@ -32,7 +32,14 @@
 Sentite libre de agregar otro problema q te tuvo mal - Agus
 */
 
+//Agrego esto para que se den cuenta cuando les falta el env !!
 import 'dotenv/config';
+if(!process.env.GOOGLE_KEY || !process.env.BDLOCATION || !process.env.JWT_SECRET){
+  console.error("Te falta el envvvv o lo tenes incompleto")
+  process.exit(1);
+}
+
+
 import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
@@ -154,7 +161,6 @@ async function createDefaultAdmin() {
 }
 
 await createDefaultAdmin();
-
 await actualizarresultados();
 
 app.listen(3000, () => {

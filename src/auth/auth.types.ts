@@ -18,6 +18,7 @@ export interface RegisterRequest {
   fav_team?: string;
   fav_circuit?: string;
   bio?: string;
+  avatar_url?: string;
 }
 
 export interface LoginResponse {
