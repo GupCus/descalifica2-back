@@ -1,3 +1,4 @@
+import { authenticateAdmin } from '../auth/auth.middleware.js';
 import { Router } from 'express';
 import {
   findAll,
@@ -12,7 +13,7 @@ export const sesionRouter = Router();
 
 sesionRouter.get('/', findAll);
 sesionRouter.get('/:id', findOne);
-sesionRouter.post('/', sanitizeSesionInput, add);
-sesionRouter.put('/:id', sanitizeSesionInput, update);
-sesionRouter.patch('/:id', sanitizeSesionInput, update);
-sesionRouter.delete('/:id', remove);
+sesionRouter.post('/', authenticateAdmin, sanitizeSesionInput, add);
+sesionRouter.put('/:id', authenticateAdmin, sanitizeSesionInput, update);
+sesionRouter.patch('/:id', authenticateAdmin, sanitizeSesionInput, update);
+sesionRouter.delete('/:id', authenticateAdmin, remove);

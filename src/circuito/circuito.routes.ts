@@ -1,3 +1,4 @@
+import { authenticateAdmin } from '../auth/auth.middleware.js';
 import { Router } from "express";
 import {
   findAll,
@@ -20,39 +21,34 @@ export const circuitoRouter = Router();
 
 circuitoRouter.get("/", findAll);
 circuitoRouter.get("/:id", findOne);
-circuitoRouter.post(
-  "/",
+circuitoRouter.post("/", authenticateAdmin,
   ...uploadImageOptional("circuitos", "track_maps"),
   sanitizeCircuitoInput,
   add,
 );
-circuitoRouter.put(
-  "/:id",
+circuitoRouter.put("/:id", authenticateAdmin,
   ...uploadImageOptional("circuitos", "track_maps"),
   sanitizeCircuitoInput,
   update,
 );
-circuitoRouter.patch(
-  "/:id",
+circuitoRouter.patch("/:id", authenticateAdmin,
   ...uploadImageOptional("circuitos", "track_maps"),
   sanitizeCircuitoInput,
   update,
 );
 
 // Upload dedicado de mapa del trazado
-circuitoRouter.patch(
-  "/:id/track-map",
+circuitoRouter.patch("/:id/track-map", authenticateAdmin,
   ...uploadImage("circuitos", "track_maps"),
   uploadTrackMap,
 );
-circuitoRouter.delete("/:id/track-map", deleteTrackMap);
+circuitoRouter.delete("/:id/track-map", authenticateAdmin, deleteTrackMap);
 
 // Upload dedicado de foto del circuito
-circuitoRouter.patch(
-  "/:id/upload-image",
+circuitoRouter.patch("/:id/upload-image", authenticateAdmin,
   ...uploadImage("circuitos", "photos"),
   uploadPhotoImage,
 );
-circuitoRouter.delete("/:id/upload-image", deletePhotoImage);
+circuitoRouter.delete("/:id/upload-image", authenticateAdmin, deletePhotoImage);
 
-circuitoRouter.delete("/:id", remove);
+circuitoRouter.delete("/:id", authenticateAdmin, remove);

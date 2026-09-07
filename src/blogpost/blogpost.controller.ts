@@ -86,6 +86,11 @@ async function findOne(req: Request, res: Response) {
 async function add(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
+    const authReq = req as any;
+
+    // Forzamos el autor al ID del usuario en sesión, ignorando lo que haya mandado en el body
+    req.body.sanitizedInput.author = authReq.user.id;
+
     if (req.file) {
       req.body.sanitizedInput.cover_image = getRelativePath(req.file.path);
     }
@@ -105,14 +110,31 @@ async function add(req: Request, res: Response) {
 async function update(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
+    const authReq = req as any;
     const id = Number.parseInt(req.params.id);
-    const blogpost = await em.findOneOrFail(Blogpost, { id });
+    const blogpost = await em.findOneOrFail(
+      Blogpost,
+      { id },
+      { populate: ['author'] },
+    );
+
+    const isAuthor = blogpost.author.id === authReq.user.id;
+    if (!isAuthor) {
+      return res
+        .status(403)
+        .json({ message: 'Solo el autor original puede editar este blogpost' });
+    }
+
     if (req.file) {
       req.body.sanitizedInput.cover_image = getRelativePath(req.file.path);
       if (blogpost.cover_image) {
         deleteFile(blogpost.cover_image);
       }
     }
+
+    // Evitamos que intente cambiar el autor accidentalmente en una edición
+    delete req.body.sanitizedInput.author;
+
     em.assign(blogpost, req.body.sanitizedInput);
     await em.flush();
     res
@@ -132,12 +154,22 @@ async function update(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
+    const authReq = req as any;
     const id = Number.parseInt(req.params.id);
     const blogpost = await em.findOneOrFail(
       Blogpost,
       { id },
-      { populate: ['comentarios'] },
+      { populate: ['author'] },
     );
+    const isAuthor = blogpost.author.id === authReq.user.id;
+    const isAdmin = authReq.user.user_type === 'admin';
+
+    if (!isAuthor && !isAdmin) {
+      return res
+        .status(403)
+        .json({ message: 'No tienes permiso para eliminar este blogpost' });
+    }
+
     if (blogpost.cover_image) {
       deleteFile(blogpost.cover_image);
     }
@@ -155,8 +187,20 @@ async function remove(req: Request, res: Response) {
 async function uploadCoverImage(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
+    const authReq = req as any;
     const id = Number.parseInt(req.params.id);
-    const blogpost = await em.findOneOrFail(Blogpost, { id });
+    const blogpost = await em.findOneOrFail(
+      Blogpost,
+      { id },
+      { populate: ['author'] },
+    );
+
+    const isAuthor = blogpost.author.id === authReq.user.id;
+    if (!isAuthor) {
+      return res
+        .status(403)
+        .json({ message: 'Solo el autor original puede modificar la portada' });
+    }
 
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
@@ -185,8 +229,22 @@ async function uploadCoverImage(req: Request, res: Response) {
 async function deleteCoverImage(req: Request, res: Response) {
   try {
     const em = orm.em.fork();
+    const authReq = req as any;
     const id = Number.parseInt(req.params.id);
-    const blogpost = await em.findOneOrFail(Blogpost, { id });
+    const blogpost = await em.findOneOrFail(
+      Blogpost,
+      { id },
+      { populate: ['author'] },
+    );
+
+    const isAuthor = blogpost.author.id === authReq.user.id;
+    const isAdmin = authReq.user.user_type === 'admin';
+
+    if (!isAuthor && !isAdmin) {
+      return res
+        .status(403)
+        .json({ message: 'No tienes permiso para eliminar la portada' });
+    }
 
     if (blogpost.cover_image) {
       deleteFile(blogpost.cover_image);

@@ -10,7 +10,8 @@ export const orm = await MikroORM.init({
   driver: MySqlDriver,
   clientUrl: process.env.BDLOCATION,
   highlighter: new SqlHighlighter(),
-  debug:true,
+  debug: true,
+  allowGlobalContext: true,
 
   schemaGenerator:{
     disableForeignKeys:true,

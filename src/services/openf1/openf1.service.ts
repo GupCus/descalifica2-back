@@ -342,7 +342,15 @@ async function actualizarresultados(id?: number) {
           populate: ['sessions', 'sessions.session_result'],
         },
       );
-      if (carrera) {
+
+      //Si ya están los ultimos resultados solo actualiza el campeonato (a veces hay sanciones por fuera de las carreras)
+      if (
+        carrera &&
+        carrera.sessions.length > 0 &&
+        carrera.sessions
+          .getItems()
+          [carrera.sessions.getItems().length - 1].session_result.isEmpty()
+      ) {
         //a veces cambian los pilotos de escuderia en una sesion
         await CargarPilotosyEscuderias(em, carrera.season);
         await actualizarsesiones(em, carrera, 'latest');

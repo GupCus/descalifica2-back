@@ -12,6 +12,12 @@ export interface RegisterRequest {
   email: string;
   date_of_birth: string;
   name: string;
+  surname?: string;
+  telegram_username?: string;
+  fav_driver?: string;
+  fav_team?: string;
+  fav_circuit?: string;
+  bio?: string;
 }
 
 export interface LoginResponse {
