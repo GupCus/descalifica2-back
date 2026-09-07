@@ -34,4 +34,7 @@ export class Blogpost{
     cascade: [Cascade.ALL],
   })
   comentarios!: Rel<ComentarioPost[]>;
+
+  @Property({ nullable: true })
+  tags?: string[];
 }
