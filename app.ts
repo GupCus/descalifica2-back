@@ -47,7 +47,6 @@ if (
 import "reflect-metadata";
 import express from "express";
 import cors from "cors";
-import path from "path";
 import { pilotoRouter } from "./src/piloto/piloto.routes.js";
 import { escuderiaRouter } from "./src/escuderia/escuderia.routes.js";
 import { orm, syncSchema } from "./src/shared/db/orm.js";
@@ -61,7 +60,6 @@ import { usuarioRouter } from "./src/usuario/usuario.routes.js";
 import { sesionRouter } from "./src/sesion/sesion.routes.js";
 import { blogpostRouter } from "./src/blogpost/blogpost.routes.js";
 import { authRouter } from "./src/auth/auth.routes.js";
-import { Usuario } from "./src/usuario/usuario.entity.js";
 import { of1router } from "./src/services/openf1/openf1.routes.js";
 import { actualizarresultados } from "./src/services/openf1/openf1.service.js";
 import multer from "multer";
@@ -69,6 +67,7 @@ import { assetRouter } from "./src/asset/asset.routes.js";
 import { nationalities } from "./src/shared/nationalities.js";
 import { comentarioRouter } from "./src/comentariopost/comentario.routes.js";
 import { iniciarBotTelegram } from "./src/services/telegram/telegram.service.js";
+import { telegramrouter } from "./src/services/telegram/telegram.routes.js";
 
 const app = express();
 
@@ -96,6 +95,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/openf1", of1router);
 app.use("/api/assets", assetRouter);
 app.use("/api/comentarios", comentarioRouter);
+app.use("/api/telegram", telegramrouter);
 
 app.get("/api/nationalities", (req, res) => {
   res.status(200).json({ message: "OK", data: nationalities });
@@ -143,7 +143,7 @@ app.use((_, res) => {
 
 await syncSchema();
 await actualizarresultados();
-await iniciarBotTelegram();
+iniciarBotTelegram();
 
 app.listen(3000, () => {
   console.log("Corriendo en el puerto 3000");

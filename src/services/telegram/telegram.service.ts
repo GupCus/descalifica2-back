@@ -1,6 +1,5 @@
 import { Bot } from "node-telegram-bot-api";
 import { run } from "node-telegram-bot-api/node";
-import { EntityManager } from "@mikro-orm/mysql";
 import { orm } from "../../shared/db/orm.js";
 import "dotenv/config";
 import { Usuario } from "../../usuario/usuario.entity.js";
@@ -17,10 +16,11 @@ bot.command("start", async (ctx) => {
 
       const em = orm.em.fork();
 
-      const usuario = await buscarUsuarioPorCodigo(em, codigo);
+      const usuario = await em.findOne(Usuario, { telegram_id: codigo });
 
       if (usuario) {
-        await guardartelegram(em, usuario, chatId);
+        usuario.telegram_id = chatId.toString();
+        await em.flush();
         await ctx.reply(
           "¡Cuenta vinculada con éxito! Ya puedes volver a la página web.",
         );
@@ -31,22 +31,6 @@ bot.command("start", async (ctx) => {
     }
   }
 });
-
-async function buscarUsuarioPorCodigo(
-  em: EntityManager,
-  codigo: string,
-): Promise<Usuario | null> {
-  return await em.findOne(Usuario, { telegram_id: codigo });
-}
-
-async function guardartelegram(
-  em: EntityManager,
-  usuario: Usuario,
-  chatId: number,
-) {
-  usuario.telegram_id = chatId.toString();
-  await em.flush();
-}
 
 //Funcion para enviar posts de interes a usuarios
 export async function enviarMensajeMasivo(mensaje: string) {
@@ -82,7 +66,7 @@ export async function enviarMensajeMasivo(mensaje: string) {
 }
 
 //Arranca el bot
-export async function iniciarBotTelegram() {
-  await run(bot).catch(console.error);
+export function iniciarBotTelegram() {
+  run(bot).catch(console.error);
   console.log("Bot de Telegram iniciado");
 }
