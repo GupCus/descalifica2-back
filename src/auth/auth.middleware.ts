@@ -1,7 +1,6 @@
 import { AuthenticatedRequest, jwtpayload } from "./auth.types.js";
 import { Response, Request, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-
 export const authenticateToken = (
   req: AuthenticatedRequest,
   res: Response,
@@ -108,3 +107,51 @@ export const authorizeSelfOrAdmin = (
     next();
   });
 };
+
+export function sanitizeLogin(req: Request, res: Response, next: NextFunction) {
+  if (res.locals.googlePayload) {
+    return next();
+  }
+
+  // Si es un login normal, sanitizamos el body
+  req.body.sanitizedInput = {
+    mail: req.body.mail,
+    password: req.body.password,
+  };
+
+  Object.keys(req.body.sanitizedInput).forEach((key) => {
+    if (req.body.sanitizedInput[key] === undefined) {
+      delete req.body.sanitizedInput[key];
+    }
+  });
+
+  next();
+}
+
+export function sanitizeRegister(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  req.body.sanitizedInput = {
+    username: req.body.username,
+    email: req.body.email,
+    password: req.body.password,
+    date_of_birth: req.body.date_of_birth,
+    name: req.body.name,
+    surname: req.body.surname,
+    telegram_username: req.body.telegram_username,
+    fav_driver: req.body.fav_driver,
+    fav_team: req.body.fav_team,
+    fav_circuit: req.body.fav_circuit,
+    bio: req.body.bio,
+    avatar_url: req.body.avatar_url,
+  };
+
+  Object.keys(req.body.sanitizedInput).forEach((key) => {
+    if (req.body.sanitizedInput[key] === undefined) {
+      delete req.body.sanitizedInput[key];
+    }
+  });
+  next();
+}
