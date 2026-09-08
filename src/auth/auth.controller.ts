@@ -86,7 +86,7 @@ async function register(req: Request, res: Response) {
         message:
           "Debes tener al menos 13 (trece) años para registrarte en este foro.",
       });
-    } else if (maxAge > nacimiento) {
+    } else if (today.getFullYear() - nacimiento.getFullYear() > 100) {
       return res.status(400).json({
         message:
           "Lamentablemente 100 años nos parecen un montón para que te registrés en el foro.",
