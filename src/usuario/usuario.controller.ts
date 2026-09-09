@@ -12,14 +12,20 @@ import {
 function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
   const sanitized: Record<string, any> = {};
 
-  if (req.body.username !== undefined) sanitized.username = req.body.username.trim();
-  if (req.body.password !== undefined && req.body.password.length > 0) sanitized.password = req.body.password;
+  if (req.body.username !== undefined)
+    sanitized.username = req.body.username.trim();
+  if (req.body.password !== undefined && req.body.password.length > 0)
+    sanitized.password = req.body.password;
   if (req.body.name !== undefined) sanitized.name = req.body.name.trim();
-  if (req.body.surname !== undefined) sanitized.surname = req.body.surname.trim() || null;
+  if (req.body.surname !== undefined)
+    sanitized.surname = req.body.surname.trim() || null;
   if (req.body.email !== undefined) sanitized.email = req.body.email.trim();
-  
+
   if (req.body.date_of_birth !== undefined) {
-    if (req.body.date_of_birth && String(req.body.date_of_birth).trim() !== "") {
+    if (
+      req.body.date_of_birth &&
+      String(req.body.date_of_birth).trim() !== ''
+    ) {
       const d = new Date(req.body.date_of_birth);
       sanitized.date_of_birth = isNaN(d.getTime()) ? null : d;
     } else {
@@ -27,18 +33,21 @@ function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
     }
   }
 
-  if (req.body.fav_driver !== undefined) sanitized.fav_driver = req.body.fav_driver.trim() || null;
-  if (req.body.fav_team !== undefined) sanitized.fav_team = req.body.fav_team.trim() || null;
-  if (req.body.fav_circuit !== undefined) sanitized.fav_circuit = req.body.fav_circuit.trim() || null;
+  if (req.body.fav_driver !== undefined)
+    sanitized.fav_driver = req.body.fav_driver.trim() || null;
+  if (req.body.fav_team !== undefined)
+    sanitized.fav_team = req.body.fav_team.trim() || null;
+  if (req.body.fav_circuit !== undefined)
+    sanitized.fav_circuit = req.body.fav_circuit.trim() || null;
   if (req.body.bio !== undefined) sanitized.bio = req.body.bio.trim() || null;
-  
+
   if (req.body.telegram_username !== undefined) {
     const rawTg = String(req.body.telegram_username).trim();
     if (rawTg.length > 0) {
-      const cleanTg = rawTg.replace(/^@/, "");
+      const cleanTg = rawTg.replace(/^@/, '');
       if (/\s/.test(cleanTg)) {
         return res.status(400).json({
-          message: "El usuario de Telegram no debe contener espacios.",
+          message: 'El usuario de Telegram no debe contener espacios.',
         });
       }
       sanitized.telegram_username = cleanTg;
@@ -47,7 +56,8 @@ function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
     }
   }
 
-  if (req.body.user_type !== undefined) sanitized.user_type = req.body.user_type;
+  if (req.body.user_type !== undefined)
+    sanitized.user_type = req.body.user_type;
 
   if (req.file) {
     sanitized.avatar = getRelativePath(req.file.path);
@@ -158,7 +168,7 @@ async function update(req: Request, res: Response) {
     if (req.body.sanitizedInput.password) {
       req.body.sanitizedInput.password = await bcrypt.hash(
         req.body.sanitizedInput.password,
-        12
+        12,
       );
     }
 
@@ -173,13 +183,17 @@ async function update(req: Request, res: Response) {
 
     em.assign(usuario, req.body.sanitizedInput);
     await em.flush();
-    res.status(200).json({ message: 'Updated', data: addImageUrls(req, usuario) });
+    res
+      .status(200)
+      .json({ message: 'Updated', data: addImageUrls(req, usuario) });
   } catch (error: any) {
     console.error('Error in update usuario:', error);
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: error.message || 'Internal server error' });
+      res
+        .status(500)
+        .json({ message: error.message || 'Internal server error' });
     }
   }
 }
@@ -206,6 +220,23 @@ async function remove(req: Request, res: Response) {
     }
   }
 }
+// Encontrar usuarios publicos
+
+async function findPublic(req: Request, res: Response) {
+  const em = orm.em.fork();
+  try {
+    const usuarios = await em.find(Usuario, {});
+    const data = usuarios.map((u) => ({
+      id: u.id,
+      username: u.username,
+      name: u.name,
+      avatar_url: u.avatar ? buildImageUrl(req, u.avatar) : undefined,
+    }));
+    res.status(200).json({ message: 'OK', data });
+  } catch {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
 
 export {
   sanitizeUsuario,
@@ -215,4 +246,5 @@ export {
   remove,
   uploadAvatar,
   deleteAvatar,
+  findPublic,
 };

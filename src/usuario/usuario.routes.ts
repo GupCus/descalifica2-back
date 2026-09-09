@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router } from 'express';
 import {
   findAll,
   findOne,
@@ -7,31 +7,33 @@ import {
   sanitizeUsuario,
   uploadAvatar,
   deleteAvatar,
-} from "./usuario.controller.js";
+  findPublic,
+} from './usuario.controller.js';
 import {
   uploadImage,
   uploadImageOptional,
-} from "../shared/upload/upload.middleware.js";
+} from '../shared/upload/upload.middleware.js';
 import {
   authenticateToken,
   authenticateAdmin,
   authorizeSelfOrAdmin,
-} from "../auth/auth.middleware.js";
+} from '../auth/auth.middleware.js';
 
 export const usuarioRouter = Router();
 
-usuarioRouter.get("/", authenticateAdmin, findAll);
-usuarioRouter.get("/:id", authenticateToken, findOne);
+usuarioRouter.get('/', authenticateAdmin, findAll);
+usuarioRouter.get('/public', findPublic);
+usuarioRouter.get('/:id', authenticateToken, findOne);
 usuarioRouter.put(
-  "/:id",
-  ...uploadImageOptional("usuarios", "avatars"),
+  '/:id',
+  ...uploadImageOptional('usuarios', 'avatars'),
   authorizeSelfOrAdmin,
   sanitizeUsuario,
   update,
 );
 usuarioRouter.patch(
-  "/:id",
-  ...uploadImageOptional("usuarios", "avatars"),
+  '/:id',
+  ...uploadImageOptional('usuarios', 'avatars'),
   authorizeSelfOrAdmin,
   sanitizeUsuario,
   update,
@@ -39,11 +41,11 @@ usuarioRouter.patch(
 
 // Upload dedicado de avatar
 usuarioRouter.patch(
-  "/:id/avatar",
-  ...uploadImage("usuarios", "avatars"),
+  '/:id/avatar',
+  ...uploadImage('usuarios', 'avatars'),
   authorizeSelfOrAdmin,
   uploadAvatar,
 );
-usuarioRouter.delete("/:id/avatar", authorizeSelfOrAdmin, deleteAvatar);
+usuarioRouter.delete('/:id/avatar', authorizeSelfOrAdmin, deleteAvatar);
 
-usuarioRouter.delete("/:id", authenticateAdmin, remove);
+usuarioRouter.delete('/:id', authenticateAdmin, remove);

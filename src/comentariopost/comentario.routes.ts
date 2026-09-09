@@ -3,16 +3,16 @@ import {
   findAll,
   findOne,
   add,
-  update,
   remove,
   sanitizeComentario,
+  countsByBlogpost,
 } from './comentario.controller.js';
+import { authenticateToken } from '../auth/auth.middleware.js';
 
 export const comentarioRouter = Router();
 
 comentarioRouter.get('/', findAll);
+comentarioRouter.get('/counts', countsByBlogpost);
 comentarioRouter.get('/:id', findOne);
-comentarioRouter.post('/', sanitizeComentario, add);
-comentarioRouter.put('/:id', sanitizeComentario, update);
-comentarioRouter.patch('/:id', sanitizeComentario, update);
-comentarioRouter.delete('/:id', remove);
+comentarioRouter.post('/', authenticateToken, sanitizeComentario, add);
+comentarioRouter.delete('/:id', authenticateToken, remove);
