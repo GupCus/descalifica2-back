@@ -17,9 +17,9 @@
    - Si no teenes commits locales: git restore .
    - Si tenes commits locales: git fetch y git reset --hard
 2. Borra las carpetas /dist y node_modules
-3. Ejecuta en orden:
+3. ACORDATE DE CHEQUEAR SI TENES .ENV AL DIA !!!!
+4. Ejecuta en orden:
    - pnpm install
-   - pnpm seed
    - pnpm start:dev
 
 ¿Solución para "NODE NO ES UN COMANDO RECONOCIDO" o similar?
@@ -32,11 +32,22 @@
 Sentite libre de agregar otro problema q te tuvo mal - Agus
 */
 
+//Agrego esto para que se den cuenta cuando les falta el env !!
 import 'dotenv/config';
+if (
+  !process.env.TELEGRAM_BOT ||
+  !process.env.GOOGLE_KEY ||
+  !process.env.BDLOCATION ||
+  !process.env.JWT_SECRET
+) {
+  console.error('Te falta el env o lo tenes incompleto');
+  process.exit(1);
+}
+
 import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
+import multer from 'multer';
 import { pilotoRouter } from './src/piloto/piloto.routes.js';
 import { escuderiaRouter } from './src/escuderia/escuderia.routes.js';
 import { orm, syncSchema } from './src/shared/db/orm.js';
@@ -50,13 +61,13 @@ import { usuarioRouter } from './src/usuario/usuario.routes.js';
 import { sesionRouter } from './src/sesion/sesion.routes.js';
 import { blogpostRouter } from './src/blogpost/blogpost.routes.js';
 import { authRouter } from './src/auth/auth.routes.js';
-import { Usuario } from './src/usuario/usuario.entity.js';
 import { of1router } from './src/services/openf1/openf1.routes.js';
 import { actualizarresultados } from './src/services/openf1/openf1.service.js';
-import multer from 'multer';
 import { assetRouter } from './src/asset/asset.routes.js';
 import { nationalities } from './src/shared/nationalities.js';
 import { comentarioRouter } from './src/comentariopost/comentario.routes.js';
+import { iniciarBotTelegram } from './src/services/telegram/telegram.service.js';
+import { telegramrouter } from './src/services/telegram/telegram.routes.js';
 
 const app = express();
 
@@ -81,14 +92,14 @@ app.use('/api/circuitos', circuitoRouter);
 app.use('/api/sesion', sesionRouter);
 app.use('/api/blogposts', blogpostRouter);
 app.use('/api/auth', authRouter);
-app.use('/openf1', of1router);
+app.use('/api/openf1', of1router);
 app.use('/api/assets', assetRouter);
 app.use('/api/comentarios', comentarioRouter);
+app.use('/api/telegram', telegramrouter);
 
 app.get('/api/nationalities', (req, res) => {
   res.status(200).json({ message: 'OK', data: nationalities });
 });
-
 app.get('/api/nationalities/:code', (req, res) => {
   const code = req.params.code.toUpperCase();
   const nationality = nationalities.find((n) => n.code === code);
@@ -131,32 +142,9 @@ app.use((_, res) => {
 });
 
 await syncSchema();
-
-async function createDefaultAdmin() {
-  const em = orm.em.fork();
-  try {
-    const adminExists = await em.findOne(Usuario, { user_type: 'admin' });
-    if (!adminExists) {
-      const admin = new Usuario();
-      admin.username = 'admin';
-      admin.password = 'admin123';
-      admin.name = 'Administrador';
-      admin.user_type = 'admin';
-      admin.email = 'admin@descalifica.com';
-
-      em.persist(admin);
-      await em.flush();
-      console.log('✓ Usuario admin creado por defecto');
-    }
-  } catch (error) {
-    console.error('Error al crear admin por defecto:', error);
-  }
-}
-
-await createDefaultAdmin();
-
 await actualizarresultados();
+iniciarBotTelegram();
 
 app.listen(3000, () => {
-  console.log('Corriendo en http://localhost:3000');
+  console.log('Corriendo en el puerto 3000');
 });

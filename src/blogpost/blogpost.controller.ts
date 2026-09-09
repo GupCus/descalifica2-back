@@ -7,13 +7,32 @@ import {
   buildImageUrl,
   getRelativePath,
 } from '../shared/upload/upload.utils.js';
+import { Usuario } from '../usuario/usuario.entity.js';
 
 function sanitizeBlogpost(req: Request, res: Response, next: NextFunction) {
+  // Parsear tags: puede venir como string JSON (form-data/multer) o como array (JSON)
+  let tags = req.body.tags;
+  if (typeof tags === 'string') {
+    try {
+      tags = JSON.parse(tags);
+    } catch {
+      tags = undefined;
+    }
+  }
+  if (Array.isArray(tags)) {
+    tags = tags
+      .map((t: string) => String(t).trim().toLowerCase())
+      .filter((t: string) => t.length > 0);
+  } else {
+    tags = undefined;
+  }
+
   req.body.sanitizedInput = {
     title: req.body.title,
     content: req.body.content,
     author: req.body.authorID ? Number(req.body.authorID) : undefined,
     created_at: new Date(),
+    tags,
     id: req.params.id,
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
@@ -142,7 +161,6 @@ async function remove(req: Request, res: Response) {
       { id },
       { populate: ['author'] },
     );
-
     const isAuthor = blogpost.author.id === authReq.user.id;
     const isAdmin = authReq.user.user_type === 'admin';
 
@@ -247,6 +265,61 @@ async function deleteCoverImage(req: Request, res: Response) {
   }
 }
 
+async function findSuggested(req: Request, res: Response) {
+  try {
+    const em = orm.em.fork();
+    const userId = Number.parseInt(req.params.userId);
+    const usuario = await em.findOneOrFail(Usuario, { id: userId });
+
+    const userInterests: string[] = [
+      usuario.fav_driver,
+      usuario.fav_team,
+      usuario.fav_circuit,
+    ]
+      .filter((v): v is string => !!v)
+      .map((v) => v.trim().toLowerCase());
+
+    if (userInterests.length === 0) {
+      return res.status(200).json({ message: 'OK', data: [] });
+    }
+
+    const blogposts = await em.find(Blogpost, { tags: { $ne: null } });
+
+    const scored = blogposts
+      .map((bp) => {
+        const matches = (bp.tags ?? []).filter((tag) => {
+          const normalizedTag = tag.trim().toLowerCase();
+          return userInterests.some(
+            (interest) =>
+              normalizedTag.includes(interest) ||
+              interest.includes(normalizedTag),
+          );
+        }).length;
+        return { blogpost: bp, matches };
+      })
+      .filter((item) => item.matches > 0)
+      .sort((a, b) => {
+        if (b.matches !== a.matches) return b.matches - a.matches;
+        return (
+          b.blogpost.created_at.getTime() - a.blogpost.created_at.getTime()
+        );
+      });
+
+    const data = scored.map((item) => ({
+      ...addImageUrls(req, item.blogpost),
+      relevance: item.matches,
+    }));
+
+    res.status(200).json({ message: 'OK', data });
+  } catch (error: any) {
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ message: 'User not found' });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+}
+
 export {
   findAll,
   findOne,
@@ -256,4 +329,5 @@ export {
   sanitizeBlogpost,
   uploadCoverImage,
   deleteCoverImage,
+  findSuggested,
 };
