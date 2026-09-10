@@ -68,7 +68,7 @@ async function uploadLogoImage(req: Request, res: Response) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }
 }
@@ -93,7 +93,7 @@ async function deleteLogoImage(req: Request, res: Response) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }
 }
@@ -126,7 +126,7 @@ async function uploadCarImage(req: Request, res: Response) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }
 }
@@ -151,7 +151,7 @@ async function deleteCarImage(req: Request, res: Response) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }
 }
@@ -169,7 +169,7 @@ async function findAll(req: Request, res: Response) {
     );
     res.status(200).json({ message: "OK", data: escuderiasWithUrls });
   } catch (error: any) {
-    res.status(500).json({ message: "Internal server error" });
+    console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
   }
 }
 
@@ -187,7 +187,7 @@ async function findOne(req: Request, res: Response) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }
 }
@@ -210,7 +210,7 @@ async function add(req: Request, res: Response) {
     if (req.file) {
       deleteFile(req.file.path);
     }
-    console.error("Error creating escuderia:", error);
+    console.error(error);
     res
       .status(500)
       .json({ message: "Internal server error", error: error.message });
@@ -244,7 +244,7 @@ async function update(req: Request, res: Response) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: "Resource not found" });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }
 }
@@ -269,8 +269,10 @@ async function remove(req: Request, res: Response) {
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: "Resource not found" });
+    } else if (error.message && error.message.includes("foreign key constraint fails")) {
+      res.status(409).json({ message: "No se puede borrar la escudería porque tiene pilotos u otros registros asociados." });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }
 }
