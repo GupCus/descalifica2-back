@@ -68,6 +68,7 @@ import { nationalities } from './src/shared/nationalities.js';
 import { comentarioRouter } from './src/comentariopost/comentario.routes.js';
 import { iniciarBotTelegram } from './src/services/telegram/telegram.service.js';
 import { telegramrouter } from './src/services/telegram/telegram.routes.js';
+import { championshipRouter } from './src/championship/championship.routes.js';
 
 const app = express();
 
@@ -96,6 +97,7 @@ app.use('/api/openf1', of1router);
 app.use('/api/assets', assetRouter);
 app.use('/api/comentarios', comentarioRouter);
 app.use('/api/telegram', telegramrouter);
+app.use('/api/championship', championshipRouter);
 
 app.get('/api/nationalities', (req, res) => {
   res.status(200).json({ message: 'OK', data: nationalities });

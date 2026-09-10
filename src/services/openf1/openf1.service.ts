@@ -15,6 +15,8 @@ import { Championship_Drivers } from './openf1.types/championship_drivers.type.j
 import { Championship_Teams } from './openf1.types/championship_teams.type.js';
 import { Session_Result } from '../../sesion/session_result.entity.js';
 import { error } from 'node:console';
+import { Driver_Championship } from '../../championship/driver_championship.entity.js';
+import { Team_Championship } from '../../championship/team_championship.entity.js';
 
 const f1api = 'https://api.openf1.org/v1';
 const temporadas = [2023, 2024, 2025, 2026];
@@ -81,50 +83,177 @@ const asignarganadores = async (
   temporada: Temporada,
   ultimameeting = 'latest',
 ) => {
-  //Esto da un objeto con propiedad .driver_number, el cual es un campo de piloto(num), necesito buscar esa entidad piloto y asignarla a temporada.winner_driver
+  //PRIMERO: CAMPEONATO CONDUCTORES
+  //Pide todos los resultados actualizados a la meeting solicitada
   const resultadospilotos = (await fetchF1(
-    '/championship_drivers?meeting_key=' +
-      ultimameeting +
-      '&position_current=1',
+    '/championship_drivers?meeting_key=' + ultimameeting,
   )) as Championship_Drivers[];
 
-  if (resultadospilotos && resultadospilotos.length > 0) {
-    // Buscar en la bd de pilotos por su número
-    const pilotoGanador = await em.findOne(Piloto, {
-      num: resultadospilotos[0].driver_number,
-      season: temporada,
-    });
-    if (pilotoGanador) {
-      temporada.winner_driver = pilotoGanador;
-      console.log(
-        'El piloto ganador de la temporada ' +
-          temporada.year +
-          ' es ' +
-          pilotoGanador.name,
-      );
+  //Me guardo los pilotos y escuderias en memoria para no matar la bd a querys
+  let pilotos = await em.find(Piloto, {
+    season: temporada,
+  });
+
+  //Me guardo los pilotos y escuderias en memoria para no matar la bd a querys
+  let escuderias = await em.find(Escuderia, {});
+
+  //Si todo ok, sigo
+  if (
+    resultadospilotos &&
+    resultadospilotos.length > 0 &&
+    temporada.drivers_championship
+  ) {
+    //Inicia la coleccion para vaciarla
+    if (!temporada.drivers_championship.isInitialized()) {
+      await temporada.drivers_championship.init();
     }
+    temporada.drivers_championship.removeAll();
+
+    //Itera sobre los resultados
+    const resultadostramitados = [];
+    for (const r of resultadospilotos) {
+      let piloto = pilotos.find((p) => p.num === r.driver_number);
+
+      // Si el piloto no está en la bd, busco el piloto en la api
+      if (!piloto && r.driver_number) {
+        console.log(
+          `[!] Piloto ${r.driver_number} no encontrado. Cargando piloto desde la api...`,
+        );
+        const driver = (await fetchF1(
+          'drivers?driver_number=' + r.driver_number + '&meeting_key=latest', //Puse latest, tengo miedo que al poner una meeting key personalizada, no encuentre nada si no la corrió
+        )) as Drivers[];
+
+        //Lo encontró? Crearlo, no existe su escudería por alguna razón? Crearla, no tiene? derecho a la escuderia null
+        if (driver && driver.length > 0) {
+          const d = driver[0];
+          const teamName = d.team_name;
+          let escuderia;
+          if (teamName) {
+            escuderia = await em.findOne(Escuderia, { name: d.team_name });
+            if (!escuderia) {
+              escuderia = em.create(Escuderia, {
+                name: teamName,
+                racing_series: temporada.racing_series,
+                color: d.team_colour,
+              });
+              em.persist(escuderia);
+            }
+          } else {
+            escuderia = await em.findOne(Escuderia, { name: 'null' });
+            if (!escuderia) {
+              escuderia = em.create(Escuderia, {
+                name: 'null',
+                racing_series: temporada.racing_series,
+                color: '000000',
+              });
+              em.persist(escuderia);
+            }
+          }
+          piloto =
+            (await em.findOne(Piloto, {
+              name: d.full_name,
+              season: temporada,
+            })) || undefined;
+          if (!piloto) {
+            piloto = em.create(Piloto, {
+              name: d.full_name,
+              num: d.driver_number,
+              nationality: d.country_code,
+              team: escuderia,
+              profile_image: crearUrlHeadshot(d.headshot_url),
+              season: temporada,
+              racing_series: temporada.racing_series,
+            });
+            em.persist(piloto);
+          }
+        }
+      }
+
+      //TODO OK, CREAR RESULTADO
+      if (piloto) {
+        //Crea el resultado
+        const resultado = em.create(Driver_Championship, {
+          position: r.position_current,
+          points: r.points_current,
+          piloto: piloto,
+          season: temporada,
+        });
+        resultadostramitados.push(resultado);
+        //Si es el que tiene pos 1, es el winner driver
+        if (r.position_current === 1) {
+          temporada.winner_driver = piloto;
+          console.log(
+            'El que está ganando la temporada ' +
+              temporada.year +
+              ' es ' +
+              piloto.name,
+          );
+        }
+      }
+    }
+    temporada.drivers_championship.add(resultadostramitados);
   }
+  //SEGUNDA PARTE: TORNEO DE ESCUDERIAS
+  //Me ahorro los comentarios
   //Esto da un objeto con propiedad .team_name, el cual es un campo de escuderia(name), necesito buscar esa entidad escuderia y asignarla a temporada.winner_driver
   const resultadosescuderias = (await fetchF1(
-    '/championship_teams?meeting_key=' + ultimameeting + '&position_current=1',
+    '/championship_teams?meeting_key=' + ultimameeting,
   )) as Championship_Teams[];
 
-  if (resultadosescuderias && resultadosescuderias.length > 0) {
-    // Buscar en la bd de escuderías por su nombre
-    const escuderiaGanadora = await em.findOne(Escuderia, {
-      name: resultadosescuderias[0].team_name,
-    });
-    if (escuderiaGanadora) {
-      temporada.winner_team = escuderiaGanadora;
-      escuderiaGanadora.wccs.add(temporada);
-      console.log(
-        'La escudería ganadora de la temporada ' +
-          temporada.year +
-          ' es ' +
-          escuderiaGanadora.name,
-      );
+  if (
+    resultadosescuderias &&
+    resultadosescuderias.length > 0 &&
+    temporada.team_championship
+  ) {
+    //Inicia la coleccion para vaciarla
+    if (!temporada.team_championship.isInitialized()) {
+      await temporada.team_championship.init();
     }
+    temporada.team_championship.removeAll();
+
+    //Itera
+    const resultadostramitados = [];
+    for (const r of resultadosescuderias) {
+      let escuderia = escuderias.find((e) => e.name === r.team_name);
+
+      // Si no está la escudería (por alguna razón extraña), la crea
+      if (!escuderia && r.team_name) {
+        console.log(`[!] Escudería ${r.team_name} no encontrada. Creando...`);
+
+        escuderia = em.create(Escuderia, {
+          name: r.team_name,
+          racing_series: temporada.racing_series,
+          color: '000000',
+        });
+        em.persist(escuderia);
+      }
+      //Todo ok, crea el resultado, es el numero 1? Es el ganador entonces
+      if (escuderia) {
+        const resultado = em.create(Team_Championship, {
+          position: r.position_current,
+          points: r.points_current,
+          escuderia: escuderia,
+          season: temporada,
+        });
+        resultadostramitados.push(resultado);
+        if (r.position_current === 1) {
+          const escuderiaGanadora = escuderia;
+          if (escuderiaGanadora) {
+            temporada.winner_team = escuderiaGanadora;
+            escuderiaGanadora.wccs.add(temporada);
+            console.log(
+              'La escudería ganadora de la temporada ' +
+                temporada.year +
+                ' es ' +
+                escuderiaGanadora.name,
+            );
+          }
+        }
+      }
+    }
+    temporada.team_championship.add(resultadostramitados);
   }
+  em.flush();
 };
 
 //Funcion para cargar a la bd todos los pilotos que provee openf1
@@ -141,41 +270,51 @@ const CargarPilotosyEscuderias = async (
     '/drivers?session_key=' + session_key,
   )) as Drivers[];
   for (const d of drivers) {
-    //Hay algunos conductores que no tienen escudería, por defecto, los descartamos.
+    //Hay algunos conductores que no tienen escudería, lo mandamos a la escuderia null.
     const teamName = d.team_name;
+    let escuderia;
     if (teamName) {
-      let escuderia = await em.findOne(Escuderia, { name: d.team_name });
+      escuderia = await em.findOne(Escuderia, { name: d.team_name });
       if (!escuderia) {
         escuderia = em.create(Escuderia, {
           name: teamName,
           racing_series: temporada.racing_series,
           color: d.team_colour,
         });
+        em.persist(escuderia);
       }
-      em.persist(escuderia);
-
-      let piloto = await em.findOne(Piloto, {
-        name: d.full_name,
-        season: temporada,
-      });
-
-      if (!piloto) {
-        piloto = em.create(Piloto, {
-          name: d.full_name,
-          num: d.driver_number,
-          nationality: d.country_code,
-          team: escuderia,
-          profile_image: crearUrlHeadshot(d.headshot_url),
-          season: temporada,
+    } else {
+      escuderia = await em.findOne(Escuderia, { name: 'null' });
+      if (!escuderia) {
+        escuderia = em.create(Escuderia, {
+          name: 'null',
           racing_series: temporada.racing_series,
+          color: '000000',
         });
-        em.persist(piloto);
-      } else {
-        //Si hubo algun cambio en la escuderia o las imagenes del piloto, las actualiza
-        if (piloto.team.name !== d.team_name) piloto.team = escuderia;
-        if (piloto.profile_image !== crearUrlHeadshot(d.headshot_url))
-          piloto.profile_image = crearUrlHeadshot(d.headshot_url);
+        em.persist(escuderia);
       }
+    }
+    let piloto = await em.findOne(Piloto, {
+      name: d.full_name,
+      season: temporada,
+    });
+
+    if (!piloto) {
+      piloto = em.create(Piloto, {
+        name: d.full_name,
+        num: d.driver_number,
+        nationality: d.country_code,
+        team: escuderia,
+        profile_image: crearUrlHeadshot(d.headshot_url),
+        season: temporada,
+        racing_series: temporada.racing_series,
+      });
+      em.persist(piloto);
+    } else {
+      //Si hubo algun cambio en la escuderia o las imagenes del piloto, las actualiza
+      if (piloto.team.name !== d.team_name) piloto.team = escuderia;
+      if (piloto.profile_image !== crearUrlHeadshot(d.headshot_url))
+        piloto.profile_image = crearUrlHeadshot(d.headshot_url);
     }
   }
   await em.flush();

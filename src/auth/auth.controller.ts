@@ -1,13 +1,13 @@
-import { orm } from "../shared/db/orm.js";
+import { orm } from '../shared/db/orm.js';
 import {
   AuthenticatedRequest,
   LoginResponse,
   RegisterRequest,
-} from "./auth.types.js";
-import { Request, Response } from "express";
-import { Usuario } from "../usuario/usuario.entity.js";
-import jwt, { SignOptions } from "jsonwebtoken";
-import validator from "validator";
+} from './auth.types.js';
+import { Request, Response } from 'express';
+import { Usuario } from '../usuario/usuario.entity.js';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import validator from 'validator';
 
 async function register(req: Request, res: Response) {
   try {
@@ -37,7 +37,7 @@ async function register(req: Request, res: Response) {
     if (telegram_username) {
       if (/\s/.test(telegram_username.trim())) {
         return res.status(400).json({
-          message: "El username de Telegram no debe contener espacios.",
+          message: 'El username de Telegram no debe contener espacios.',
         });
       }
     }
@@ -45,20 +45,20 @@ async function register(req: Request, res: Response) {
     //verificar que el mail sea válido.
     if (!validator.isEmail(email)) {
       return res.status(400).json({
-        message: "Introduzca un mail válido.",
+        message: 'Introduzca un mail válido.',
       });
     }
 
     //validación de longitud de contraseña y usuario
     if (password.length < 6) {
       return res.status(400).json({
-        message: "La contraseña requiere al menos 6 caracteres.",
+        message: 'La contraseña requiere al menos 6 caracteres.',
       });
     }
 
     if (username.length < 6) {
       return res.status(400).json({
-        message: "El nombre de usuario debe tener al menos 6 caracteres.",
+        message: 'El nombre de usuario debe tener al menos 6 caracteres.',
       });
     }
 
@@ -67,7 +67,7 @@ async function register(req: Request, res: Response) {
 
     if (isNaN(nacimiento.getTime())) {
       return res.status(400).json({
-        message: "Fecha de nacimiento mal escrita (AAAA/MM/DD).",
+        message: 'Fecha de nacimiento mal escrita (AAAA/MM/DD).',
       });
     }
     const today = new Date();
@@ -84,12 +84,12 @@ async function register(req: Request, res: Response) {
     if (nacimiento > minimunAge) {
       return res.status(400).json({
         message:
-          "Debes tener al menos 13 (trece) años para registrarte en este foro.",
+          'Debes tener al menos 13 (trece) años para registrarte en este foro.',
       });
     } else if (today.getFullYear() - nacimiento.getFullYear() > 100) {
       return res.status(400).json({
         message:
-          "Lamentablemente 100 años nos parecen un montón para que te registrés en el foro.",
+          'Lamentablemente 100 años nos parecen un montón para que te registrés en el foro.',
       });
     }
 
@@ -98,14 +98,23 @@ async function register(req: Request, res: Response) {
     const existeUsuarioMail = await em.findOne(Usuario, { email: email });
     if (existeUsuarioMail) {
       return res.status(409).json({
-        message: "El correo provisto ya está registrado.",
+        message: 'El correo provisto ya está registrado.',
       });
     }
 
     const existeUsername = await em.findOne(Usuario, { username: username });
     if (existeUsername) {
       return res.status(409).json({
-        message: "El nombre de usuario ya está en uso.",
+        message: 'El nombre de usuario ya está en uso.',
+      });
+    }
+
+    const existecuentatelegram = await em.findOne(Usuario, {
+      telegram_username: telegram_username,
+    });
+    if (existecuentatelegram) {
+      return res.status(409).json({
+        message: 'El usuario de telegram está registrado en otra cuenta.',
       });
     }
 
@@ -114,7 +123,7 @@ async function register(req: Request, res: Response) {
       username: username,
       password: password,
       date_of_birth: date_of_birth,
-      user_type: "user",
+      user_type: 'user',
       name: name,
       surname: surname?.trim() || undefined,
       telegram_username: telegram_username?.trim() || undefined,
@@ -131,7 +140,7 @@ async function register(req: Request, res: Response) {
 
     if (!usuario || !usuario.id) {
       return res.status(500).json({
-        message: "Ocurrió un error al crear el usuario.",
+        message: 'Ocurrió un error al crear el usuario.',
       });
     }
 
@@ -161,9 +170,9 @@ async function register(req: Request, res: Response) {
 
     res.status(201).json(response);
   } catch (error) {
-    console.error("Error en registro:", error);
+    console.error('Error en registro:', error);
     res.status(500).json({
-      message: "Error registrando al usuario",
+      message: 'Error registrando al usuario',
     });
   }
 }
@@ -175,12 +184,12 @@ async function checkToken(req: AuthenticatedRequest, res: Response) {
     const usuario = await em.findOne(Usuario, { id: req.user?.id });
 
     if (!usuario) {
-      return res.status(401).json({ message: "Usuario no encontrado" });
+      return res.status(401).json({ message: 'Usuario no encontrado' });
     }
 
     // Devolver datos actualizados de la BD, no del token
     res.status(200).json({
-      message: "Token válido",
+      message: 'Token válido',
       user: {
         id: usuario.id,
         username: usuario.username,
@@ -190,7 +199,7 @@ async function checkToken(req: AuthenticatedRequest, res: Response) {
     });
   } catch (error) {
     console.error(`checkToken error: ${error}`);
-    res.status(500).json({ message: "Internal server error." });
+    res.status(500).json({ message: 'Internal server error.' });
   }
 }
 
@@ -210,7 +219,7 @@ async function login(req: AuthenticatedRequest, res: Response) {
 
       if (!mail || !password) {
         return res.status(400).json({
-          message: "Por favor complete todos los campos.",
+          message: 'Por favor complete todos los campos.',
         });
       }
     }
@@ -221,8 +230,8 @@ async function login(req: AuthenticatedRequest, res: Response) {
       // Si es un login de Google, le devolvemos los datos para que el front lo registra
       if (res.locals.googlePayload) {
         return res.status(404).json({
-          message: "Usuario de gauth no registrado. Redirigir al registro...",
-          action: "REQUIERE_REGISTRO",
+          message: 'Usuario de gauth no registrado. Redirigir al registro...',
+          action: 'REQUIERE_REGISTRO',
           prefillData: {
             email: res.locals.googlePayload.email,
             name: res.locals.googlePayload.given_name,
@@ -232,13 +241,13 @@ async function login(req: AuthenticatedRequest, res: Response) {
         });
       }
       return res.status(401).json({
-        message: "El usuario no existe.",
+        message: 'El usuario no existe.',
       });
     }
 
     if (password && !(await usuario.compare_password(password))) {
       return res.status(401).json({
-        message: "Contraseña incorrecta.",
+        message: 'Contraseña incorrecta.',
       });
     }
     const payload = {
@@ -268,7 +277,7 @@ async function login(req: AuthenticatedRequest, res: Response) {
     res.status(200).json(response);
   } catch (error) {
     console.error(`ERROR LOGIN: ${error}`);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 
