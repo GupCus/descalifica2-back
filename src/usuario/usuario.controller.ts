@@ -184,6 +184,43 @@ async function update(req: Request, res: Response) {
       req.body.sanitizedInput.avatar = getRelativePath(req.file.path);
     }
 
+    const { email, username, telegram_username } = req.body.sanitizedInput;
+
+    if (email) {
+      const existeEmail = await em.findOne(Usuario, { email, id: { $ne: id } });
+      if (existeEmail) {
+        return res
+          .status(409)
+          .json({ message: 'El correo provisto ya está registrado.' });
+      }
+    }
+
+    if (username) {
+      const existeUsername = await em.findOne(Usuario, {
+        username,
+        id: { $ne: id },
+      });
+      if (existeUsername) {
+        return res
+          .status(409)
+          .json({ message: 'El nombre de usuario ya está en uso.' });
+      }
+    }
+
+    if (telegram_username) {
+      const existeTelegram = await em.findOne(Usuario, {
+        telegram_username,
+        id: { $ne: id },
+      });
+      if (existeTelegram) {
+        return res
+          .status(409)
+          .json({
+            message: 'El usuario de telegram está registrado en otra cuenta.',
+          });
+      }
+    }
+
     delete req.body.sanitizedInput.id;
 
     em.assign(usuario, req.body.sanitizedInput);
@@ -196,9 +233,7 @@ async function update(req: Request, res: Response) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: 'Resource not found' });
     } else {
-      res
-        .status(500)
-        .json({ message: error.message || 'Internal server error' });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
