@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from "express";
-import { Carrera } from "./carrera.entity.js";
-import { orm } from "../shared/db/orm.js";
-import { NotFoundError } from "@mikro-orm/core";
-import { Sesion } from "../sesion/sesion.entity.js";
+import { Request, Response, NextFunction } from 'express';
+import { Carrera } from './carrera.entity.js';
+import { orm } from '../shared/db/orm.js';
+import { NotFoundError } from '@mikro-orm/core';
+import { Sesion } from '../sesion/sesion.entity.js';
 
 const em = orm.em;
 function sanitizeCarrera(req: Request, res: Response, next: NextFunction) {
@@ -25,23 +25,41 @@ function sanitizeCarrera(req: Request, res: Response, next: NextFunction) {
 //Traer todas las carreras
 async function findAll(req: Request, res: Response) {
   try {
-    const carreras = await em.find(
-      Carrera,
-      {},
-      {
-        populate: [
-          "track",
-          "season",
-          "sessions",
-          "season.racing_series",
-          "sessions.session_result",
-          "sessions.session_result.piloto",
-        ],
-      },
-    );
-    res.status(200).json({ message: "OK", data: carreras });
+    let carreras;
+    if (req.query.year) {
+      carreras = await em.find(
+        Carrera,
+        { season: { year: Number.parseInt(req.query.year as string) } },
+        {
+          populate: [
+            'track',
+            'season',
+            'sessions',
+            'season.racing_series',
+            'sessions.session_result',
+            'sessions.session_result.piloto',
+          ],
+        },
+      );
+    } else {
+      carreras = await em.find(
+        Carrera,
+        {},
+        {
+          populate: [
+            'track',
+            'season',
+            'sessions',
+            'season.racing_series',
+            'sessions.session_result',
+            'sessions.session_result.piloto',
+          ],
+        },
+      );
+    }
+    res.status(200).json({ message: 'OK', data: carreras });
   } catch (error: any) {
-    res.status(500).json({ message: "message: error.message" });
+    res.status(500).json({ message: 'Hubo un error en el servidor' });
   }
 }
 async function findOne(req: Request, res: Response) {
@@ -52,20 +70,20 @@ async function findOne(req: Request, res: Response) {
       { id },
       {
         populate: [
-          "track",
-          "season",
-          "sessions",
-          "sessions.session_result",
-          "sessions.session_result.piloto",
+          'track',
+          'season',
+          'sessions',
+          'sessions.session_result',
+          'sessions.session_result.piloto',
         ],
       },
     );
-    res.status(200).json({ message: "OK", data: carrera });
+    res.status(200).json({ message: 'OK', data: carrera });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
@@ -81,10 +99,10 @@ async function add(req: Request, res: Response) {
 
     if (Array.isArray(sessionsInput) && sessionsInput.length > 0) {
       for (const s of sessionsInput) {
-        if (typeof s === "object" && s !== null) {
+        if (typeof s === 'object' && s !== null) {
           // Crear nueva session y asociarla a la carrera
           em.create(Sesion, { ...s, carrera });
-        } else if (typeof s === "number" || /^\d+$/.test(s)) {
+        } else if (typeof s === 'number' || /^\d+$/.test(s)) {
           // si viene un id,busca la session y la asocia.
           const found_sesion = await em.findOne(Sesion, { id: Number(s) });
           if (found_sesion) {
@@ -95,13 +113,13 @@ async function add(req: Request, res: Response) {
       await em.flush();
     }
     // Populate las relaciones para mostrar información completa
-    await em.populate(carrera, ["track", "season", "sessions"]);
+    await em.populate(carrera, ['track', 'season', 'sessions']);
     res
       .status(201)
-      .json({ message: "Carrera created successfully", data: carrera });
+      .json({ message: 'Carrera created successfully', data: carrera });
   } catch (error: any) {
-    console.error("Error creating carrera:", error);
-    res.status(500).json({ message: error.message });
+    console.error('Error creating carrera:', error);
+    res.status(500).json({ message: 'Hubo un error en el servidor' });
   }
 }
 
@@ -113,12 +131,12 @@ async function update(req: Request, res: Response) {
     await em.flush();
     res
       .status(200)
-      .json({ message: "Carrera updated successfully", data: carrera });
+      .json({ message: 'Carrera updated successfully', data: carrera });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
@@ -128,12 +146,12 @@ async function remove(req: Request, res: Response) {
     const id = Number.parseInt(req.params.id);
     const carrera = await em.findOneOrFail(Carrera, { id });
     await em.removeAndFlush(carrera);
-    res.status(200).json({ message: "Carrera deleted successfully" });
+    res.status(200).json({ message: 'Carrera deleted successfully' });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
