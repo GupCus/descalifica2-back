@@ -97,7 +97,7 @@ async function update(req: Request, res: Response) {
     const sesion = await em.findOneOrFail(Sesion, { id });
     em.assign(sesion, req.body.sanitizedInput);
     await em.flush();
-    res.status(204).json({ message: "Updated" });
+    res.status(200).json({ message: "Updated", data: sesion });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: "Resource not found" });

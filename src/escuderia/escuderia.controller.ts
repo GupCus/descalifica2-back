@@ -236,7 +236,7 @@ async function update(req: Request, res: Response) {
       deleteFile(oldLogoImage);
     }
 
-    res.status(204).json({ message: "Updated" });
+    res.status(200).json({ message: "Updated", data: addImageUrls(req, escuderia) });
   } catch (error: any) {
     if (req.file) {
       deleteFile(req.file.path);
