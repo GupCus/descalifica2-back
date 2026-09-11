@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 import { Usuario } from '../usuario/usuario.entity.js';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import validator from 'validator';
+import { getRelativePath } from '../shared/upload/upload.utils.js';
 
 async function register(req: Request, res: Response) {
   try {
@@ -132,7 +133,7 @@ async function register(req: Request, res: Response) {
       fav_circuit: fav_circuit?.trim() || undefined,
       bio: bio?.trim() || undefined,
       avatar: req.file
-        ? `/uploads/avatars/${req.file.filename}`
+        ? getRelativePath(req.file.path)
         : avatar_url?.trim() || undefined,
     });
 
@@ -249,6 +250,14 @@ async function login(req: AuthenticatedRequest, res: Response) {
       return res.status(401).json({
         message: 'Contraseña incorrecta.',
       });
+    }
+
+    if (
+      res.locals.googlePayload?.picture &&
+      (!usuario.avatar || usuario.avatar.startsWith('/uploads/'))
+    ) {
+      usuario.avatar = res.locals.googlePayload.picture;
+      await em.flush();
     }
     const payload = {
       id: usuario.id,

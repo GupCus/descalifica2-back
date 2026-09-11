@@ -6,6 +6,13 @@ import { UPLOADS_BASE } from "./multer.config.js";
  * Elimina un archivo del disco dado su path relativo a UPLOADS_BASE
  */
 export async function deleteFile(relativePath: string): Promise<void> {
+  if (
+    !relativePath ||
+    relativePath.startsWith("http://") ||
+    relativePath.startsWith("https://")
+  ) {
+    return;
+  }
   try {
     const fullPath = path.join(UPLOADS_BASE, relativePath);
     await fs.unlink(fullPath);
@@ -26,6 +33,12 @@ export function buildImageUrl(
   relativePath: string | undefined | null
 ): string | null {
   if (!relativePath) return null;
+  if (
+    relativePath.startsWith("http://") ||
+    relativePath.startsWith("https://")
+  ) {
+    return relativePath;
+  }
   const host = req.get("host") || "localhost:3000";
   return `${req.protocol}://${host}/uploads/${relativePath}`;
 }
@@ -34,5 +47,5 @@ export function buildImageUrl(
  * Obtiene la ruta relativa (respecto a UPLOADS_BASE) desde un path absoluto de Multer
  */
 export function getRelativePath(absolutePath: string): string {
-  return path.relative(UPLOADS_BASE, absolutePath);
+  return path.relative(UPLOADS_BASE, absolutePath).replace(/\\/g, "/");
 }

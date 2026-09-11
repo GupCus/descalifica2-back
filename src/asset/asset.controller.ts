@@ -16,8 +16,11 @@ export const getAsset = (req: Request, res: Response) => {
     return res.status(400).json({ message: "Ruta de archivo inválida." });
   }
 
+  // Si trae el prefijo 'uploads/', lo removemos ya que UPLOADS_BASE ya es la carpeta de uploads
+  const cleanRelativePath = relativePath.replace(/^uploads\//, "");
+
   // Construir la ruta absoluta del archivo
-  const absolutePath = path.join(UPLOADS_BASE, relativePath);
+  const absolutePath = path.join(UPLOADS_BASE, cleanRelativePath);
 
   // Verificar si el archivo existe
   if (!fs.existsSync(absolutePath)) {
