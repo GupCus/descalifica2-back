@@ -145,7 +145,7 @@ export function sanitizeRegister(
     fav_team: req.body.fav_team,
     fav_circuit: req.body.fav_circuit,
     bio: req.body.bio,
-    avatar_url: req.body.avatar_url,
+    avatar_url: req.body.avatar_url || req.body.avatar,
   };
 
   Object.keys(req.body.sanitizedInput).forEach((key) => {
