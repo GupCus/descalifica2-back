@@ -207,17 +207,15 @@ async function update(req: Request, res: Response) {
       }
     }
 
-    if (telegram_username) {
+    if (telegram_username && telegram_username.length > 0) {
       const existeTelegram = await em.findOne(Usuario, {
         telegram_username,
         id: { $ne: id },
       });
       if (existeTelegram) {
-        return res
-          .status(409)
-          .json({
-            message: 'El usuario de telegram está registrado en otra cuenta.',
-          });
+        return res.status(409).json({
+          message: 'El usuario de telegram está registrado en otra cuenta.',
+        });
       }
     }
 

@@ -109,10 +109,13 @@ async function register(req: Request, res: Response) {
       });
     }
 
-    const existecuentatelegram = await em.findOne(Usuario, {
-      telegram_username: telegram_username,
-    });
-    if (existecuentatelegram) {
+    if (
+      telegram_username &&
+      telegram_username.length > 0 &&
+      (await em.findOne(Usuario, {
+        telegram_username: telegram_username,
+      }))
+    ) {
       return res.status(409).json({
         message: 'El usuario de telegram está registrado en otra cuenta.',
       });
