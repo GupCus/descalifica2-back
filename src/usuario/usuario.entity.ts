@@ -38,6 +38,10 @@ export class Usuario extends baseEntity {
   telegram_username?: string;
   @Property({ nullable: true, unique: false })
   telegram_id?: string;
+  @Property({ nullable: true })
+  reset_password_token?: string;
+  @Property({ nullable: true })
+  reset_password_expires?: Date;
   @OneToMany(() => Blogpost, (blogpost) => blogpost.author)
   posts = new Collection<Blogpost>(this);
   @OneToMany(() => ComentarioPost, (comentario) => comentario.author)
