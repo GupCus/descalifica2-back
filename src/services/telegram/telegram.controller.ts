@@ -49,3 +49,69 @@ export const generarcodigo = async (
       .json({ message: "Error interno", error: error.message });
   }
 };
+
+export const verificarVinculacion = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "No autorizado" });
+    }
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { id: req.user.id });
+
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    if (!usuario.telegram_id) {
+      return res.status(200).json({ vinculado: false, pendiente: false });
+    }
+
+    if (usuario.telegram_id.includes("otp")) {
+      return res.status(200).json({ vinculado: false, pendiente: true });
+    }
+
+    return res.status(200).json({
+      vinculado: true,
+      pendiente: false,
+      telegram_username: usuario.telegram_username || null,
+    });
+  } catch (error: any) {
+    console.error("Error verificando vinculación:", error);
+    return res
+      .status(500)
+      .json({ message: "Error interno", error: error.message });
+  }
+};
+
+export const desvincularTelegram = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "No autorizado" });
+    }
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { id: req.user.id });
+
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    usuario.telegram_id = null as any;
+    usuario.telegram_username = null as any;
+    await em.flush();
+
+    return res.status(200).json({
+      message: "Cuenta de Telegram desvinculada correctamente.",
+    });
+  } catch (error: any) {
+    console.error("Error desvinculando Telegram:", error);
+    return res
+      .status(500)
+      .json({ message: "Error interno", error: error.message });
+  }
+};

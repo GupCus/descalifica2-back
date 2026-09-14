@@ -122,6 +122,10 @@ async function register(req: Request, res: Response) {
       });
     }
 
+    const codigoTelegram = telegram_username?.trim()
+      ? 'otp' + Math.floor(Math.random() * 10000).toString().padStart(4, '0')
+      : undefined;
+
     const usuario = em.create(Usuario, {
       email: email,
       username: username,
@@ -131,6 +135,7 @@ async function register(req: Request, res: Response) {
       name: name,
       surname: surname?.trim() || undefined,
       telegram_username: telegram_username?.trim() || undefined,
+      telegram_id: codigoTelegram,
       fav_driver: fav_driver?.trim() || undefined,
       fav_team: fav_team?.trim() || undefined,
       fav_circuit: fav_circuit?.trim() || undefined,

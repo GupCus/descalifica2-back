@@ -69,6 +69,7 @@ import { comentarioRouter } from './src/comentariopost/comentario.routes.js';
 import { iniciarBotTelegram } from './src/services/telegram/telegram.service.js';
 import { telegramrouter } from './src/services/telegram/telegram.routes.js';
 import { championshipRouter } from './src/championship/championship.routes.js';
+import { iniciarCronJobs } from './src/services/cron/cron.service.js';
 
 const app = express();
 
@@ -146,6 +147,7 @@ app.use((_, res) => {
 await syncSchema();
 await actualizarresultados();
 iniciarBotTelegram();
+iniciarCronJobs();
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
