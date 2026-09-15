@@ -2,16 +2,28 @@ import nodemailer, { type Transporter } from 'nodemailer';
 
 let transporter: Transporter | null = null;
 
+function parseSender(fromStr?: string): { name: string; email: string } {
+  const defaultSender = {
+    name: 'Descalifica2',
+    email: 'ignaciotaborda2014@gmail.com',
+  };
+
+  if (!fromStr) return defaultSender;
+
+  const match = fromStr.match(/^(?:"?([^"]*)"?\s)?(?:<?(.+@[^>]+)>?)$/);
+  if (match) {
+    return {
+      name: match[1]?.trim() || defaultSender.name,
+      email: match[2]?.trim() || defaultSender.email,
+    };
+  }
+
+  return { name: defaultSender.name, email: fromStr };
+}
+
 async function getTransporter(): Promise<Transporter> {
   if (transporter) {
     return transporter;
-  }
-
-  // Validar que las credenciales existan
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    throw new Error(
-      '[EmailService] Faltan configurar las variables SMTP_USER y SMTP_PASS.',
-    );
   }
 
   const port = Number(process.env.SMTP_PORT) || 587;
@@ -25,14 +37,10 @@ async function getTransporter(): Promise<Transporter> {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-    connectionTimeout: 8000, // 8s máx para conectar
-    greetingTimeout: 8000,   // 8s máx esperando respuesta
-    socketTimeout: 10000,    // 10s máx de inactividad
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
   });
-
-  console.log(
-    `[EmailService] Servidor SMTP configurado: ${process.env.SMTP_HOST || 'smtp-relay.brevo.com'}:${port} (secure: ${isSecure})`,
-  );
 
   return transporter;
 }
@@ -44,13 +52,7 @@ export async function sendPasswordResetEmail({
   to: string;
   resetUrl: string;
 }) {
-  try {
-    const mailer = await getTransporter();
-
-    const from =
-      process.env.EMAIL_FROM || '"Descalifica2" <no-reply@descalifica2.com>';
-
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #1a1a1a; color: #ffffff; border-radius: 8px;">
       <div style="text-align: center; margin-bottom: 24px;">
         <h1 style="color: #e10600; margin: 0; font-size: 26px;">Descalifica2</h1>
@@ -80,20 +82,71 @@ export async function sendPasswordResetEmail({
     </div>
   `;
 
+  const text = `Recibimos una solicitud para restablecer tu contraseña en Descalifica2. Visita el siguiente enlace para continuar (expira en 15 minutos): ${resetUrl}`;
+
+  // Prioridad 1: Brevo HTTP API (Puerto 443 HTTPS - 100% inmune a bloqueos de puertos en Railway)
+  const brevoApiKey =
+    process.env.BREVO_API_KEY ||
+    (process.env.SMTP_PASS?.startsWith('xkeysib-')
+      ? process.env.SMTP_PASS
+      : undefined);
+
+  if (brevoApiKey) {
+    try {
+      console.log('[EmailService] Enviando correo mediante Brevo HTTP API (HTTPS)...');
+      const sender = parseSender(process.env.EMAIL_FROM);
+
+      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          accept: 'application/json',
+          'api-key': brevoApiKey,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender,
+          to: [{ email: to }],
+          subject: 'Recuperación de contraseña - Descalifica2',
+          htmlContent: html,
+          textContent: text,
+        }),
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(
+          `Error ${response.status} en Brevo API: ${JSON.stringify(errJson)}`,
+        );
+      }
+
+      const result = await response.json();
+      console.log(`📧 Correo enviado con éxito (vía Brevo API) a: ${to}`, result);
+      return result;
+    } catch (apiError: any) {
+      console.error('[EmailService] Falló el envío por Brevo API:', apiError.message || apiError);
+      throw apiError;
+    }
+  }
+
+  // Prioridad 2: SMTP con Nodemailer (como fallback o para otros servidores)
+  try {
+    const mailer = await getTransporter();
+    const from =
+      process.env.EMAIL_FROM || '"Descalifica2" <no-reply@descalifica2.com>';
+
     const info = await mailer.sendMail({
       from,
       to,
       subject: 'Recuperación de contraseña - Descalifica2',
-      text: `Recibimos una solicitud para restablecer tu contraseña en Descalifica2. Visita el siguiente enlace para continuar (expira en 15 minutos): ${resetUrl}`,
+      text,
       html,
     });
 
     console.log(`📧 Correo de recuperación enviado a: ${to}`);
     return info;
-  } catch (error: any) {
-    // Si falló, reseteamos la instancia para no reusar una conexión muerta
+  } catch (smtpError: any) {
     transporter = null;
-    console.error('[EmailService] Error al enviar email:', error.message || error);
-    throw error;
+    console.error('[EmailService] Error al enviar email vía SMTP:', smtpError.message || smtpError);
+    throw smtpError;
   }
 }
