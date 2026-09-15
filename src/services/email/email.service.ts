@@ -7,33 +7,32 @@ async function getTransporter(): Promise<Transporter> {
     return transporter;
   }
 
-  // Si hay credenciales en el .env (modo producción / SMTP real)
-  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-    transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: Number(process.env.SMTP_PORT) || 465,
-      secure: process.env.SMTP_SECURE !== 'false', // true por defecto para puerto 465
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-    console.log('[EmailService] Usando servidor SMTP configurado en .env');
-  } else {
-    // Si no hay credenciales (desarrollo local) -> Ethereal Email
-    console.log('[EmailService] Creando cuenta de prueba en Ethereal Email...');
-    const testAccount = await nodemailer.createTestAccount();
-    transporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass,
-      },
-    });
-    console.log('[EmailService] Conectado a Ethereal (Sandbox para pruebas)');
+  // Validar que las credenciales existan
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    throw new Error(
+      '[EmailService] Faltan configurar las variables SMTP_USER y SMTP_PASS.',
+    );
   }
+
+  const port = Number(process.env.SMTP_PORT) || 587;
+  const isSecure = process.env.SMTP_SECURE === 'true' || port === 465;
+
+  transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
+    port,
+    secure: isSecure,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    connectionTimeout: 8000, // 8s máx para conectar
+    greetingTimeout: 8000,   // 8s máx esperando respuesta
+    socketTimeout: 10000,    // 10s máx de inactividad
+  });
+
+  console.log(
+    `[EmailService] Servidor SMTP configurado: ${process.env.SMTP_HOST || 'smtp-relay.brevo.com'}:${port} (secure: ${isSecure})`,
+  );
 
   return transporter;
 }
@@ -45,12 +44,13 @@ export async function sendPasswordResetEmail({
   to: string;
   resetUrl: string;
 }) {
-  const mailer = await getTransporter();
+  try {
+    const mailer = await getTransporter();
 
-  const from =
-    process.env.EMAIL_FROM || '"Descalifica2" <no-reply@descalifica2.com>';
+    const from =
+      process.env.EMAIL_FROM || '"Descalifica2" <no-reply@descalifica2.com>';
 
-  const html = `
+    const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #1a1a1a; color: #ffffff; border-radius: 8px;">
       <div style="text-align: center; margin-bottom: 24px;">
         <h1 style="color: #e10600; margin: 0; font-size: 26px;">Descalifica2</h1>
@@ -80,24 +80,20 @@ export async function sendPasswordResetEmail({
     </div>
   `;
 
-  const info = await mailer.sendMail({
-    from,
-    to,
-    subject: 'Recuperación de contraseña - Descalifica2',
-    text: `Recibimos una solicitud para restablecer tu contraseña en Descalifica2. Visita el siguiente enlace para continuar (expira en 15 minutos): ${resetUrl}`,
-    html,
-  });
+    const info = await mailer.sendMail({
+      from,
+      to,
+      subject: 'Recuperación de contraseña - Descalifica2',
+      text: `Recibimos una solicitud para restablecer tu contraseña en Descalifica2. Visita el siguiente enlace para continuar (expira en 15 minutos): ${resetUrl}`,
+      html,
+    });
 
-  const previewUrl = nodemailer.getTestMessageUrl(info);
-  if (previewUrl) {
-    console.log('====================================================');
-    console.log('📧 [Ethereal Email] Enlace para ver el correo de prueba:');
-    console.log(previewUrl);
-    console.log(`🔗 Enlace directo de reseteo: ${resetUrl}`);
-    console.log('====================================================');
-  } else {
     console.log(`📧 Correo de recuperación enviado a: ${to}`);
+    return info;
+  } catch (error: any) {
+    // Si falló, reseteamos la instancia para no reusar una conexión muerta
+    transporter = null;
+    console.error('[EmailService] Error al enviar email:', error.message || error);
+    throw error;
   }
-
-  return info;
 }
