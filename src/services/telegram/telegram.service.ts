@@ -4,6 +4,7 @@ import { orm } from '../../shared/db/orm.js';
 import 'dotenv/config';
 import { Usuario } from '../../usuario/usuario.entity.js';
 import { Blogpost } from '../../blogpost/blogpost.entity.js';
+import { Sesion } from '../../sesion/sesion.entity.js';
 
 const bot = new Bot(process.env.TELEGRAM_BOT!);
 
@@ -60,6 +61,51 @@ bot.command('start', async (ctx) => {
     }
   }
 });
+
+export async function enviarNotificacionSesion(sesionId: number) {
+  const em = orm.em.fork();
+  const sesion = await em.findOne(
+    Sesion,
+    { id: sesionId },
+    { populate: ['race'] },
+  );
+
+  if (sesion) {
+    if (sesion.notificado_30min) {
+      console.log(`La sesión ${sesionId} ya ha sido notificada.`);
+      return;
+    } else {
+      const mensaje = `🏁 ¡Atención! La "${sesion.name}" del ${sesion.race.name} comenzará a las ${sesion.start_time} .\n\n`;
+      sesion.notificado_30min = true;
+
+      await enviarMensajeMasivo(mensaje);
+      await em.flush();
+      console.log(`Notificación enviada para la sesión ${sesionId}.`);
+    }
+  } else {
+    console.log(`No se encontró la sesión ${sesionId}.`);
+  }
+}
+
+const timers = new Map<number, NodeJS.Timeout>();
+
+export async function programarNotificacionSesion(
+  sesionId: number,
+  delay: number,
+) {
+  // Si ya había un timer para esa sesión, lo cancelamos (ej: se editó la hora)
+  if (timers.has(sesionId)) {
+    clearTimeout(timers.get(sesionId)!);
+    timers.delete(sesionId);
+  }
+
+  const timer = setTimeout(() => {
+    timers.delete(sesionId); // al dispararse, se limpia solo del Map
+    void enviarNotificacionSesion(sesionId);
+  }, delay);
+
+  timers.set(sesionId, timer); // guardamos la referencia
+}
 
 //Funcion para enviar posts de interes a usuarios
 export async function enviarMensajeMasivo(mensaje: string) {
@@ -130,7 +176,7 @@ export async function enviarTopPostSemanal() {
     return;
   }
 
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'; // despues se pone el link de la pagina
   const mensaje =
     `🏁 ¡Post destacado de la semana!\n\n` +
     `👀 ¡Pasa a echar un vistazo!\n\n` +
