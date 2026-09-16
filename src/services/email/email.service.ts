@@ -1,7 +1,3 @@
-import nodemailer, { type Transporter } from 'nodemailer';
-
-let transporter: Transporter | null = null;
-
 function parseSender(fromStr?: string): { name: string; email: string } {
   const defaultSender = {
     name: 'Descalifica2',
@@ -19,30 +15,6 @@ function parseSender(fromStr?: string): { name: string; email: string } {
   }
 
   return { name: defaultSender.name, email: fromStr };
-}
-
-async function getTransporter(): Promise<Transporter> {
-  if (transporter) {
-    return transporter;
-  }
-
-  const port = Number(process.env.SMTP_PORT) || 587;
-  const isSecure = process.env.SMTP_SECURE === 'true' || port === 465;
-
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
-    port,
-    secure: isSecure,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000,
-  });
-
-  return transporter;
 }
 
 export async function sendPasswordResetEmail({
@@ -91,62 +63,49 @@ export async function sendPasswordResetEmail({
       ? process.env.SMTP_PASS
       : undefined);
 
-  if (brevoApiKey) {
-    try {
-      console.log('[EmailService] Enviando correo mediante Brevo HTTP API (HTTPS)...');
-      const sender = parseSender(process.env.EMAIL_FROM);
-
-      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-        method: 'POST',
-        headers: {
-          accept: 'application/json',
-          'api-key': brevoApiKey,
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          sender,
-          to: [{ email: to }],
-          subject: 'Recuperación de contraseña - Descalifica2',
-          htmlContent: html,
-          textContent: text,
-        }),
-      });
-
-      if (!response.ok) {
-        const errJson = await response.json().catch(() => ({}));
-        throw new Error(
-          `Error ${response.status} en Brevo API: ${JSON.stringify(errJson)}`,
-        );
-      }
-
-      const result = await response.json();
-      console.log(`📧 Correo enviado con éxito (vía Brevo API) a: ${to}`, result);
-      return result;
-    } catch (apiError: any) {
-      console.error('[EmailService] Falló el envío por Brevo API:', apiError.message || apiError);
-      throw apiError;
-    }
+  if (!brevoApiKey) {
+    throw new Error(
+      '[EmailService] No se encontró la variable BREVO_API_KEY configurada.',
+    );
   }
 
-  // Prioridad 2: SMTP con Nodemailer (como fallback o para otros servidores)
   try {
-    const mailer = await getTransporter();
-    const from =
-      process.env.EMAIL_FROM || '"Descalifica2" <no-reply@descalifica2.com>';
+    console.log(
+      '[EmailService] Enviando correo mediante Brevo HTTP API (HTTPS)...',
+    );
+    const sender = parseSender(process.env.EMAIL_FROM);
 
-    const info = await mailer.sendMail({
-      from,
-      to,
-      subject: 'Recuperación de contraseña - Descalifica2',
-      text,
-      html,
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'api-key': brevoApiKey,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender,
+        to: [{ email: to }],
+        subject: 'Recuperación de contraseña - Descalifica2',
+        htmlContent: html,
+        textContent: text,
+      }),
     });
 
-    console.log(`📧 Correo de recuperación enviado a: ${to}`);
-    return info;
-  } catch (smtpError: any) {
-    transporter = null;
-    console.error('[EmailService] Error al enviar email vía SMTP:', smtpError.message || smtpError);
-    throw smtpError;
+    if (!response.ok) {
+      const errJson = await response.json().catch(() => ({}));
+      throw new Error(
+        `Error ${response.status} en Brevo API: ${JSON.stringify(errJson)}`,
+      );
+    }
+
+    const result = await response.json();
+    console.log(`📧 Correo enviado con éxito (vía Brevo API) a: ${to}`, result);
+    return result;
+  } catch (apiError: any) {
+    console.error(
+      '[EmailService] Falló el envío por Brevo API:',
+      apiError.message || apiError,
+    );
+    throw apiError;
   }
 }
