@@ -400,6 +400,7 @@ async function actualizarsesiones(
         start_time: s.date_start,
         end_time: s.date_end,
         race: carrera,
+        notificado_30min: false,
       });
       carrera.sessions.add(sesion);
     } else {
@@ -409,6 +410,15 @@ async function actualizarsesiones(
       // Limpiamos los resultados viejos si la sesión ya existía
       if (sesion.session_result) {
         sesion.session_result.removeAll();
+      }
+      const nuevoInicio = new Date(s.date_start).getTime();
+      const inicioActual = sesion.start_time
+        ? sesion.start_time.getTime()
+        : null;
+      if (inicioActual !== nuevoInicio) {
+        sesion.start_time = new Date(s.date_start);
+        sesion.end_time = new Date(s.date_end);
+        sesion.notificado_30min = false;
       }
     }
 

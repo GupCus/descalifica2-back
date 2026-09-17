@@ -5,6 +5,17 @@ import 'dotenv/config';
 import { Usuario } from '../../usuario/usuario.entity.js';
 import { Blogpost } from '../../blogpost/blogpost.entity.js';
 import { Sesion } from '../../sesion/sesion.entity.js';
+import { Reference } from '@mikro-orm/core';
+
+export interface PendingRegistration {
+  vinculado: boolean;
+  chatId?: string;
+  telegramUsername?: string;
+  expiresAt: number;
+  error?: string;
+}
+
+export const pendingRegistrationLinks = new Map<string, PendingRegistration>();
 
 const bot = new Bot(process.env.TELEGRAM_BOT!);
 
@@ -19,6 +30,57 @@ bot.command('start', async (ctx) => {
 
       const em = orm.em.fork();
 
+      // 1. Verificar si corresponde a un código temporal de registro
+      const pendingReg = pendingRegistrationLinks.get(codigo);
+      if (pendingReg) {
+        if (pendingReg.expiresAt < Date.now()) {
+          pendingReg.error = 'El código de vinculación ha expirado.';
+          await ctx.reply(
+            '❌ Este código de vinculación ha expirado. Por favor, genera uno nuevo en la página de registro.',
+          );
+          return;
+        }
+
+        const existeChatId = await em.findOne(Usuario, {
+          telegram_id: chatId.toString(),
+        });
+
+        if (existeChatId) {
+          pendingReg.error = 'Esta cuenta de Telegram ya está vinculada a otro usuario.';
+          await ctx.reply(
+            '❌ Esta cuenta de Telegram ya está vinculada a otro usuario de Descalifica2.',
+          );
+          return;
+        }
+
+        if (tgUsername) {
+          const existeTgUser = await em.findOne(Usuario, {
+            telegram_username: tgUsername,
+          });
+
+          if (existeTgUser) {
+            pendingReg.error = `El usuario de Telegram @${tgUsername} ya está en uso por otra cuenta.`;
+            await ctx.reply(
+              `❌ Ya existe una cuenta con el nombre de usuario de Telegram @${tgUsername}.`,
+            );
+            return;
+          }
+        }
+
+        pendingReg.chatId = chatId.toString();
+        pendingReg.telegramUsername = tgUsername || undefined;
+        pendingReg.vinculado = true;
+
+        await ctx.reply(
+          '¡Cuenta vinculada con éxito! Ya puedes volver a la página web y completar tu registro.',
+        );
+        await ctx.reply(
+          'Próximamente recibirás noticias a través de este canal 🏎️🏎️',
+        );
+        return;
+      }
+
+      // 2. Verificar si corresponde a un usuario ya existente
       const usuario = await em.findOne(Usuario, { telegram_id: codigo });
 
       if (usuario) {
@@ -70,41 +132,21 @@ export async function enviarNotificacionSesion(sesionId: number) {
     { populate: ['race'] },
   );
 
-  if (sesion) {
-    if (sesion.notificado_30min) {
-      console.log(`La sesión ${sesionId} ya ha sido notificada.`);
-      return;
-    } else {
-      const mensaje = `🏁 ¡Atención! La "${sesion.name}" del ${sesion.race.name} comenzará a las ${sesion.start_time} .\n\n`;
-      sesion.notificado_30min = true;
+  if (!sesion || sesion.notificado_30min) return;
 
-      await enviarMensajeMasivo(mensaje);
-      await em.flush();
-      console.log(`Notificación enviada para la sesión ${sesionId}.`);
-    }
-  } else {
-    console.log(`No se encontró la sesión ${sesionId}.`);
-  }
-}
+  const hora = new Intl.DateTimeFormat('es-AR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone: 'America/Argentina/Buenos_Aires',
+  }).format(sesion.start_time);
 
-const timers = new Map<number, NodeJS.Timeout>();
-
-export async function programarNotificacionSesion(
-  sesionId: number,
-  delay: number,
-) {
-  // Si ya había un timer para esa sesión, lo cancelamos (ej: se editó la hora)
-  if (timers.has(sesionId)) {
-    clearTimeout(timers.get(sesionId)!);
-    timers.delete(sesionId);
-  }
-
-  const timer = setTimeout(() => {
-    timers.delete(sesionId); // al dispararse, se limpia solo del Map
-    void enviarNotificacionSesion(sesionId);
-  }, delay);
-
-  timers.set(sesionId, timer); // guardamos la referencia
+  const carrera = Reference.unwrapReference(sesion.race);
+  const mensaje = `🏁 ¡Atención! La "${sesion.name}" del ${carrera.name} comenzará a las ${hora}.\n\n`;
+  await enviarMensajeMasivo(mensaje);
+  sesion.notificado_30min = true;
+  await em.flush();
+  console.log(`Notificación enviada para la sesión ${sesionId}.`);
 }
 
 //Funcion para enviar posts de interes a usuarios
@@ -138,6 +180,24 @@ export async function enviarMensajeMasivo(mensaje: string) {
   }
 
   console.log('Envío masivo finalizado.');
+}
+
+export async function verificarSesionesProximas() {
+  const em = orm.em.fork();
+  const ahora = new Date();
+  const en30min = new Date(ahora.getTime() + 30 * 60 * 1000);
+
+  const sesiones = await em.find(
+    Sesion,
+    {
+      start_time: { $gt: ahora, $lt: en30min },
+      notificado_30min: false,
+    },
+    { populate: ['race'] },
+  );
+  for (const s of sesiones) {
+    await enviarNotificacionSesion(s.id!);
+  }
 }
 
 //Arranca el bot

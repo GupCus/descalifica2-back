@@ -20,7 +20,6 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
     race: req.body.race,
     session_result: req.body.session_result,
     id: req.params.id,
-    notificado_30min: req.body.notificado_30min,
   };
   if (!tipos.includes(req.body.sanitizedInput.type)) {
     return res.status(400).json({

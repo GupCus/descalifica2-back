@@ -1,5 +1,8 @@
 import cron from 'node-cron';
-import { enviarTopPostSemanal } from '../telegram/telegram.service.js';
+import {
+  enviarTopPostSemanal,
+  verificarSesionesProximas,
+} from '../telegram/telegram.service.js';
 
 export function iniciarCronJobs() {
   // Todos los viernes a las 17:00 (5 PM, hora del servidor)
@@ -9,6 +12,14 @@ export function iniciarCronJobs() {
       await enviarTopPostSemanal();
     } catch (error) {
       console.error('[CRON] Error al enviar top post semanal:', error);
+    }
+  });
+
+  cron.schedule('*/5 * * * *', async () => {
+    try {
+      await verificarSesionesProximas();
+    } catch (error) {
+      console.error('[CRON] Error al verificar próximas sesiones:', error);
     }
   });
 }

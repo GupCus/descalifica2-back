@@ -14,6 +14,7 @@ export interface RegisterRequest {
   name: string;
   surname?: string;
   telegram_username?: string;
+  telegram_code?: string;
   fav_driver?: string;
   fav_team?: string;
   fav_circuit?: string;
