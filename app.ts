@@ -66,7 +66,10 @@ import { actualizarresultados } from './src/services/openf1/openf1.service.js';
 import { assetRouter } from './src/asset/asset.routes.js';
 import { nationalities } from './src/shared/nationalities.js';
 import { comentarioRouter } from './src/comentariopost/comentario.routes.js';
-import { iniciarBotTelegram } from './src/services/telegram/telegram.service.js';
+import {
+  iniciarBotTelegram,
+  detenerBotTelegram,
+} from './src/services/telegram/telegram.service.js';
 import { telegramrouter } from './src/services/telegram/telegram.routes.js';
 import { championshipRouter } from './src/championship/championship.routes.js';
 import { iniciarCronJobs } from './src/services/cron/cron.service.js';
@@ -153,3 +156,17 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Corriendo en puerto ${port}`);
 });
+
+// Manejo de cierre ordenado (Graceful Shutdown)
+const apagarServidor = async (senal: string) => {
+  console.log(`\nRecibida señal ${senal}. Cerrando aplicación...`);
+
+  // 1. Detenemos el bot de Telegram para liberar la conexión en sus servidores
+  detenerBotTelegram();
+
+  // 2. Salimos del proceso Node
+  process.exit(0);
+};
+
+process.on('SIGINT', () => apagarServidor('SIGINT'));
+process.on('SIGTERM', () => apagarServidor('SIGTERM'));

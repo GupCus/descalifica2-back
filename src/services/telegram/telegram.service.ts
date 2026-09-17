@@ -46,7 +46,8 @@ bot.command('start', async (ctx) => {
         });
 
         if (existeChatId) {
-          pendingReg.error = 'Esta cuenta de Telegram ya está vinculada a otro usuario.';
+          pendingReg.error =
+            'Esta cuenta de Telegram ya está vinculada a otro usuario.';
           await ctx.reply(
             '❌ Esta cuenta de Telegram ya está vinculada a otro usuario de Descalifica2.',
           );
@@ -199,11 +200,51 @@ export async function verificarSesionesProximas() {
     await enviarNotificacionSesion(s.id!);
   }
 }
+//Variable para saber si el apagado fue voluntario y no seguir reintentando
+let debeDetenerse = false;
 
-//Arranca el bot
-export function iniciarBotTelegram() {
-  run(bot).catch(console.error);
-  console.log('Bot de Telegram iniciado');
+// Arranca el bot con tolerancia a fallos y reintentos en caso de conflicto 409
+export async function iniciarBotTelegram(
+  maxIntentos = 5,
+  delayInicialMs = 3000,
+) {
+  debeDetenerse = false;
+  let intento = 1;
+  let delay = delayInicialMs;
+
+  while (intento <= maxIntentos && !debeDetenerse) {
+    try {
+      console.log(
+        `Conectando bot de Telegram (intento ${intento}/${maxIntentos})...`,
+      );
+      await run(bot);
+      break;
+    } catch (error: any) {
+      if (debeDetenerse) break;
+
+      // Verificamos si es el típico error 409 Conflict de Telegram
+      const esConflicto409 =
+        error?.errorCode === 409 ||
+        error?.message?.includes('409') ||
+        error?.message?.includes('Conflict');
+
+      if (esConflicto409 && intento < maxIntentos) {
+        console.warn(
+          `⚠ [Telegram 409 Conflict]: La conexión anterior aún se está liberando en Telegram. ` +
+            `Esperando ${Math.round(delay / 1000)}s antes de reintentar (intento ${intento}/${maxIntentos})...`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        intento++;
+        delay *= 1.5;
+      } else {
+        console.error(
+          '❌ Error no recuperable al iniciar el bot de Telegram:',
+          error,
+        );
+        break;
+      }
+    }
+  }
 }
 
 //Funcion para enviar el post más comentado de la semana
@@ -244,4 +285,12 @@ export async function enviarTopPostSemanal() {
     `👉 ${frontendUrl}/blog/${blogpost.id}`;
 
   await enviarMensajeMasivo(mensaje);
+}
+// Función para detener el bot de forma limpia (Paso 1)
+export function detenerBotTelegram() {
+  debeDetenerse = true;
+  if (bot.isRunning()) {
+    bot.stop();
+    console.log('🛑 Bot de Telegram detenido limpiamente.');
+  }
 }
