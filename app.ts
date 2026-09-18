@@ -161,8 +161,8 @@ app.listen(port, () => {
 const apagarServidor = async (senal: string) => {
   console.log(`\nRecibida señal ${senal}. Cerrando aplicación...`);
 
-  // 1. Detenemos el bot de Telegram para liberar la conexión en sus servidores
-  detenerBotTelegram();
+  // 1. Detenemos el bot de Telegram y esperamos a que se libere la conexión en sus servidores
+  await detenerBotTelegram();
 
   // 2. Salimos del proceso Node
   process.exit(0);

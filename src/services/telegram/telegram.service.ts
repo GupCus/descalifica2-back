@@ -202,24 +202,39 @@ export async function verificarSesionesProximas() {
 }
 //Variable para saber si el apagado fue voluntario y no seguir reintentando
 let debeDetenerse = false;
+let pollingPromise: Promise<void> | null = null;
 
 // Arranca el bot con tolerancia a fallos y reintentos en caso de conflicto 409
 export async function iniciarBotTelegram(
   maxIntentos = 5,
   delayInicialMs = 3000,
 ) {
+  if (bot.isRunning()) {
+    console.warn('⚠ El bot de Telegram ya está activo.');
+    return;
+  }
+
   debeDetenerse = false;
   let intento = 1;
   let delay = delayInicialMs;
+
+  // Aseguramos que no haya un webhook residual configurado bloqueando getUpdates
+  try {
+    await bot.api.deleteWebhook();
+  } catch (err) {
+    // Si falla la petición de red u otra causa, no bloquea el inicio
+  }
 
   while (intento <= maxIntentos && !debeDetenerse) {
     try {
       console.log(
         `Conectando bot de Telegram (intento ${intento}/${maxIntentos})...`,
       );
-      await run(bot);
+      pollingPromise = run(bot);
+      await pollingPromise;
       break;
     } catch (error: any) {
+      pollingPromise = null;
       if (debeDetenerse) break;
 
       // Verificamos si es el típico error 409 Conflict de Telegram
@@ -287,10 +302,21 @@ export async function enviarTopPostSemanal() {
   await enviarMensajeMasivo(mensaje);
 }
 // Función para detener el bot de forma limpia (Paso 1)
-export function detenerBotTelegram() {
+export async function detenerBotTelegram() {
   debeDetenerse = true;
   if (bot.isRunning()) {
     bot.stop();
+    if (pollingPromise) {
+      try {
+        await Promise.race([
+          pollingPromise,
+          new Promise((resolve) => setTimeout(resolve, 2000)),
+        ]);
+      } catch {
+        // Ignoramos errores de cancelación
+      }
+      pollingPromise = null;
+    }
     console.log('🛑 Bot de Telegram detenido limpiamente.');
   }
 }
