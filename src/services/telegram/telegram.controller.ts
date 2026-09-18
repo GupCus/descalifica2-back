@@ -1,7 +1,8 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { orm } from "../../shared/db/orm.js";
 import { Usuario } from "../../usuario/usuario.entity.js";
 import { AuthenticatedRequest } from "../../auth/auth.types.js";
+import { pendingRegistrationLinks } from "./telegram.service.js";
 
 export const generarcodigo = async (
   req: AuthenticatedRequest,
@@ -44,6 +45,138 @@ export const generarcodigo = async (
     }
   } catch (error: any) {
     console.error("Hubo un error:", error);
+    return res
+      .status(500)
+      .json({ message: "Error interno", error: error.message });
+  }
+};
+
+export const verificarVinculacion = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "No autorizado" });
+    }
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { id: req.user.id });
+
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    if (!usuario.telegram_id) {
+      return res.status(200).json({ vinculado: false, pendiente: false });
+    }
+
+    if (usuario.telegram_id.includes("otp")) {
+      return res.status(200).json({ vinculado: false, pendiente: true });
+    }
+
+    return res.status(200).json({
+      vinculado: true,
+      pendiente: false,
+      telegram_username: usuario.telegram_username || null,
+    });
+  } catch (error: any) {
+    console.error("Error verificando vinculación:", error);
+    return res
+      .status(500)
+      .json({ message: "Error interno", error: error.message });
+  }
+};
+
+export const desvincularTelegram = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "No autorizado" });
+    }
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { id: req.user.id });
+
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    usuario.telegram_id = null as any;
+    usuario.telegram_username = null as any;
+    await em.flush();
+
+    return res.status(200).json({
+      message: "Cuenta de Telegram desvinculada correctamente.",
+    });
+  } catch (error: any) {
+    console.error("Error desvinculando Telegram:", error);
+    return res
+      .status(500)
+      .json({ message: "Error interno", error: error.message });
+  }
+};
+
+export const generarcodigoRegistro = async (
+  _req: Request,
+  res: Response,
+) => {
+  try {
+    const now = Date.now();
+    for (const [code, val] of pendingRegistrationLinks.entries()) {
+      if (val.expiresAt < now) {
+        pendingRegistrationLinks.delete(code);
+      }
+    }
+
+    const codigo =
+      "reg" +
+      Math.floor(100000 + Math.random() * 900000).toString();
+
+    pendingRegistrationLinks.set(codigo, {
+      vinculado: false,
+      expiresAt: now + 15 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      message: "Código de registro generado con éxito",
+      codigo,
+    });
+  } catch (error: any) {
+    console.error("Error generando código de registro:", error);
+    return res
+      .status(500)
+      .json({ message: "Error interno", error: error.message });
+  }
+};
+
+export const verificarRegistro = async (
+  req: Request,
+  res: Response,
+) => {
+  try {
+    const { codigo } = req.params;
+    if (!codigo) {
+      return res.status(400).json({ message: "Código requerido" });
+    }
+
+    const pending = pendingRegistrationLinks.get(codigo);
+    if (!pending || pending.expiresAt < Date.now()) {
+      return res.status(200).json({
+        vinculado: false,
+        pendiente: false,
+        expirado: true,
+      });
+    }
+
+    return res.status(200).json({
+      vinculado: pending.vinculado,
+      pendiente: !pending.vinculado && !pending.error,
+      telegram_username: pending.telegramUsername || null,
+      error: pending.error || null,
+    });
+  } catch (error: any) {
+    console.error("Error verificando registro de Telegram:", error);
     return res
       .status(500)
       .json({ message: "Error interno", error: error.message });

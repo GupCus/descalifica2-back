@@ -141,6 +141,7 @@ export function sanitizeRegister(
     name: req.body.name,
     surname: req.body.surname,
     telegram_username: req.body.telegram_username,
+    telegram_code: req.body.telegram_code,
     fav_driver: req.body.fav_driver,
     fav_team: req.body.fav_team,
     fav_circuit: req.body.fav_circuit,

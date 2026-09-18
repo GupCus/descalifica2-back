@@ -11,6 +11,7 @@ import validator from 'validator';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import { getRelativePath } from '../shared/upload/upload.utils.js';
+import { pendingRegistrationLinks } from '../services/telegram/telegram.service.js';
 import { sendPasswordResetEmail } from '../services/email/email.service.js';
 
 async function register(req: Request, res: Response) {
@@ -24,6 +25,7 @@ async function register(req: Request, res: Response) {
       name,
       surname,
       telegram_username,
+      telegram_code,
       fav_driver,
       fav_team,
       fav_circuit,
@@ -113,16 +115,29 @@ async function register(req: Request, res: Response) {
       });
     }
 
-    if (
-      telegram_username &&
-      telegram_username.length > 0 &&
-      (await em.findOne(Usuario, {
-        telegram_username: telegram_username,
-      }))
-    ) {
-      return res.status(409).json({
-        message: 'El usuario de telegram está registrado en otra cuenta.',
+    let finalTelegramId: string | undefined = undefined;
+    let finalTelegramUsername: string | undefined = undefined;
+
+    if (telegram_code) {
+      const pending = pendingRegistrationLinks.get(telegram_code);
+      if (pending && pending.vinculado && pending.chatId) {
+        finalTelegramId = pending.chatId;
+        finalTelegramUsername = pending.telegramUsername || undefined;
+        pendingRegistrationLinks.delete(telegram_code);
+      }
+    } else if (telegram_username && telegram_username.trim().length > 0) {
+      const cleanTg = telegram_username.trim().replace(/^@/, '');
+      const existeTelegram = await em.findOne(Usuario, {
+        telegram_username: cleanTg,
       });
+      if (existeTelegram) {
+        return res.status(409).json({
+          message: 'El usuario de telegram está registrado en otra cuenta.',
+        });
+      }
+      finalTelegramUsername = cleanTg;
+      finalTelegramId =
+        'otp' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
     }
 
     const usuario = em.create(Usuario, {
@@ -133,7 +148,8 @@ async function register(req: Request, res: Response) {
       user_type: 'user',
       name: name,
       surname: surname?.trim() || undefined,
-      telegram_username: telegram_username?.trim() || undefined,
+      telegram_username: finalTelegramUsername,
+      telegram_id: finalTelegramId,
       fav_driver: fav_driver?.trim() || undefined,
       fav_team: fav_team?.trim() || undefined,
       fav_circuit: fav_circuit?.trim() || undefined,
