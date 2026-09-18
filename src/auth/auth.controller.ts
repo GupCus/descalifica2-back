@@ -8,8 +8,11 @@ import { Request, Response } from 'express';
 import { Usuario } from '../usuario/usuario.entity.js';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import validator from 'validator';
+import crypto from 'crypto';
+import bcrypt from 'bcrypt';
 import { getRelativePath } from '../shared/upload/upload.utils.js';
 import { pendingRegistrationLinks } from '../services/telegram/telegram.service.js';
+import { sendPasswordResetEmail } from '../services/email/email.service.js';
 
 async function register(req: Request, res: Response) {
   try {
@@ -309,4 +312,120 @@ async function login(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-export { login, register, checkToken };
+async function forgotPassword(req: Request, res: Response) {
+  try {
+    const email = req.body.email?.trim();
+
+    if (!email || !validator.isEmail(email)) {
+      return res.status(400).json({
+        message: 'Por favor, proporciona un correo electrónico válido.',
+      });
+    }
+
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { email });
+
+    // Respuesta genérica para evitar enumeración de usuarios
+    const genericResponse = {
+      message:
+        'Si el correo está registrado, recibirás las instrucciones para restablecer tu contraseña.',
+    };
+
+    if (!usuario) {
+      return res.status(200).json(genericResponse);
+    }
+
+    // Generar token seguro y hash
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
+
+    // Expiración: 15 minutos
+    usuario.reset_password_token = hashedToken;
+    usuario.reset_password_expires = new Date(Date.now() + 15 * 60 * 1000);
+
+    await em.flush();
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password?token=${rawToken}`;
+
+    try {
+      await sendPasswordResetEmail({
+        to: usuario.email,
+        resetUrl,
+      });
+    } catch (mailError) {
+      console.error('Error al enviar correo de recuperación:', mailError);
+      return res.status(500).json({
+        message: 'Error al enviar el correo de recuperación. Inténtalo más tarde.',
+      });
+    }
+
+    return res.status(200).json(genericResponse);
+  } catch (error) {
+    console.error('Error en forgotPassword:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+async function resetPassword(req: Request, res: Response) {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({
+        message: 'Token de recuperación no proporcionado o inválido.',
+      });
+    }
+
+    if (
+      !newPassword ||
+      typeof newPassword !== 'string' ||
+      newPassword.length < 6
+    ) {
+      return res.status(400).json({
+        message: 'La nueva contraseña debe tener al menos 6 caracteres.',
+      });
+    }
+
+    const hashedToken = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
+
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, {
+      reset_password_token: hashedToken,
+      reset_password_expires: { $gt: new Date() },
+    });
+
+    if (!usuario) {
+      return res.status(400).json({
+        message: 'El enlace de recuperación es inválido o ha expirado.',
+      });
+    }
+
+    // Hashear y actualizar contraseña
+    const salt = 12;
+    usuario.password = await bcrypt.hash(newPassword, salt);
+
+    // Invalidar token
+    usuario.reset_password_token = undefined;
+    usuario.reset_password_expires = undefined;
+
+    await em.flush();
+
+    return res.status(200).json({
+      message:
+        '¡Contraseña restablecida exitosamente! Ya puedes iniciar sesión.',
+    });
+  } catch (error) {
+    console.error('Error en resetPassword:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+export { login, register, checkToken, forgotPassword, resetPassword };
+

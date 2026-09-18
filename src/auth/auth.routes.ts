@@ -7,7 +7,13 @@ import {
 import { upload } from "../shared/middlewares/multer.config.js";
 import { setUploadPath } from "../shared/upload/upload.middleware.js";
 import { loginGoogle } from "../services/OAuth/oauth.service.js";
-import { checkToken, login, register } from "./auth.controller.js";
+import {
+  checkToken,
+  forgotPassword,
+  login,
+  register,
+  resetPassword,
+} from "./auth.controller.js";
 
 export const authRouter = Router();
 
@@ -23,3 +29,6 @@ authRouter.get("/check-token", authenticateToken, (req, res) =>
   checkToken(req as any, res),
 );
 authRouter.post("/login/google", loginGoogle, sanitizeLogin, login);
+authRouter.post("/forgot-password", forgotPassword);
+authRouter.post("/reset-password", resetPassword);
+

@@ -16,6 +16,9 @@ export class Marca extends baseEntity {
   @Property({ nullable: false })
   foundation!: number;
 
+  @Property({ nullable: true, type: 'text' })
+  description?: string;
+
   @Property({ nullable: true })
   logo_image?: string;
 

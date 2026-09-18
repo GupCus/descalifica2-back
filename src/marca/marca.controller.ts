@@ -20,6 +20,7 @@ function sanitizeMarca(req: Request, res: Response, next: NextFunction) {
     id: req.params.id,
     nationality: req.body.nationality,
     foundation: req.body.foundation,
+    description: req.body.description,
     // ¿Mostramos teams de c/ marca??
   };
   Object.keys(req.body.sanitizedInput).forEach((key) => {
