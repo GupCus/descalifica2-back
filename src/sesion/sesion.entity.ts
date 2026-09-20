@@ -22,6 +22,9 @@ export class Sesion extends baseEntity {
   @Property({ nullable: true })
   end_time!: Date;
 
+  @Property({ default: false })
+  notificado_30min!: boolean;
+
   // Relación con carrera DEBIL
   @ManyToOne(() => Carrera, { nullable: false })
   race!: Rel<Carrera>;

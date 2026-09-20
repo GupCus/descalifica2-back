@@ -217,6 +217,15 @@ async function update(req: Request, res: Response) {
           message: 'El usuario de telegram está registrado en otra cuenta.',
         });
       }
+
+      // Si cambió el telegram_username, regenerar el código OTP para que vuelva a vincular
+      if (telegram_username !== usuario.telegram_username) {
+        req.body.sanitizedInput.telegram_id =
+          'otp' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      }
+    } else if (telegram_username !== undefined) {
+      // Si borró el telegram_username, limpiar también el telegram_id
+      req.body.sanitizedInput.telegram_id = null;
     }
 
     delete req.body.sanitizedInput.id;
