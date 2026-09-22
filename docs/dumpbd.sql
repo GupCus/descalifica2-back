@@ -1,4 +1,6 @@
 CREATE DATABASE  IF NOT EXISTS `descalifica2` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+create user if not exists dsw@'%' identified by 'dsw';
+grant all on descalifica2.* to dsw@'%';
 USE `descalifica2`;
 -- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
 --

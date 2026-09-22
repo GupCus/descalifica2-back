@@ -22,6 +22,15 @@ function sanitizeComentario(req: Request, res: Response, next: NextFunction) {
 }
 
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Comentarios']
+    #swagger.summary = 'Obtener todos los comentarios'
+    #swagger.responses[200] = { 
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: [{ $ref: '#/components/schemas/ComentarioPost' }] }
+    }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const filter = req.query.blogpost
@@ -35,6 +44,16 @@ async function findAll(req: Request, res: Response) {
 }
 
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Comentarios']
+    #swagger.summary = 'Obtener un comentario'
+    #swagger.responses[200] = { 
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: { $ref: '#/components/schemas/ComentarioPost' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
@@ -50,6 +69,23 @@ async function findOne(req: Request, res: Response) {
 }
 
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Comentarios']
+    #swagger.summary = 'Crear un comentario'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/ComentarioPostInput" }
+    }
+    #swagger.responses[201] = { 
+      description: 'Resource created',
+      schema: { message: { type: 'string', example: 'Resource created' }, data: { $ref: '#/components/schemas/ComentarioPost' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const authReq = req as any;
@@ -71,6 +107,18 @@ async function add(req: Request, res: Response) {
 }
 
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Comentarios']
+    #swagger.summary = 'Eliminar un comentario'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Resource deleted',
+      schema: { message: { type: 'string', example: 'Resource deleted' }, data: { $ref: '#/components/schemas/ComentarioPost' } }
+    }
+    #swagger.responses[403] = { description: 'Forbidden' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
@@ -96,6 +144,20 @@ async function remove(req: Request, res: Response) {
 }
 
 async function countsByBlogpost(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Comentarios']
+    #swagger.summary = 'Obtener conteo de comentarios por blogpost'
+    #swagger.responses[200] = { 
+      description: 'OK',
+      schema: { 
+        message: { type: 'string', example: 'OK' },
+        data: { 
+          "1": { type: 'integer', example: 5 },
+          "2": { type: 'integer', example: 10 }
+        }
+      }
+    }
+  */
   const em = orm.em.fork();
   const ids = String(req.query.blogposts ?? '')
     .split(',')

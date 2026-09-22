@@ -38,6 +38,16 @@ function sanitizeChampionshipInput(
 // Obtener todos los resultados
 
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Championships']
+    #swagger.summary = 'Obtener resultados del campeonato (pilotos o escuderías)'
+    #swagger.responses[200] = { 
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: [{ $ref: '#/components/schemas/Team_Championship' }] }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const tempactual = await em.findOne(Temporada, {
       year: new Date().getFullYear(),
@@ -66,6 +76,17 @@ async function findAll(req: Request, res: Response) {
 
 // Crear una resultado
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Championships']
+    #swagger.summary = 'Crear un resultado del campeonato'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[201] = { 
+      description: 'Created',
+      schema: { message: { type: 'string', example: 'Championship result created successfully' }, data: { $ref: '#/components/schemas/Team_Championship' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const resultadoData = { ...req.body.sanitizedInput };
     const tempactual = await em.findOne(Temporada, {
@@ -96,6 +117,18 @@ async function add(req: Request, res: Response) {
 // Actualizar un resultado
 
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Championships']
+    #swagger.summary = 'Actualizar un resultado del campeonato'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[204] = { 
+      description: 'Updated',
+      schema: { message: { type: 'string', example: 'Updated' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     let resultado;
@@ -122,6 +155,18 @@ async function update(req: Request, res: Response) {
 // Eliminar un resultado
 
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Championships']
+    #swagger.summary = 'Eliminar un resultado del campeonato'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[204] = { 
+      description: 'Deleted',
+      schema: { message: { type: 'string', example: 'Deleted' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     let resultado;

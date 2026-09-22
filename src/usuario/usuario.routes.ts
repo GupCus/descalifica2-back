@@ -23,7 +23,7 @@ export const usuarioRouter = Router();
 
 usuarioRouter.get('/', authenticateAdmin, findAll);
 usuarioRouter.get('/public', findPublic);
-usuarioRouter.get('/:id', authenticateToken, findOne);
+usuarioRouter.get('/:id', authorizeSelfOrAdmin, findOne);
 usuarioRouter.put(
   '/:id',
   ...uploadImageOptional('usuarios', 'avatars'),

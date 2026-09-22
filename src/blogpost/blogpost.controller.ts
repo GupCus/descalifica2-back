@@ -54,6 +54,16 @@ function addImageUrls(req: Request, blogpost: Blogpost) {
 // obtener todos los blogposts
 
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Blogposts']
+    #swagger.summary = 'Obtener todos los blogposts'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: [{ $ref: '#/components/schemas/Blogpost' }] }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const blogposts = await em.find(Blogpost, {});
@@ -67,6 +77,16 @@ async function findAll(req: Request, res: Response) {
 // Obtener un blogpost por ID
 
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Blogposts']
+    #swagger.summary = 'Obtener un blogpost'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: { $ref: '#/components/schemas/Blogpost' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
@@ -84,6 +104,22 @@ async function findOne(req: Request, res: Response) {
 //Crear un nuevo blogpost
 
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Blogposts']
+    #swagger.summary = 'Crear blogpost'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/BlogpostInput" }
+    }
+    #swagger.responses[201] = {
+      description: 'Created',
+      schema: { message: { type: 'string', example: 'Resource created' }, data: { $ref: '#/components/schemas/Blogpost' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const authReq = req as any;
@@ -108,6 +144,22 @@ async function add(req: Request, res: Response) {
 //Actualizar un blogpost
 
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Blogposts']
+    #swagger.summary = 'Actualizar blogpost'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/BlogpostInput" }
+    }
+    #swagger.responses[200] = {
+      description: 'Updated',
+      schema: { message: { type: 'string', example: 'Resource updated' }, data: { $ref: '#/components/schemas/Blogpost' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const authReq = req as any;
@@ -152,6 +204,17 @@ async function update(req: Request, res: Response) {
 //Eliminar un blogpost
 
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Blogposts']
+    #swagger.summary = 'Eliminar blogpost'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Deleted',
+      schema: { message: { type: 'string', example: 'Resource deleted' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const authReq = req as any;
@@ -159,7 +222,7 @@ async function remove(req: Request, res: Response) {
     const blogpost = await em.findOneOrFail(
       Blogpost,
       { id },
-      { populate: ['author'] },
+      { populate: ['author', 'comentarios'] },
     );
     const isAuthor = blogpost.author.id === authReq.user.id;
     const isAdmin = authReq.user.user_type === 'admin';
@@ -185,6 +248,21 @@ async function remove(req: Request, res: Response) {
 }
 
 async function uploadCoverImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Blogposts']
+    #swagger.summary = 'Subir imagen de portada del blogpost'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.consumes = ['multipart/form-data']
+    #swagger.parameters['image'] = { in: 'formData', type: 'file', required: true, description: 'Imagen de portada' }
+    #swagger.responses[200] = { 
+      description: 'Imagen subida',
+      schema: { message: { type: 'string', example: 'Cover image uploaded successfully' }, data: { $ref: '#/components/schemas/Blogpost' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[403] = { description: 'Forbidden' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const authReq = req as any;
@@ -227,6 +305,18 @@ async function uploadCoverImage(req: Request, res: Response) {
 }
 
 async function deleteCoverImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Blogposts']
+    #swagger.summary = 'Eliminar imagen de portada del blogpost'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Imagen eliminada',
+      schema: { message: { type: 'string', example: 'Cover image deleted successfully' }, data: { $ref: '#/components/schemas/Blogpost' } }
+    }
+    #swagger.responses[403] = { description: 'Forbidden' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const authReq = req as any;
@@ -266,6 +356,16 @@ async function deleteCoverImage(req: Request, res: Response) {
 }
 
 async function findSuggested(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Foro: Blogposts']
+    #swagger.summary = 'Obtener blogposts sugeridos para el usuario'
+    #swagger.responses[200] = { 
+      description: 'Blogposts sugeridos',
+      schema: { message: { type: 'string', example: 'OK' }, data: [{ $ref: '#/components/schemas/Blogpost' }] }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     const userId = Number.parseInt(req.params.userId);

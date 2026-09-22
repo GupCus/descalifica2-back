@@ -1,6 +1,6 @@
-import { orm } from "../shared/db/orm.js";
-import { Temporada } from "./temporada.entity.js";
-import { Request, Response, NextFunction } from "express";
+import { orm } from '../shared/db/orm.js';
+import { Temporada } from './temporada.entity.js';
+import { Request, Response, NextFunction } from 'express';
 
 const em = orm.em;
 
@@ -27,26 +27,46 @@ function sanitizeTemporadaInput(
 
 //findALL
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Temporadas']
+    #swagger.summary = 'Obtener todas las temporadas'
+    #swagger.responses[200] = {
+      description: 'findAll Temporadas',
+      schema: { message: { type: 'string', example: 'findAll Temporadas' }, data: [{ $ref: '#/components/schemas/Temporada' }] }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const temporada = await em.find(
       Temporada,
       {},
-      { populate: ["racing_series"] },
+      { populate: ['racing_series'] },
     );
-    res.status(200).json({ message: "findAll Temporadas", data: temporada });
+    res.status(200).json({ message: 'findAll Temporadas', data: temporada });
   } catch (error: any) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 
 //findOne
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Temporadas']
+    #swagger.summary = 'Obtener una temporada'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { data: { $ref: '#/components/schemas/Temporada' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const temporada = await em.findOneOrFail(
       Temporada,
       { id },
-      { populate: ["racing_series", "winner_driver", "winner_team", "races"] },
+      { populate: ['racing_series', 'winner_driver', 'winner_team', 'races'] },
     );
     res.status(200).json({ data: temporada });
   } catch (error: any) {
@@ -56,12 +76,28 @@ async function findOne(req: Request, res: Response) {
 
 //add
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Temporadas']
+    #swagger.summary = 'Crear temporada'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/TemporadaInput" }
+    }
+    #swagger.responses[201] = {
+      description: 'temporada created succesfully',
+      schema: { message: { type: 'string', example: 'temporada created succesfully' }, data: { $ref: '#/components/schemas/Temporada' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const temporada = em.create(Temporada, req.body.sanitizedInput);
     await em.flush();
     res
       .status(201)
-      .json({ message: "temporada created succesfully", data: temporada });
+      .json({ message: 'temporada created succesfully', data: temporada });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -69,12 +105,28 @@ async function add(req: Request, res: Response) {
 
 //update
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Temporadas']
+    #swagger.summary = 'Actualizar temporada'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/TemporadaInput" }
+    }
+    #swagger.responses[200] = {
+      description: 'Updated succesfully',
+      schema: { message: { type: 'string', example: 'Updated succesfully' }, data: { $ref: '#/components/schemas/Temporada' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const temporada = em.getReference(Temporada, id);
     em.assign(temporada, req.body.sanitizedInput);
     await em.flush();
-    res.status(200).json({ message: "Updated succesfully", data: temporada });
+    res.status(200).json({ message: 'Updated succesfully', data: temporada });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
@@ -82,11 +134,22 @@ async function update(req: Request, res: Response) {
 
 //delete
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Temporadas']
+    #swagger.summary = 'Eliminar temporada'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+    description: 'deleted succesfully',       
+    schema: { message: { type: 'string', example: 'deleted succesfully' }, data: { $ref: '#/components/schemas/Temporada' } }
+ }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const temporada = em.getReference(Temporada, id);
     await em.removeAndFlush(temporada);
-    res.status(200).json({ message: "deleted succesfully", data: temporada });
+    res.status(200).json({ message: 'deleted succesfully', data: temporada });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }

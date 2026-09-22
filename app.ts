@@ -1,15 +1,9 @@
-//Recordar el pnpm install para los módulos
-//No hace falta hacer nada, ya lo acomodé pero como estamos utilizando Express@4 al instalar los tipos tenemos que instalar pnpm add -D @types/express@4
-//Tener correctamente configurado fnm en la terminal donde abrimos vscode (seguramente el bash de git además de powershell, sino no van a funcionar los comandos de node y npm)
-//Primero buildear y despues start:dev
-//los import, como el de character agregarle .js al final o va a lanzar error de que no lo encuentra(me pelee con copilot por esto como por 2h)
-
 /* 
 
 ¿Tenés algun problema y viniste acá por qué no se te ocurre que hacer?
 
 ==========================
-      Q&A PARA EL EQUIPO
+    Q&A PARA EL EQUIPO
 ==========================
 
 ¿El proyecto funciona en otra compu pero no en la tuya?
@@ -38,16 +32,17 @@ if (
   !process.env.TELEGRAM_BOT ||
   !process.env.GOOGLE_KEY ||
   !process.env.BDLOCATION ||
-  !process.env.JWT_SECRET
+  !process.env.JWT_SECRET ||
+  !process.env.PORT ||
+  !process.env.BREVO_API_KEY
 ) {
   console.error('Te falta el env o lo tenes incompleto');
-  process.exit(1);
+  process.exit();
 }
 
 import 'reflect-metadata';
 import express from 'express';
 import cors from 'cors';
-import multer from 'multer';
 import { pilotoRouter } from './src/piloto/piloto.routes.js';
 import { escuderiaRouter } from './src/escuderia/escuderia.routes.js';
 import { orm, syncSchema } from './src/shared/db/orm.js';
@@ -64,7 +59,7 @@ import { authRouter } from './src/auth/auth.routes.js';
 import { of1router } from './src/services/openf1/openf1.routes.js';
 import { actualizarresultados } from './src/services/openf1/openf1.service.js';
 import { assetRouter } from './src/asset/asset.routes.js';
-import { nationalities } from './src/shared/nationalities.js';
+import { nationalityRouter } from './src/shared/nationalities.routes.js';
 import { comentarioRouter } from './src/comentariopost/comentario.routes.js';
 import {
   iniciarBotTelegram,
@@ -73,19 +68,21 @@ import {
 import { telegramrouter } from './src/services/telegram/telegram.routes.js';
 import { championshipRouter } from './src/championship/championship.routes.js';
 import { iniciarCronJobs } from './src/services/cron/cron.service.js';
+import { handleMulterErrors } from './src/shared/upload/upload.middleware.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import swaggerUi from 'swagger-ui-express';
 
+//Express + cors + middleware p/ leer json
 const app = express();
-
 app.use(cors());
-
-//Middleware para poder leer paquetes json
 app.use(express.json());
 
 app.use((req, res, next) => {
   RequestContext.create(orm.em, next);
 });
 
-//Handler de routeo
+//Rutas API
 app.use('/api/usuarios', usuarioRouter);
 app.use('/api/pilotos', pilotoRouter);
 app.use('/api/escuderias', escuderiaRouter);
@@ -102,71 +99,60 @@ app.use('/api/assets', assetRouter);
 app.use('/api/comentarios', comentarioRouter);
 app.use('/api/telegram', telegramrouter);
 app.use('/api/championship', championshipRouter);
-
-app.get('/api/nationalities', (req, res) => {
-  res.status(200).json({ message: 'OK', data: nationalities });
-});
-app.get('/api/nationalities/:code', (req, res) => {
-  const code = req.params.code.toUpperCase();
-  const nationality = nationalities.find((n) => n.code === code);
-
-  if (nationality) {
-    res.status(200).json({ message: 'OK', data: nationality });
-  } else {
-    res.status(404).json({ message: 'Nacionalidad no encontrada' });
-  }
-});
+app.use('/api/nationalities', nationalityRouter);
 
 //Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
-app.use(
-  (
-    err: any,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
-  ) => {
-    if (err instanceof multer.MulterError) {
-      if (err.code === 'LIMIT_FILE_SIZE') {
-        return res
-          .status(413)
-          .json({ message: 'El archivo excede el tamaño máximo de 5MB' });
-      }
-      return res
-        .status(400)
-        .json({ message: `Error de upload: ${err.message}` });
-    }
-    if (err.message?.includes('Tipo de archivo no permitido')) {
-      return res.status(415).json({ message: err.message });
-    }
-    next(err);
-  },
+app.use(handleMulterErrors);
+
+// Documentación Swagger
+const swaggerFilePath = path.resolve(
+  process.cwd(),
+  'src/shared/swagger/swagger-output.json',
 );
+// Si existe el json del swagger, deja abierto el endpoint /api/docs
+if (fs.existsSync(swaggerFilePath)) {
+  const swaggerDocument = JSON.parse(fs.readFileSync(swaggerFilePath, 'utf8'));
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+} else {
+  console.warn(
+    'No se encontró swagger-output.json. Ejecutá el script de swagger para generarlo. No va a funcionar swagger hasta entonces.',
+  );
+}
 
 //Repuesta default para cualquier unhandled request
 app.use((_, res) => {
   res.status(404).send({ message: 'Recurso no encontrado.' });
 });
 
+//Sincroniza la config de tablas esto es de DEV cuando este todo terminado hay que borrarlo
 await syncSchema();
-await actualizarresultados();
-iniciarBotTelegram();
+
+//Intenta actualizar los ultimos resultados, falla si hay una sesión en curso (no pagamos la api)
+try {
+  await actualizarresultados();
+} catch (err) {
+  console.warn(
+    'No se pudo actualizar el último resultado, seguramente haya una sesión actualmente: ' +
+      err,
+  );
+}
+//Bot de telegram solo en prod, pq solo podemos tener una instancia activa
+if (!process.argv.includes('--dev')) {
+  iniciarBotTelegram();
+}
 iniciarCronJobs();
 
-const port = process.env.PORT || 3000;
+//Inicio del server
+const port = process.env.PORT;
 app.listen(port, () => {
   console.log(`Corriendo en puerto ${port}`);
 });
 
-// Manejo de cierre ordenado (Graceful Shutdown)
+// Manejo de apagado del server
 const apagarServidor = async (senal: string) => {
-  console.log(`\nRecibida señal ${senal}. Cerrando aplicación...`);
-
-  // 1. Detenemos el bot de Telegram y esperamos a que se libere la conexión en sus servidores
+  console.log("Recibida señal ' " + senal + " '. Cerrando aplicación...");
   await detenerBotTelegram();
-
-  // 2. Salimos del proceso Node
   process.exit(0);
 };
-
 process.on('SIGINT', () => apagarServidor('SIGINT'));
 process.on('SIGTERM', () => apagarServidor('SIGTERM'));

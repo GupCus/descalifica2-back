@@ -14,7 +14,7 @@ import { ComentarioPost } from '../comentariopost/comentario.entity.js';
 export class Usuario extends baseEntity {
   @Property({ nullable: true, unique: true })
   username!: string;
-  @Property({ nullable: false })
+  @Property({ nullable: false, hidden: true })
   password!: string;
   @Property({ nullable: false })
   user_type!: string;
@@ -38,7 +38,7 @@ export class Usuario extends baseEntity {
   telegram_username?: string;
   @Property({ nullable: true, unique: false })
   telegram_id?: string;
-  @Property({ nullable: true })
+  @Property({ nullable: true, hidden: true })
   reset_password_token?: string;
   @Property({ nullable: true })
   reset_password_expires?: Date;

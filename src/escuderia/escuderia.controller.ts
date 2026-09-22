@@ -41,6 +41,20 @@ function addImageUrls(req: Request, escuderia: Escuderia) {
 }
 
 async function uploadLogoImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Escuderias']
+    #swagger.summary = 'Subir imagen de logo de escudería'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.consumes = ['multipart/form-data']
+    #swagger.parameters['image'] = { in: 'formData', type: 'file', required: true, description: 'Imagen de logo' }
+    #swagger.responses[200] = { 
+      description: 'Imagen subida',
+      schema: { message: { type: 'string', example: 'Logo image uploaded successfully' }, data: { $ref: '#/components/schemas/Escuderia' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const escuderia = await em.findOneOrFail(Escuderia, { id });
@@ -74,6 +88,17 @@ async function uploadLogoImage(req: Request, res: Response) {
 }
 
 async function deleteLogoImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Escuderias']
+    #swagger.summary = 'Eliminar imagen de logo de escudería'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Imagen eliminada',
+      schema: { message: { type: 'string', example: 'Logo image deleted successfully' }, data: { $ref: '#/components/schemas/Escuderia' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const escuderia = await em.findOneOrFail(Escuderia, { id });
@@ -99,6 +124,20 @@ async function deleteLogoImage(req: Request, res: Response) {
 }
 
 async function uploadCarImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Escuderias']
+    #swagger.summary = 'Subir imagen del auto de la escudería'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.consumes = ['multipart/form-data']
+    #swagger.parameters['image'] = { in: 'formData', type: 'file', required: true, description: 'Imagen del auto' }
+    #swagger.responses[200] = { 
+      description: 'Imagen subida',
+      schema: { message: { type: 'string', example: 'Car image uploaded successfully' }, data: { $ref: '#/components/schemas/Escuderia' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const escuderia = await em.findOneOrFail(Escuderia, { id });
@@ -132,6 +171,17 @@ async function uploadCarImage(req: Request, res: Response) {
 }
 
 async function deleteCarImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Escuderias']
+    #swagger.summary = 'Eliminar imagen del auto de la escudería'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Imagen eliminada',
+      schema: { message: { type: 'string', example: 'Car image deleted successfully' }, data: { $ref: '#/components/schemas/Escuderia' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const escuderia = await em.findOneOrFail(Escuderia, { id });
@@ -158,6 +208,16 @@ async function deleteCarImage(req: Request, res: Response) {
 
 //GET ALL
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Escuderias']
+    #swagger.summary = 'Obtener todas las escuderías'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: [{ $ref: '#/components/schemas/Escuderia' }] }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const escuderias = await em.find(
       Escuderia,
@@ -175,6 +235,16 @@ async function findAll(req: Request, res: Response) {
 
 //GET ONE
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Escuderias']
+    #swagger.summary = 'Obtener una escudería por ID'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: { $ref: '#/components/schemas/Escuderia' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const escuderia = await em.findOneOrFail(
@@ -194,6 +264,22 @@ async function findOne(req: Request, res: Response) {
 
 //POST
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Escuderias']
+    #swagger.summary = 'Crear una nueva escudería'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/EscuderiaInput" }
+    }
+    #swagger.responses[201] = {
+      description: 'Created',
+      schema: { message: { type: 'string', example: 'Created' }, data: { $ref: '#/components/schemas/Escuderia' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     if (req.file) {
       req.body.sanitizedInput.logo_image = getRelativePath(req.file.path);
@@ -219,6 +305,22 @@ async function add(req: Request, res: Response) {
 
 //PUT & PATCH
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Escuderias']
+    #swagger.summary = 'Actualizar una escudería'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/EscuderiaInput" }
+    }
+    #swagger.responses[200] = {
+      description: 'Updated',
+      schema: { message: { type: 'string', example: 'Updated' }, data: { $ref: '#/components/schemas/Escuderia' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const escuderia = await em.findOneOrFail(Escuderia, { id });
@@ -251,6 +353,18 @@ async function update(req: Request, res: Response) {
 
 //DELETE
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Escuderias']
+    #swagger.summary = 'Eliminar una escudería'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[204] = { description: 'Deleted' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[409] = { 
+      description: 'Conflict',
+      schema: { message: { type: 'string', example: 'No se puede borrar la escudería porque tiene pilotos u otros registros asociados.' } }
+    }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const escuderia = await em.findOneOrFail(Escuderia, { id });

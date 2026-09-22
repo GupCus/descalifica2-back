@@ -33,6 +33,16 @@ function sanitizeMarca(req: Request, res: Response, next: NextFunction) {
 
 //Traer todas las marcas
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Marcas']
+    #swagger.summary = 'Obtener todas las marcas'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: [{ $ref: '#/components/schemas/Marca' }] }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const marcas = await em.find(Marca, {}, { populate: ["teams"] });
     const marcasWithUrls = marcas.map((m) => addImageUrls(m, req));
@@ -43,6 +53,16 @@ async function findAll(req: Request, res: Response) {
 }
 
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Marcas']
+    #swagger.summary = 'Obtener una marca por ID'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: { $ref: '#/components/schemas/Marca' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     console.log("Buscando marca con ID:", id);
@@ -70,6 +90,22 @@ async function findOne(req: Request, res: Response) {
 }
 
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Marcas']
+    #swagger.summary = 'Crear una nueva marca'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/MarcaInput" }
+    }
+    #swagger.responses[201] = {
+      description: 'Marca created successfully',
+      schema: { message: { type: 'string', example: 'Marca created successfully' }, data: { $ref: '#/components/schemas/Marca' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const data = req.body.sanitizedInput;
     if (req.file) {
@@ -87,6 +123,22 @@ async function add(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Marcas']
+    #swagger.summary = 'Actualizar una marca'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/MarcaInput" }
+    }
+    #swagger.responses[200] = {
+      description: 'Marca updated successfully',
+      schema: { message: { type: 'string', example: 'Marca updated successfully' }, data: { $ref: '#/components/schemas/Marca' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const marca = await em.findOneOrFail(Marca, { id });
@@ -112,6 +164,17 @@ async function update(req: Request, res: Response) {
 }
 
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Marcas']
+    #swagger.summary = 'Eliminar una marca'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Deleted',
+      schema: { message: { type: 'string', example: 'Marca deleted successfully' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const marca = await em.findOneOrFail(Marca, { id });
@@ -130,6 +193,20 @@ async function remove(req: Request, res: Response) {
 }
 
 async function uploadLogoImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Marcas']
+    #swagger.summary = 'Subir logo de la marca'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.consumes = ['multipart/form-data']
+    #swagger.parameters['image'] = { in: 'formData', type: 'file', required: true, description: 'Logo de la marca' }
+    #swagger.responses[200] = { 
+      description: 'Logo subido',
+      schema: { message: { type: 'string', example: 'Logo image uploaded successfully' }, data: { $ref: '#/components/schemas/Marca' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const marca = await em.findOneOrFail(Marca, { id });
@@ -159,6 +236,17 @@ async function uploadLogoImage(req: Request, res: Response) {
 }
 
 async function deleteLogoImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Marcas']
+    #swagger.summary = 'Eliminar logo de la marca'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Logo eliminado',
+      schema: { message: { type: 'string', example: 'Logo image deleted successfully' }, data: { $ref: '#/components/schemas/Marca' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const marca = await em.findOneOrFail(Marca, { id });
