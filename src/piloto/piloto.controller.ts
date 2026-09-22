@@ -1,12 +1,12 @@
-import { Request, Response, NextFunction } from "express";
-import { Piloto } from "./piloto.entity.js";
-import { orm } from "../shared/db/orm.js";
-import { NotFoundError } from "@mikro-orm/core";
+import { Request, Response, NextFunction } from 'express';
+import { Piloto } from './piloto.entity.js';
+import { orm } from '../shared/db/orm.js';
+import { NotFoundError } from '@mikro-orm/core';
 import {
   deleteFile,
   buildImageUrl,
   getRelativePath,
-} from "../shared/upload/upload.utils.js";
+} from '../shared/upload/upload.utils.js';
 
 const em = orm.em;
 
@@ -35,18 +35,32 @@ function sanitizePiloto(req: Request, res: Response, next: NextFunction) {
 // Helper: agrega URLs completas de imágenes a la respuesta
 function addImageUrls(req: Request, piloto: any) {
   const data =
-    typeof piloto.toJSON === "function" ? piloto.toJSON() : { ...piloto };
+    typeof piloto.toJSON === 'function' ? piloto.toJSON() : { ...piloto };
   data.profile_image_url = buildImageUrl(req, piloto.profile_image);
   return data;
 }
 // Upload de imagen de perfil dedicado
 async function uploadProfileImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Pilotos']
+    #swagger.summary = 'Subir imagen de retrato de piloto'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.consumes = ['multipart/form-data']
+    #swagger.parameters['image'] = { in: 'formData', type: 'file', required: true, description: 'Imagen de retrato' }
+    #swagger.responses[200] = { 
+      description: 'Imagen subida',
+      schema: { message: { type: 'string', example: 'Imagen actualizada' }, data: { $ref: '#/components/schemas/Piloto' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const piloto = await em.findOneOrFail(Piloto, { id });
 
     if (!req.file) {
-      return res.status(400).json({ message: "No se proporcionó una imagen" });
+      return res.status(400).json({ message: 'No se proporcionó una imagen' });
     }
 
     // Si ya tenía imagen, eliminar la anterior del disco
@@ -56,19 +70,30 @@ async function uploadProfileImage(req: Request, res: Response) {
 
     res
       .status(200)
-      .json({ message: "Imagen actualizada", data: addImageUrls(req, piloto) });
+      .json({ message: 'Imagen actualizada', data: addImageUrls(req, piloto) });
   } catch (error: any) {
     if (req.file) await deleteFile(getRelativePath(req.file.path));
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
 
 // Eliminar imagen de perfil sin borrar la entidad
 async function deleteProfileImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Pilotos']
+    #swagger.summary = 'Eliminar imagen de retrato de piloto'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Imagen eliminada',
+      schema: { message: { type: 'string', example: 'Imagen eliminada' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const piloto = await em.findOneOrFail(Piloto, { id });
@@ -76,61 +101,107 @@ async function deleteProfileImage(req: Request, res: Response) {
     if (!piloto.profile_image) {
       return res
         .status(404)
-        .json({ message: "El piloto no tiene imagen de perfil" });
+        .json({ message: 'El piloto no tiene imagen de perfil' });
     }
 
     await deleteFile(piloto.profile_image);
     piloto.profile_image = undefined;
     await em.flush();
 
-    res.status(200).json({ message: "Imagen eliminada" });
+    res.status(200).json({ message: 'Imagen eliminada' });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
 
 //get todos los pilotos
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Pilotos']
+    #swagger.summary = 'Obtener todos los pilotos'
+    #swagger.description = 'Devuelve un arreglo con la lista de pilotos registrados.'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { 
+        message: { type: 'string', example: 'OK' },
+        data: [{ $ref: '#/components/schemas/Piloto' }] 
+      }
+    }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const pilotos = await em.find(
       Piloto,
       {},
       {
-        populate: ["team", "racing_series", "season"],
+        populate: ['team', 'racing_series', 'season'],
       },
     );
     const data = pilotos.map((p) => addImageUrls(req, p));
-    res.status(200).json({ message: "OK", data });
+    res.status(200).json({ message: 'OK', data });
   } catch (error: any) {
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 
 //get para un piloto en específico
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Pilotos']
+    #swagger.summary = 'Obtener un piloto por ID'
+    #swagger.description = 'Busca un piloto por su ID y devuelve sus datos.'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { 
+        message: { type: 'string', example: 'OK' },
+        data: { $ref: '#/components/schemas/Piloto' } 
+      }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const piloto = await em.findOneOrFail(
       Piloto,
       { id },
-      { populate: ["team", "racing_series", "season"] },
+      { populate: ['team', 'racing_series', 'season'] },
     );
-    res.status(200).json({ message: "OK", data: addImageUrls(req, piloto) });
+    res.status(200).json({ message: 'OK', data: addImageUrls(req, piloto) });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
 
 //post un nuevo piloto
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Pilotos']
+    #swagger.summary = 'Crear un nuevo piloto'
+    #swagger.description = 'Crea un piloto utilizando los datos proporcionados. Soporta multipart para imágenes.'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/PilotoInput" }
+    }
+    #swagger.responses[201] = {
+      description: 'Created',
+      schema: { 
+        message: { type: 'string', example: 'Created' },
+        data: { $ref: '#/components/schemas/Piloto' } 
+      }
+    }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     // Si viene imagen en el POST multipart
     if (req.file) {
@@ -140,23 +211,43 @@ async function add(req: Request, res: Response) {
     await em.flush();
 
     // Populate la escudería para mostrar información completa
-    await em.populate(piloto, ["team", "racing_series"]);
+    await em.populate(piloto, ['team', 'racing_series']);
 
     res
       .status(201)
-      .json({ message: "Created", data: addImageUrls(req, piloto) });
+      .json({ message: 'Created', data: addImageUrls(req, piloto) });
   } catch (error: any) {
     // Limpiar archivo subido si hay error
     if (req.file) await deleteFile(getRelativePath(req.file.path));
-    console.error("Error creating piloto:", error);
+    console.error('Error creating piloto:', error);
     res
       .status(500)
-      .json({ message: "Internal server error", error: error.message });
+      .json({ message: 'Internal server error', error: error.message });
   }
 }
 
 //put&patch de piloto
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Pilotos']
+    #swagger.summary = 'Actualizar un piloto'
+    #swagger.description = 'Actualiza parcialmente los datos de un piloto por su ID.'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/PilotoInput" }
+    }
+    #swagger.responses[200] = {
+      description: 'Updated',
+      schema: { 
+        message: { type: 'string', example: 'Updated' },
+        data: { $ref: '#/components/schemas/Piloto' } 
+      }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const piloto = await em.findOneOrFail(Piloto, { id });
@@ -169,18 +260,27 @@ async function update(req: Request, res: Response) {
     await em.flush();
     res
       .status(200)
-      .json({ message: "Updated", data: addImageUrls(req, piloto) });
+      .json({ message: 'Updated', data: addImageUrls(req, piloto) });
   } catch (error: any) {
     if (req.file) await deleteFile(getRelativePath(req.file.path));
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }
 
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Pilotos']
+    #swagger.summary = 'Eliminar un piloto'
+    #swagger.description = 'Borra de manera permanente un piloto.'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[204] = { description: 'Deleted' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const piloto = await em.findOneOrFail(Piloto, { id });
@@ -189,12 +289,12 @@ async function remove(req: Request, res: Response) {
     if (piloto.profile_image) await deleteFile(piloto.profile_image);
 
     await em.removeAndFlush(piloto);
-    res.status(204).json({ message: "Deleted" });
+    res.status(204).json({ message: 'Deleted' });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
+      res.status(404).json({ message: 'Resource not found' });
     } else {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: 'Internal server error' });
     }
   }
 }

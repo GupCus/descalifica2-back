@@ -37,6 +37,16 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
 // Obtener todas las sesiones
 
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Sesiones']
+    #swagger.summary = 'Obtener todas las sesiones'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: [{ $ref: '#/components/schemas/Sesion' }] }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const sesiones = await em.find(
       Sesion,
@@ -52,6 +62,16 @@ async function findAll(req: Request, res: Response) {
 // Obtener una sesión específica
 
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Sesiones']
+    #swagger.summary = 'Obtener una sesión'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: { $ref: '#/components/schemas/Sesion' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const sesion = await em.findOneOrFail(
@@ -72,6 +92,22 @@ async function findOne(req: Request, res: Response) {
 // Crear una sesion
 
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Sesiones']
+    #swagger.summary = 'Crear sesión'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/SesionInput" }
+    }
+    #swagger.responses[201] = {
+      description: 'Sesion created successfully',
+      schema: { message: { type: 'string', example: 'Sesion created successfully' }, data: { $ref: '#/components/schemas/Sesion' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const sesionData = { ...req.body.sanitizedInput };
     const { session_results, ...sesionProps } = sesionData;
@@ -92,6 +128,22 @@ async function add(req: Request, res: Response) {
 // Actualizar una sesión
 
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Sesiones']
+    #swagger.summary = 'Actualizar sesión'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/SesionInput" }
+    }
+    #swagger.responses[200] = {
+      description: 'Updated',
+      schema: { message: { type: 'string', example: 'Updated' }, data: { $ref: '#/components/schemas/Sesion' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const sesion = await em.findOneOrFail(Sesion, { id });
@@ -110,6 +162,14 @@ async function update(req: Request, res: Response) {
 // Eliminar una sesión
 
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Sesiones']
+    #swagger.summary = 'Eliminar sesión'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[204] = { description: 'Deleted' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const sesion = em.getReference(Sesion, id);

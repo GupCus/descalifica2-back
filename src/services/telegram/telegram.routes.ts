@@ -25,6 +25,13 @@ telegramrouter.post(
   '/test-top-semanal',
   authenticateAdmin,
   async (_req, res) => {
+    /*
+      #swagger.tags = ['Servicios: Telegram']
+      #swagger.summary = 'Forzar el envío de los posts más populares de la semana'
+      #swagger.security = [{ "bearerAuth": [] }]
+      #swagger.responses[200] = { description: 'Envío ejecutado' }
+      #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+    */
     try {
       await enviarTopPostSemanal();
       res
@@ -42,6 +49,13 @@ telegramrouter.post(
   '/test-proximas-sesiones',
   authenticateAdmin,
   async (_req, res) => {
+    /*
+      #swagger.tags = ['Servicios: Telegram']
+      #swagger.summary = 'Forzar chequeo manual de próximas sesiones'
+      #swagger.security = [{ "bearerAuth": [] }]
+      #swagger.responses[200] = { description: 'Verificación ejecutada' }
+      #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+    */
     try {
       await verificarSesionesProximas();
       res

@@ -1,30 +1,37 @@
-import { Request, Response } from "express";
-import path from "node:path";
-import fs from "node:fs";
-import { UPLOADS_BASE } from "../shared/upload/multer.config.js";
+import { Request, Response } from 'express';
+import path from 'node:path';
+import fs from 'node:fs';
+import { UPLOADS_BASE } from '../shared/upload/multer.config.js';
 
 export const getAsset = (req: Request, res: Response) => {
+  /*
+    #swagger.tags = ['Assets']
+    #swagger.summary = 'Obtener una imagen'
+    //No se como responde esto sinceramente
+    #swagger.responses[200] = { description: 'Archivo' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+  */
   // En Express, el comodín '*' se captura en req.params[0]
   const relativePath = req.params[0];
 
   if (!relativePath) {
-    return res.status(400).json({ message: "Ruta no proporcionada." });
+    return res.status(400).json({ message: 'Ruta no proporcionada.' });
   }
 
   // Validación básica para prevenir Directory Traversal
-  if (relativePath.includes("..")) {
-    return res.status(400).json({ message: "Ruta de archivo inválida." });
+  if (relativePath.includes('..')) {
+    return res.status(400).json({ message: 'Ruta de archivo inválida.' });
   }
 
   // Si trae el prefijo 'uploads/', lo removemos ya que UPLOADS_BASE ya es la carpeta de uploads
-  const cleanRelativePath = relativePath.replace(/^uploads\//, "");
+  const cleanRelativePath = relativePath.replace(/^uploads\//, '');
 
   // Construir la ruta absoluta del archivo
   const absolutePath = path.join(UPLOADS_BASE, cleanRelativePath);
 
   // Verificar si el archivo existe
   if (!fs.existsSync(absolutePath)) {
-    return res.status(404).json({ message: "Asset no encontrado." });
+    return res.status(404).json({ message: 'Asset no encontrado.' });
   }
 
   // Enviar el archivo con caché de 30 días (en milisegundos)

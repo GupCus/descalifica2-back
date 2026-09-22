@@ -24,6 +24,16 @@ function sanitizeCarrera(req: Request, res: Response, next: NextFunction) {
 
 //Traer todas las carreras
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Carreras']
+    #swagger.summary = 'Obtener todas las carreras'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: [{ $ref: '#/components/schemas/Carrera' }] }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     let carreras;
     if (req.query.year) {
@@ -63,6 +73,16 @@ async function findAll(req: Request, res: Response) {
   }
 }
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Carreras']
+    #swagger.summary = 'Obtener una carrera por ID'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: { $ref: '#/components/schemas/Carrera' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const carrera = await em.findOneOrFail(
@@ -89,6 +109,22 @@ async function findOne(req: Request, res: Response) {
 }
 
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Carreras']
+    #swagger.summary = 'Crear una nueva carrera'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/CarreraInput" }
+    }
+    #swagger.responses[201] = {
+      description: 'Created',
+      schema: { message: { type: 'string', example: 'Carrera created successfully' }, data: { $ref: '#/components/schemas/Carrera' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const input = { ...req.body.sanitizedInput };
     const sessionsInput = input.sessions;
@@ -124,6 +160,22 @@ async function add(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Carreras']
+    #swagger.summary = 'Actualizar una carrera'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/CarreraInput" }
+    }
+    #swagger.responses[200] = {
+      description: 'Updated',
+      schema: { message: { type: 'string', example: 'Carrera updated successfully' }, data: { $ref: '#/components/schemas/Carrera' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const carrera = await em.findOneOrFail(Carrera, { id });
@@ -142,6 +194,17 @@ async function update(req: Request, res: Response) {
 }
 
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Carreras']
+    #swagger.summary = 'Eliminar una carrera'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Deleted',
+      schema: { message: { type: 'string', example: 'Carrera deleted successfully' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const carrera = await em.findOneOrFail(Carrera, { id });

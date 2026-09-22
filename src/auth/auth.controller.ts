@@ -15,6 +15,22 @@ import { pendingRegistrationLinks } from '../services/telegram/telegram.service.
 import { sendPasswordResetEmail } from '../services/email/email.service.js';
 
 async function register(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Auth']
+    #swagger.summary = 'Registro de usuario'
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/UsuarioInput" }
+    }
+    #swagger.responses[201] = {
+      description: 'Usuario creado y logueado',
+      schema: { token: 'string', user: { $ref: '#/components/schemas/Usuario' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[409] = { description: 'Conflict' }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const secret = process.env.JWT_SECRET;
     const {
@@ -137,7 +153,10 @@ async function register(req: Request, res: Response) {
       }
       finalTelegramUsername = cleanTg;
       finalTelegramId =
-        'otp' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        'otp' +
+        Math.floor(Math.random() * 10000)
+          .toString()
+          .padStart(4, '0');
     }
 
     const usuario = em.create(Usuario, {
@@ -201,6 +220,17 @@ async function register(req: Request, res: Response) {
 }
 
 async function checkToken(req: AuthenticatedRequest, res: Response) {
+  /*
+    #swagger.tags = ['Auth']
+    #swagger.summary = 'Validar token JWT'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = {
+      description: 'Token válido',
+      schema: { message: 'Token válido', user: { $ref: '#/components/schemas/Usuario' } }
+    }
+    #swagger.responses[401] = { description: 'No autorizado' }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     // Obtener el usuario actual de la BD para verificar datos actualizados
     const em = orm.em.fork();
@@ -227,6 +257,24 @@ async function checkToken(req: AuthenticatedRequest, res: Response) {
 }
 
 async function login(req: AuthenticatedRequest, res: Response) {
+  /*
+    #swagger.tags = ['Auth']
+    #swagger.summary = 'Iniciar sesión'
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { 
+        mail: { type: 'string', example: 'usuario@email.com' },
+        password: { type: 'string', example: '123456' }
+      }
+    }
+    #swagger.responses[200] = {
+      description: 'Sesión iniciada',
+      schema: { token: 'string', user: { $ref: '#/components/schemas/Usuario' } }
+    }
+    #swagger.responses[401] = { description: 'No autorizado / credenciales inválidas' }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const em = orm.em.fork();
     let mail: string;
@@ -313,6 +361,21 @@ async function login(req: AuthenticatedRequest, res: Response) {
 }
 
 async function forgotPassword(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Auth']
+    #swagger.summary = 'Solicitar recuperación de contraseña'
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { email: { type: 'string', example: 'usuario@email.com' } }
+    }
+    #swagger.responses[200] = { 
+      description: 'Correo de recuperación enviado (si existe)',
+      schema: { message: { type: 'string', example: 'Si el correo está registrado, recibirás las instrucciones para restablecer tu contraseña.' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const email = req.body.email?.trim();
 
@@ -359,7 +422,8 @@ async function forgotPassword(req: Request, res: Response) {
     } catch (mailError) {
       console.error('Error al enviar correo de recuperación:', mailError);
       return res.status(500).json({
-        message: 'Error al enviar el correo de recuperación. Inténtalo más tarde.',
+        message:
+          'Error al enviar el correo de recuperación. Inténtalo más tarde.',
       });
     }
 
@@ -371,6 +435,24 @@ async function forgotPassword(req: Request, res: Response) {
 }
 
 async function resetPassword(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Auth']
+    #swagger.summary = 'Restablecer contraseña con token'
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { 
+        token: { type: 'string' },
+        newPassword: { type: 'string' }
+      }
+    }
+    #swagger.responses[200] = { 
+      description: 'Contraseña restablecida',
+      schema: { message: { type: 'string', example: '¡Contraseña restablecida exitosamente! Ya puedes iniciar sesión.' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const { token, newPassword } = req.body;
 
@@ -390,10 +472,7 @@ async function resetPassword(req: Request, res: Response) {
       });
     }
 
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     const em = orm.em.fork();
     const usuario = await em.findOne(Usuario, {
@@ -428,4 +507,3 @@ async function resetPassword(req: Request, res: Response) {
 }
 
 export { login, register, checkToken, forgotPassword, resetPassword };
-

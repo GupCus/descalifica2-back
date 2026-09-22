@@ -45,6 +45,19 @@ function addImageUrls(req: Request, circuito: Circuito) {
 }
 
 async function uploadTrackMap(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Circuitos']
+    #swagger.summary = 'Subir mapa del circuito'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.consumes = ['multipart/form-data']
+    #swagger.parameters['image'] = { in: 'formData', type: 'file', required: true, description: 'Imagen del mapa' }
+    #swagger.responses[200] = { 
+      description: 'Imagen subida',
+      schema: { message: { type: 'string', example: 'Track map uploaded successfully' }, data: { $ref: '#/components/schemas/Circuito' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const circuito = await em.findOneOrFail(Circuito, { id });
@@ -72,6 +85,17 @@ async function uploadTrackMap(req: Request, res: Response) {
 }
 
 async function deleteTrackMap(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Circuitos']
+    #swagger.summary = 'Eliminar mapa del circuito'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Imagen eliminada',
+      schema: { message: { type: 'string', example: 'Track map deleted successfully' }, data: { $ref: '#/components/schemas/Circuito' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const circuito = await em.findOneOrFail(Circuito, { id });
@@ -96,6 +120,19 @@ async function deleteTrackMap(req: Request, res: Response) {
 }
 
 async function uploadPhotoImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Circuitos']
+    #swagger.summary = 'Subir foto del circuito'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.consumes = ['multipart/form-data']
+    #swagger.parameters['image'] = { in: 'formData', type: 'file', required: true, description: 'Foto del circuito' }
+    #swagger.responses[200] = { 
+      description: 'Imagen subida',
+      schema: { message: { type: 'string', example: 'Photo image uploaded successfully' }, data: { $ref: '#/components/schemas/Circuito' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const circuito = await em.findOneOrFail(Circuito, { id });
@@ -123,6 +160,17 @@ async function uploadPhotoImage(req: Request, res: Response) {
 }
 
 async function deletePhotoImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Circuitos']
+    #swagger.summary = 'Eliminar foto del circuito'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Imagen eliminada',
+      schema: { message: { type: 'string', example: 'Photo image deleted successfully' }, data: { $ref: '#/components/schemas/Circuito' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const circuito = await em.findOneOrFail(Circuito, { id });
@@ -148,6 +196,16 @@ async function deletePhotoImage(req: Request, res: Response) {
 
 //get todos los Circuitos
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Circuitos']
+    #swagger.summary = 'Obtener todos los circuitos'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: [{ $ref: '#/components/schemas/Circuito' }] }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const circuitos = await em.find(Circuito, {});
     const data = circuitos.map((circuito) => addImageUrls(req, circuito));
@@ -159,6 +217,16 @@ async function findAll(req: Request, res: Response) {
 
 //get para un Circuito en específico
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Circuitos']
+    #swagger.summary = 'Obtener un circuito por ID'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: { $ref: '#/components/schemas/Circuito' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const circuito = await em.findOneOrFail(Circuito, { id });
@@ -174,6 +242,22 @@ async function findOne(req: Request, res: Response) {
 
 //post un nuevo Circuito
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Circuitos']
+    #swagger.summary = 'Crear un nuevo circuito'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/CircuitoInput" }
+    }
+    #swagger.responses[201] = {
+      description: 'Created',
+      schema: { message: { type: 'string', example: 'Circuito created successfully' }, data: { $ref: '#/components/schemas/Circuito' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const circuito = em.create(Circuito, req.body.sanitizedInput);
     if (req.file) {
@@ -193,6 +277,22 @@ async function add(req: Request, res: Response) {
 //put&patch de Circuito
 
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Circuitos']
+    #swagger.summary = 'Actualizar un circuito'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/CircuitoInput" }
+    }
+    #swagger.responses[200] = {
+      description: 'Updated',
+      schema: { message: { type: 'string', example: 'Circuito updated successfully' }, data: { $ref: '#/components/schemas/Circuito' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const circuito = await em.findOneOrFail(Circuito, { id });
@@ -221,6 +321,17 @@ async function update(req: Request, res: Response) {
 
 //Aunque este definida en el repository con un parametro {id: string} de esta forma tenemos la versatilidad de que manden tanto asi como el character entero
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Circuitos']
+    #swagger.summary = 'Eliminar un circuito'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Deleted',
+      schema: { message: { type: 'string', example: 'Circuito deleted successfully' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const circuito = await em.findOneOrFail(Circuito, { id });

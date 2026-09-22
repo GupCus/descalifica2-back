@@ -109,10 +109,10 @@ const swaggerFilePath = path.resolve(
   process.cwd(),
   'src/shared/swagger/swagger-output.json',
 );
-
+// Si existe el json del swagger, deja abierto el endpoint /api/docs
 if (fs.existsSync(swaggerFilePath)) {
   const swaggerDocument = JSON.parse(fs.readFileSync(swaggerFilePath, 'utf8'));
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 } else {
   console.warn(
     'No se encontró swagger-output.json. Ejecutá el script de swagger para generarlo. No va a funcionar swagger hasta entonces.',
@@ -124,13 +124,25 @@ app.use((_, res) => {
   res.status(404).send({ message: 'Recurso no encontrado.' });
 });
 
+//Sincroniza la config de tablas esto es de DEV cuando este todo terminado hay que borrarlo
 await syncSchema();
-await actualizarresultados();
+
+//Intenta actualizar los ultimos resultados, falla si hay una sesión en curso (no pagamos la api)
+try {
+  await actualizarresultados();
+} catch (err) {
+  console.warn(
+    'No se pudo actualizar el último resultado, seguramente haya una sesión actualmente: ' +
+      err,
+  );
+}
+//Bot de telegram solo en prod, pq solo podemos tener una instancia activa
 if (!process.argv.includes('--dev')) {
   iniciarBotTelegram();
 }
 iniciarCronJobs();
 
+//Inicio del server
 const port = process.env.PORT;
 app.listen(port, () => {
   console.log(`Corriendo en puerto ${port}`);

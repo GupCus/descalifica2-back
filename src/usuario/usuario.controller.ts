@@ -76,6 +76,23 @@ function addImageUrls(req: Request, usuario: Usuario) {
 }
 
 async function uploadAvatar(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Usuarios']
+    #swagger.summary = 'Subir avatar de usuario'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.consumes = ['multipart/form-data']
+    #swagger.parameters['avatar'] = { in: 'formData', type: 'file', required: true, description: 'Imagen de avatar' }
+    #swagger.responses[200] = { 
+      description: 'Avatar uploaded',
+      schema: { message: { type: 'string', example: 'Avatar uploaded' }, data: { $ref: '#/components/schemas/Usuario' } }
+    }
+    #swagger.responses[400] = { 
+      description: 'Bad Request',
+      schema: { message: { type: 'string', example: 'Image is required' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   const em = orm.em.fork();
   try {
     const em = orm.em.fork();
@@ -106,6 +123,20 @@ async function uploadAvatar(req: Request, res: Response) {
 }
 
 async function deleteAvatar(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Usuarios']
+    #swagger.summary = 'Eliminar avatar de usuario'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Avatar deleted',       
+      schema: { 
+        message: { type: 'string', example: 'Avatar deleted' }, 
+        data: { $ref: '#/components/schemas/Usuario' } 
+      }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   const em = orm.em.fork();
   try {
     const em = orm.em.fork();
@@ -132,6 +163,19 @@ async function deleteAvatar(req: Request, res: Response) {
 
 // obtener todos los usuarios
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Usuarios']
+    #swagger.summary = 'Obtener todos los usuarios'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { 
+        message: { type: 'string', example: 'OK' },
+        data: [{ $ref: '#/components/schemas/Usuario' }] 
+      }
+    }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   const em = orm.em.fork();
   try {
     const em = orm.em.fork();
@@ -146,6 +190,20 @@ async function findAll(req: Request, res: Response) {
 // Obtener un usuario por ID
 
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Usuarios']
+    #swagger.summary = 'Obtener un usuario por ID'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { 
+        message: { type: 'string', example: 'OK' },
+        data: { $ref: '#/components/schemas/Usuario' } 
+      }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   const em = orm.em.fork();
   try {
     const em = orm.em.fork();
@@ -164,6 +222,29 @@ async function findOne(req: Request, res: Response) {
 //Actualizar un usuario existente
 
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Usuarios']
+    #swagger.summary = 'Actualizar un usuario'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/UsuarioInput" }
+    }
+    #swagger.responses[200] = {
+      description: 'Updated',
+      schema: { 
+        message: { type: 'string', example: 'Updated' },
+        data: { $ref: '#/components/schemas/Usuario' } 
+      }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[409] = { 
+      description: 'Conflict',
+      schema: { message: { type: 'string', example: 'El correo provisto ya está registrado.' } }
+    }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   const em = orm.em.fork();
   try {
     const em = orm.em.fork();
@@ -221,7 +302,10 @@ async function update(req: Request, res: Response) {
       // Si cambió el telegram_username, regenerar el código OTP para que vuelva a vincular
       if (telegram_username !== usuario.telegram_username) {
         req.body.sanitizedInput.telegram_id =
-          'otp' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+          'otp' +
+          Math.floor(Math.random() * 10000)
+            .toString()
+            .padStart(4, '0');
       }
     } else if (telegram_username !== undefined) {
       // Si borró el telegram_username, limpiar también el telegram_id
@@ -248,6 +332,14 @@ async function update(req: Request, res: Response) {
 //Eliminar un usuario
 
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Usuarios']
+    #swagger.summary = 'Eliminar un usuario'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[204] = { description: 'Deleted' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   const em = orm.em.fork();
   try {
     const em = orm.em.fork();
@@ -271,6 +363,23 @@ async function remove(req: Request, res: Response) {
 // Encontrar usuarios publicos
 
 async function findPublic(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Usuarios']
+    #swagger.summary = 'Obtener usuarios publicos'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { 
+        message: { type: 'string', example: 'OK' },
+        data: [{ 
+          id: { type: 'integer' },
+          username: { type: 'string' },
+          name: { type: 'string' },
+          avatar_url: { type: 'string' }
+        }] 
+      }
+    }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   const em = orm.em.fork();
   try {
     const usuarios = await em.find(Usuario, {});

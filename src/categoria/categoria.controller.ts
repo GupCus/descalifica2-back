@@ -47,6 +47,20 @@ function addImageUrls(req: Request, categoria: Categoria) {
 }
 
 async function uploadLogoImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Categorías']
+    #swagger.summary = 'Subir logo de la categoría'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.consumes = ['multipart/form-data']
+    #swagger.parameters['image'] = { in: 'formData', type: 'file', required: true, description: 'Logo de la categoría' }
+    #swagger.responses[200] = { 
+      description: 'Logo subido',
+      schema: { message: { type: 'string', example: 'Logo image uploaded successfully' }, data: { $ref: '#/components/schemas/Categoria' } }
+    }
+    #swagger.responses[400] = { description: 'Bad Request' }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const categoria = await em.findOneOrFail(Categoria, { id });
@@ -72,6 +86,17 @@ async function uploadLogoImage(req: Request, res: Response) {
 }
 
 async function deleteLogoImage(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Categorías']
+    #swagger.summary = 'Eliminar logo de la categoría'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Logo eliminado',
+      schema: { message: { type: 'string', example: 'Logo image deleted successfully' }, data: { $ref: '#/components/schemas/Categoria' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const categoria = await em.findOneOrFail(Categoria, { id });
@@ -93,6 +118,16 @@ async function deleteLogoImage(req: Request, res: Response) {
 
 //findALL
 async function findAll(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Categorías']
+    #swagger.summary = 'Obtener todas las categorías'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'findAll categorías:' }, data: [{ $ref: '#/components/schemas/Categoria' }] } 
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const categorias = await em.find(Categoria, {});
     const data = categorias.map((c) => addImageUrls(req, c));
@@ -104,6 +139,16 @@ async function findAll(req: Request, res: Response) {
 
 //findOne
 async function findOne(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Categorías']
+    #swagger.summary = 'Obtener una categoría por ID'
+    #swagger.responses[200] = {
+      description: 'OK',
+      schema: { message: { type: 'string', example: 'OK' }, data: { $ref: '#/components/schemas/Categoria' } } 
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const categoria = await em.findOneOrFail(Categoria, { id });
@@ -115,6 +160,22 @@ async function findOne(req: Request, res: Response) {
 
 //add
 async function add(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Categorías']
+    #swagger.summary = 'Crear una nueva categoría'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/CategoriaInput" }
+    }
+    #swagger.responses[201] = {
+      description: 'Created',
+      schema: { message: { type: 'string', example: 'categoria created succesfully' }, data: { $ref: '#/components/schemas/Categoria' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const payload = req.body.sanitizedInput || req.body;
     if (req.file) {
@@ -135,6 +196,22 @@ async function add(req: Request, res: Response) {
 
 //update
 async function update(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Categorías']
+    #swagger.summary = 'Actualizar una categoría'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: { $ref: "#/components/schemas/CategoriaInput" }
+    }
+    #swagger.responses[200] = {
+      description: 'Updated',
+      schema: { message: { type: 'string', example: 'Updated succesfully' }, data: { $ref: '#/components/schemas/Categoria' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const categoria = await em.findOneOrFail(Categoria, { id });
@@ -162,6 +239,17 @@ async function update(req: Request, res: Response) {
 
 //delete
 async function remove(req: Request, res: Response) {
+  /*
+    #swagger.tags = ['Categorías']
+    #swagger.summary = 'Eliminar una categoría'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.responses[200] = { 
+      description: 'Deleted',
+      schema: { message: { type: 'string', example: 'deleted succesfully' }, data: { $ref: '#/components/schemas/Categoria' } }
+    }
+    #swagger.responses[404] = { schema: { $ref: '#/components/schemas/NotFound' } }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
   try {
     const id = Number.parseInt(req.params.id);
     const categoria = await em.findOneOrFail(Categoria, { id });
