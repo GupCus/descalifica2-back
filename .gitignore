@@ -16,7 +16,7 @@ node_modules
 dist
 dist-ssr
 *.local
-
+/src/shared/swagger/swagger-output.json
 # Archivos de entorno
 .env
 .env.*
