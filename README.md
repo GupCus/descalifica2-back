@@ -1,7 +1,5 @@
 # 🏎️ descalifica2-back 🏎️
 
-[![Tests](https://github.com/GupCus/descalifica2-back/actions/workflows/tests.yml/badge.svg)](https://github.com/GupCus/descalifica2-back/actions/workflows/tests.yml)
-
 ### 👥Integrantes
 
 - 52818 - Barroso Bollero, Agustín
