@@ -12,7 +12,8 @@
     "alwaysStrict": true,
     "skipLibCheck": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "types": ["node", "vitest/globals"] //agrego esto para que vitest funcione con typescript
   },
   "include": ["src/**/*", "**/*.ts"],
   "exclude": ["node_modules"]

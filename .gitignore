@@ -44,3 +44,7 @@ Thumbs.db
 # Archivos subidos por usuarios (excepto banderas pre-cargadas)
 uploads/users/
 uploads/blogposts/
+
+# testing
+.vitest/
+coverage/
