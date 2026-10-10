@@ -253,7 +253,7 @@ const asignarganadores = async (
     }
     temporada.team_championship.add(resultadostramitados);
   }
-  em.flush();
+  await em.flush();
 };
 
 //Funcion para cargar a la bd todos los pilotos que provee openf1
@@ -451,10 +451,11 @@ async function actualizarsesiones(
       const transformarenstring = (a: any) =>
         Array.isArray(a) ? a.toString() : a;
 
+      const pos = Number.isInteger(r.position) ? r.position : undefined;
       const resultado = em.create(Session_Result, {
-        position: r.position,
+        position: pos,
         number_of_laps: r.number_of_laps,
-        dnf: r.dnf,
+        dnf: r.dnf || (r.position as any) === 'RT',
         dns: r.dns,
         dsq: r.dsq,
         duration: transformarenstring(r.duration),
@@ -473,79 +474,83 @@ async function actualizarsesiones(
 //Si no se escribe un id, actualizará la ultima
 
 async function actualizarresultados(id?: number) {
-  const em = orm.em.fork();
+  try {
+    const em = orm.em.fork();
 
-  //Caso sin id
-  if (!id) {
-    console.log('actualizando la ultima carrera');
-    const hoy = new Date();
-    const temporada = await em.findOne(Temporada, {
-      year: hoy.getFullYear(),
-    });
-    if (temporada) {
+    //Caso sin id
+    if (!id) {
+      console.log('actualizando la ultima carrera');
+      const hoy = new Date();
+      const temporada = await em.findOne(Temporada, {
+        year: hoy.getFullYear(),
+      });
+      if (temporada) {
+        const carrera = await em.findOne(
+          Carrera,
+          { season: temporada, start_date: { $lt: hoy } },
+          {
+            orderBy: { start_date: 'DESC' },
+            populate: ['sessions', 'sessions.session_result'],
+          },
+        );
+
+        //Si ya están los ultimos resultados solo actualiza el campeonato (a veces hay sanciones por fuera de las carreras)
+        if (
+          carrera &&
+          carrera.sessions.length > 0 &&
+          carrera.sessions
+            .getItems()
+            [carrera.sessions.getItems().length - 1].session_result.isEmpty()
+        ) {
+          //a veces cambian los pilotos de escuderia en una sesion
+          await CargarPilotosyEscuderias(em, carrera.season);
+          await actualizarsesiones(em, carrera, 'latest');
+          console.log('Se actualizó la carrera: ' + carrera.name);
+        }
+        //Actualizar ganadores
+        await asignarganadores(em, temporada);
+      }
+
+      //Caso con id
+    } else {
+      console.log('actualizando la carrera id: ' + id);
       const carrera = await em.findOne(
         Carrera,
-        { season: temporada, start_date: { $lt: hoy } },
+        { id },
         {
-          orderBy: { start_date: 'DESC' },
-          populate: ['sessions', 'sessions.session_result'],
+          populate: ['season', 'sessions', 'sessions.session_result'],
         },
       );
+      if (carrera) {
+        const temporada = carrera.season;
+        if (temporada) {
+          await CargarPilotosyEscuderias(em, carrera.season);
+          const meetings = (await fetchF1(
+            '/meetings?meeting_name=' +
+              //Esto me transforma la string en formato uri
+              encodeURIComponent(carrera.name) +
+              '&year=' +
+              temporada.year,
+          )) as Meetings[];
 
-      //Si ya están los ultimos resultados solo actualiza el campeonato (a veces hay sanciones por fuera de las carreras)
-      if (
-        carrera &&
-        carrera.sessions.length > 0 &&
-        carrera.sessions
-          .getItems()
-          [carrera.sessions.getItems().length - 1].session_result.isEmpty()
-      ) {
-        //a veces cambian los pilotos de escuderia en una sesion
-        await CargarPilotosyEscuderias(em, carrera.season);
-        await actualizarsesiones(em, carrera, 'latest');
-        console.log('Se actualizó la carrera: ' + carrera.name);
-      }
-      //Actualizar ganadores
-      await asignarganadores(em, temporada);
-    }
-
-    //Caso con id
-  } else {
-    console.log('actualizando la carrera id: ' + id);
-    const carrera = await em.findOne(
-      Carrera,
-      { id },
-      {
-        populate: ['season', 'sessions', 'sessions.session_result'],
-      },
-    );
-    if (carrera) {
-      const temporada = carrera.season;
-      if (temporada) {
-        await CargarPilotosyEscuderias(em, carrera.season);
-        const meetings = (await fetchF1(
-          '/meetings?meeting_name=' +
-            //Esto me transforma la string en formato uri
-            encodeURIComponent(carrera.name) +
-            '&year=' +
-            temporada.year,
-        )) as Meetings[];
-
-        if (meetings && meetings.length > 0) {
-          const meeting_key = meetings[0].meeting_key.toString();
-          await actualizarsesiones(em, carrera, meeting_key);
-          console.log('Se actualizó la carrera: ' + carrera.name);
-        } else {
-          console.log('No se encontró la carrera en OpenF1: ' + carrera.name);
+          if (meetings && meetings.length > 0) {
+            const meeting_key = meetings[0].meeting_key.toString();
+            await actualizarsesiones(em, carrera, meeting_key);
+            console.log('Se actualizó la carrera: ' + carrera.name);
+          } else {
+            console.log('No se encontró la carrera en OpenF1: ' + carrera.name);
+          }
         }
+        //Caso alt: nos mandaron un id que no corresponde a ninguna
+      } else {
+        throw new Error('No se encontró la carrera');
       }
-      //Caso alt: nos mandaron un id que no corresponde a ninguna
-    } else {
-      throw error('No se encontró la carrera');
     }
+    await em.flush();
+    console.log('hecho!');
+  } catch (err) {
+    console.error('Error al actualizar resultados de OpenF1:', err);
   }
-  await em.flush();
-  console.log('hecho!');
 }
 
 // FUNCIONES PARA CONSTRUIR DE CERO UNA BD
