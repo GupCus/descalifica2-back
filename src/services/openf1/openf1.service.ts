@@ -109,9 +109,25 @@ const asignarganadores = async (
     }
     temporada.drivers_championship.removeAll();
 
+    // Agrupa por driver_number y conserva el de mayor session_key (última sesión con puntos del meeting)
+    const ultimosResultadosPilotosMap = new Map<number, Championship_Drivers>();
+    for (const r of resultadospilotos) {
+      const existente = ultimosResultadosPilotosMap.get(r.driver_number);
+      if (!existente || r.session_key > existente.session_key) {
+        ultimosResultadosPilotosMap.set(r.driver_number, r);
+      }
+    }
+    const ultimosResultadosPilotos = Array.from(
+      ultimosResultadosPilotosMap.values(),
+    ).sort(
+      (a, b) =>
+        (a.position_current - b.position_current) ||
+        (b.points_current - a.points_current),
+    );
+
     //Itera sobre los resultados
     const resultadostramitados = [];
-    for (const r of resultadospilotos) {
+    for (const r of ultimosResultadosPilotos) {
       let piloto = pilotos.find((p) => p.num === r.driver_number);
 
       // Si el piloto no está en la bd, busco el piloto en la api
@@ -211,9 +227,25 @@ const asignarganadores = async (
     }
     temporada.team_championship.removeAll();
 
+    // Agrupa por team_name y conserva el de mayor session_key (última sesión con puntos del meeting)
+    const ultimosResultadosEscuderiasMap = new Map<string, Championship_Teams>();
+    for (const r of resultadosescuderias) {
+      const existente = ultimosResultadosEscuderiasMap.get(r.team_name);
+      if (!existente || r.session_key > existente.session_key) {
+        ultimosResultadosEscuderiasMap.set(r.team_name, r);
+      }
+    }
+    const ultimosResultadosEscuderias = Array.from(
+      ultimosResultadosEscuderiasMap.values(),
+    ).sort(
+      (a, b) =>
+        (a.position_current - b.position_current) ||
+        (b.points_current - a.points_current),
+    );
+
     //Itera
     const resultadostramitados = [];
-    for (const r of resultadosescuderias) {
+    for (const r of ultimosResultadosEscuderias) {
       let escuderia = escuderias.find((e) => e.name === r.team_name);
 
       // Si no está la escudería (por alguna razón extraña), la crea

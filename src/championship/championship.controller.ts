@@ -57,13 +57,13 @@ async function findAll(req: Request, res: Response) {
       championship = await em.find(
         Driver_Championship,
         { season: tempactual },
-        { populate: ['piloto'] },
+        { populate: ['piloto'], orderBy: { position: 'ASC', points: 'DESC' } },
       );
     } else if (req.query.tipo === 'escuderias') {
       championship = await em.find(
         Team_Championship,
         { season: tempactual },
-        { populate: ['escuderia'] },
+        { populate: ['escuderia'], orderBy: { position: 'ASC', points: 'DESC' } },
       );
     } else {
       throw new Error('Bad Request');
