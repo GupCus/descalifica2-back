@@ -253,7 +253,6 @@ const asignarganadores = async (
     }
     temporada.team_championship.add(resultadostramitados);
   }
-  em.flush();
 };
 
 //Funcion para cargar a la bd todos los pilotos que provee openf1
@@ -452,7 +451,7 @@ async function actualizarsesiones(
         Array.isArray(a) ? a.toString() : a;
 
       const resultado = em.create(Session_Result, {
-        position: r.position,
+        position: typeof r.position === 'number' ? r.position : undefined,
         number_of_laps: r.number_of_laps,
         dnf: r.dnf,
         dns: r.dns,

@@ -124,9 +124,6 @@ app.use((_, res) => {
   res.status(404).send({ message: 'Recurso no encontrado.' });
 });
 
-//Sincroniza la config de tablas esto es de DEV cuando este todo terminado hay que borrarlo
-await syncSchema();
-
 //Intenta actualizar los ultimos resultados, falla si hay una sesión en curso (no pagamos la api)
 try {
   await actualizarresultados();

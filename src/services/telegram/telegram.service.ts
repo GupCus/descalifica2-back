@@ -270,16 +270,22 @@ export async function enviarTopPostSemanal() {
   const hace7Dias = new Date();
   hace7Dias.setDate(hace7Dias.getDate() - 7);
 
-  // Buscar el blogpost con más comentarios de la última semana (raw SQL)
-  const resultado = (await em
-    .getConnection()
-    .execute(
-      `SELECT blogpost_id, COUNT(*) as total FROM comentario_post WHERE created_at >= ? GROUP BY blogpost_id ORDER BY total DESC LIMIT 1`,
-      [hace7Dias],
-    )) as { blogpost_id: number; total: number }[];
+  // Buscar el blogpost con más comentarios de la última semana
+  const resultado = (await em.getConnection().execute(
+    `SELECT b.id AS blogpost_id, COUNT(c.id) AS total
+       FROM blogpost b
+       INNER JOIN comentario_post c ON c.blogpost_id = b.id
+       WHERE b.created_at >= ?
+       GROUP BY b.id
+       ORDER BY total DESC, b.created_at DESC
+       LIMIT 1`,
+    [hace7Dias],
+  )) as { blogpost_id: number; total: number }[];
 
-  if (!resultado.length || resultado[0].total === 0) {
-    console.log('No hay posts con comentarios esta semana. No se envía nada.');
+  if (!resultado.length || Number(resultado[0].total) === 0) {
+    console.log(
+      '[Telegram] No hay posts creados en la última semana con comentarios. No se envía nada.',
+    );
     return;
   }
 
@@ -288,16 +294,18 @@ export async function enviarTopPostSemanal() {
   const blogpost = await em.findOne(Blogpost, { id: blogpostId });
 
   if (!blogpost) {
-    console.log('No se encontró el blogpost.');
+    console.log('[Telegram] No se encontró el blogpost.');
     return;
   }
-
+  console.log(
+    `[Telegram] Post semanal seleccionado: "${blogpost.title}" (ID: ${blogpost.id}) con ${resultado[0].total} comentarios.`,
+  );
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'; // despues se pone el link de la pagina
   const mensaje =
     `🏁 ¡Post destacado de la semana!\n\n` +
     `👀 ¡Pasa a echar un vistazo!\n\n` +
     `📝 ${blogpost.title}\n` +
-    `👉 ${frontendUrl}/blog/${blogpost.id}`;
+    `👉 ${frontendUrl}/foro/${blogpost.id}`;
 
   await enviarMensajeMasivo(mensaje);
 }
