@@ -75,6 +75,16 @@ const crearUrlHeadshot = (
   return url;
 };
 
+//En fines de semana con Sprint, la api devuelve una tabla del campeonato por cada sesión que da puntos (Sprint y Carrera)
+//Si no filtramos, se duplican los pilotos/escuderías en el campeonato. Me quedo solo con la sesión más reciente
+const filtrarUltimaSesion = <T extends { session_key: number }>(
+  resultados: T[],
+): T[] => {
+  if (!Array.isArray(resultados) || resultados.length === 0) return [];
+  const ultimaSesion = Math.max(...resultados.map((r) => r.session_key));
+  return resultados.filter((r) => r.session_key === ultimaSesion);
+};
+
 // FUNCIONES PRINCIPALES
 
 //Funcion para encontrar el mejor piloto y escudería de la temporada desde openf1
@@ -85,9 +95,11 @@ const asignarganadores = async (
 ) => {
   //PRIMERO: CAMPEONATO CONDUCTORES
   //Pide todos los resultados actualizados a la meeting solicitada
-  const resultadospilotos = (await fetchF1(
-    '/championship_drivers?meeting_key=' + ultimameeting,
-  )) as Championship_Drivers[];
+  const resultadospilotos = filtrarUltimaSesion(
+    (await fetchF1(
+      '/championship_drivers?meeting_key=' + ultimameeting,
+    )) as Championship_Drivers[],
+  );
 
   //Me guardo los pilotos y escuderias en memoria para no matar la bd a querys
   let pilotos = await em.find(Piloto, {
@@ -196,9 +208,11 @@ const asignarganadores = async (
   //SEGUNDA PARTE: TORNEO DE ESCUDERIAS
   //Me ahorro los comentarios
   //Esto da un objeto con propiedad .team_name, el cual es un campo de escuderia(name), necesito buscar esa entidad escuderia y asignarla a temporada.winner_driver
-  const resultadosescuderias = (await fetchF1(
-    '/championship_teams?meeting_key=' + ultimameeting,
-  )) as Championship_Teams[];
+  const resultadosescuderias = filtrarUltimaSesion(
+    (await fetchF1(
+      '/championship_teams?meeting_key=' + ultimameeting,
+    )) as Championship_Teams[],
+  );
 
   if (
     resultadosescuderias &&
