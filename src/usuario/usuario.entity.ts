@@ -40,7 +40,7 @@ export class Usuario extends baseEntity {
   telegram_id?: string;
   @Property({ nullable: true, hidden: true })
   reset_password_token?: string;
-  @Property({ nullable: true })
+  @Property({ nullable: true, hidden: true })
   reset_password_expires?: Date;
   @OneToMany(() => Blogpost, (blogpost) => blogpost.author)
   posts = new Collection<Blogpost>(this);

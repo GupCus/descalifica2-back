@@ -9,27 +9,38 @@ import {
 
 const em = orm.em;
 
+const CATEGORIAS_PERMITIDAS = ['F1', 'F2'];
+
 function sanitizeCategoriaInput(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
-  req.body.sanitizedInput = {
-    name: req.body.name.toUpperCase(),
-    description: req.body.description,
-    teams: req.body.teams,
-    drivers: req.body.drivers,
-    seasons: req.body.seasons,
-    id: req.params.id,
-  };
-  if (
-    req.body.sanitizedInput.name !== 'F1' ||
-    req.body.sanitizedInput.name !== 'F2'
-  ) {
+  if (typeof req.body?.name !== 'string' || req.body.name.trim() === '') {
+    return res
+      .status(400)
+      .json({ message: 'El nombre de la categoría es obligatorio' });
+  }
+
+  const normalizedName = req.body.name.trim().toUpperCase();
+
+  if (!CATEGORIAS_PERMITIDAS.includes(normalizedName)) {
     return res
       .status(400)
       .json({ message: 'Categoria inválida, solo se permiten F1 y F2' });
   }
+
+  req.body.sanitizedInput = {
+    name: normalizedName,
+    description:
+      typeof req.body.description === 'string'
+        ? req.body.description.trim()
+        : req.body.description,
+    teams: req.body.teams,
+    drivers: req.body.drivers,
+    seasons: req.body.seasons,
+  };
+
   Object.keys(req.body.sanitizedInput).forEach((key) => {
     if (req.body.sanitizedInput[key] === undefined) {
       delete req.body.sanitizedInput[key];
