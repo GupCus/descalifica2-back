@@ -67,12 +67,56 @@ function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-function addImageUrls(req: Request, usuario: Usuario) {
-  const result = { ...usuario } as any;
-  if (usuario.avatar) {
-    result.avatar_url = buildImageUrl(req, usuario.avatar);
-  }
-  return result;
+export interface UsuarioResponseDTO {
+  id?: number;
+  username: string;
+  name: string;
+  surname: string | null;
+  email: string;
+  user_type: string;
+  date_of_birth: Date | null;
+  fav_driver: string | null;
+  fav_team: string | null;
+  fav_circuit: string | null;
+  bio: string | null;
+  avatar: string | null;
+  avatar_url?: string | null;
+  telegram_username: string | null;
+}
+
+export interface UsuarioPublicDTO {
+  id?: number;
+  username: string;
+  name: string;
+  avatar_url?: string | null;
+}
+
+function toUsuarioDTO(req: Request, usuario: Usuario): UsuarioResponseDTO {
+  return {
+    id: usuario.id,
+    username: usuario.username,
+    name: usuario.name,
+    surname: usuario.surname ?? null,
+    email: usuario.email,
+    user_type: usuario.user_type,
+    date_of_birth: usuario.date_of_birth ?? null,
+    fav_driver: usuario.fav_driver ?? null,
+    fav_team: usuario.fav_team ?? null,
+    fav_circuit: usuario.fav_circuit ?? null,
+    bio: usuario.bio ?? null,
+    avatar: usuario.avatar ?? null,
+    avatar_url: usuario.avatar ? buildImageUrl(req, usuario.avatar) : undefined,
+    telegram_username: usuario.telegram_username ?? null,
+  };
+}
+
+function toUsuarioPublicDTO(req: Request, usuario: Usuario): UsuarioPublicDTO {
+  return {
+    id: usuario.id,
+    username: usuario.username,
+    name: usuario.name,
+    avatar_url: usuario.avatar ? buildImageUrl(req, usuario.avatar) : undefined,
+  };
 }
 
 async function uploadAvatar(req: Request, res: Response) {
@@ -95,7 +139,6 @@ async function uploadAvatar(req: Request, res: Response) {
   */
   const em = orm.em.fork();
   try {
-    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
 
@@ -112,7 +155,7 @@ async function uploadAvatar(req: Request, res: Response) {
 
     res
       .status(200)
-      .json({ message: 'Avatar uploaded', data: addImageUrls(req, usuario) });
+      .json({ message: 'Avatar uploaded', data: toUsuarioDTO(req, usuario) });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: 'Resource not found' });
@@ -139,7 +182,6 @@ async function deleteAvatar(req: Request, res: Response) {
   */
   const em = orm.em.fork();
   try {
-    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
 
@@ -151,7 +193,7 @@ async function deleteAvatar(req: Request, res: Response) {
 
     res
       .status(200)
-      .json({ message: 'Avatar deleted', data: addImageUrls(req, usuario) });
+      .json({ message: 'Avatar deleted', data: toUsuarioDTO(req, usuario) });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: 'Resource not found' });
@@ -178,10 +220,9 @@ async function findAll(req: Request, res: Response) {
   */
   const em = orm.em.fork();
   try {
-    const em = orm.em.fork();
     const usuarios = await em.find(Usuario, {});
-    const usuariosWithUrls = usuarios.map((u) => addImageUrls(req, u));
-    res.status(200).json({ message: 'OK', data: usuariosWithUrls });
+    const usuariosDTO = usuarios.map((u) => toUsuarioDTO(req, u));
+    res.status(200).json({ message: 'OK', data: usuariosDTO });
   } catch (error: any) {
     res.status(500).json({ message: 'Internal server error' });
   }
@@ -206,10 +247,9 @@ async function findOne(req: Request, res: Response) {
   */
   const em = orm.em.fork();
   try {
-    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
-    res.status(200).json({ message: 'OK', data: addImageUrls(req, usuario) });
+    res.status(200).json({ message: 'OK', data: toUsuarioDTO(req, usuario) });
   } catch (error: any) {
     if (error instanceof NotFoundError) {
       res.status(404).json({ message: 'Resource not found' });
@@ -247,7 +287,6 @@ async function update(req: Request, res: Response) {
   */
   const em = orm.em.fork();
   try {
-    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
 
@@ -318,7 +357,7 @@ async function update(req: Request, res: Response) {
     await em.flush();
     res
       .status(200)
-      .json({ message: 'Updated', data: addImageUrls(req, usuario) });
+      .json({ message: 'Updated', data: toUsuarioDTO(req, usuario) });
   } catch (error: any) {
     console.error('Error in update usuario:', error);
     if (error instanceof NotFoundError) {
@@ -342,7 +381,6 @@ async function remove(req: Request, res: Response) {
   */
   const em = orm.em.fork();
   try {
-    const em = orm.em.fork();
     const id = Number.parseInt(req.params.id);
     const usuario = await em.findOneOrFail(Usuario, { id });
 
@@ -383,12 +421,7 @@ async function findPublic(req: Request, res: Response) {
   const em = orm.em.fork();
   try {
     const usuarios = await em.find(Usuario, {});
-    const data = usuarios.map((u) => ({
-      id: u.id,
-      username: u.username,
-      name: u.name,
-      avatar_url: u.avatar ? buildImageUrl(req, u.avatar) : undefined,
-    }));
+    const data = usuarios.map((u) => toUsuarioPublicDTO(req, u));
     res.status(200).json({ message: 'OK', data });
   } catch {
     res.status(500).json({ message: 'Internal server error' });
@@ -397,6 +430,8 @@ async function findPublic(req: Request, res: Response) {
 
 export {
   sanitizeUsuario,
+  toUsuarioDTO,
+  toUsuarioPublicDTO,
   findAll,
   findOne,
   update,
