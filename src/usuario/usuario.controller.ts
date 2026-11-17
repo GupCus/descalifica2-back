@@ -374,7 +374,8 @@ async function findPublic(req: Request, res: Response) {
           id: { type: 'integer' },
           username: { type: 'string' },
           name: { type: 'string' },
-          avatar_url: { type: 'string' }
+          avatar_url: { type: 'string' },
+          is_admin: { type: 'boolean' }
         }] 
       }
     }
@@ -388,6 +389,7 @@ async function findPublic(req: Request, res: Response) {
       username: u.username,
       name: u.name,
       avatar_url: u.avatar ? buildImageUrl(req, u.avatar) : undefined,
+      is_admin: u.user_type?.toLowerCase() === 'admin',
     }));
     res.status(200).json({ message: 'OK', data });
   } catch {
