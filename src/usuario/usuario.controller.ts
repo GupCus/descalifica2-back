@@ -42,17 +42,28 @@ function sanitizeUsuario(req: Request, res: Response, next: NextFunction) {
   if (req.body.bio !== undefined) sanitized.bio = req.body.bio.trim() || null;
 
   if (req.body.telegram_username !== undefined) {
-    const rawTg = String(req.body.telegram_username).trim();
-    if (rawTg.length > 0) {
-      const cleanTg = rawTg.replace(/^@/, '');
-      if (/\s/.test(cleanTg)) {
+    let crudo = req.body.telegram_username;
+    //Si es null o vacío queda en null
+    if (crudo === null || crudo === '') {
+      sanitized.telegram_username = null;
+
+      //Como validamos con código otp, en verdad acá podriamos dejar pasar cualquier cosa, pero por las dudas
+      //rechazamos los espacios, los strings muy cortos y todo lo que no sea string
+      //(El front stringifica siempre, por si algun usuario llega a ser 12345).
+    } else if (typeof crudo === 'string') {
+      crudo = crudo.trim();
+      crudo = crudo.startsWith('@') ? crudo.slice(1) : crudo;
+      if (crudo.length < 5 || crudo.includes(' ')) {
         return res.status(400).json({
-          message: 'El usuario de Telegram no debe contener espacios.',
+          message:
+            'El usuario de Telegram no debe contener espacios y debe tener al menos 5 caracteres.',
         });
       }
-      sanitized.telegram_username = cleanTg;
+      sanitized.telegram_username = crudo;
     } else {
-      sanitized.telegram_username = null;
+      return res.status(400).json({
+        message: 'El usuario de Telegram debe ser texto.',
+      });
     }
   }
 
