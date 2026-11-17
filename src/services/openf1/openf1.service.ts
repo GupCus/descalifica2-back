@@ -14,7 +14,6 @@ import { EntityManager } from '@mikro-orm/mysql';
 import { Championship_Drivers } from './openf1.types/championship_drivers.type.js';
 import { Championship_Teams } from './openf1.types/championship_teams.type.js';
 import { Session_Result } from '../../sesion/session_result.entity.js';
-import { error } from 'node:console';
 import { Driver_Championship } from '../../championship/driver_championship.entity.js';
 import { Team_Championship } from '../../championship/team_championship.entity.js';
 
@@ -487,9 +486,9 @@ async function actualizarsesiones(
 
 async function actualizarresultados(id?: number) {
   const em = orm.em.fork();
-
+  let carreraact;
   //Caso sin id
-  if (!id) {
+  if (id === undefined) {
     console.log('actualizando la ultima carrera');
     const hoy = new Date();
     const temporada = await em.findOne(Temporada, {
@@ -518,6 +517,7 @@ async function actualizarresultados(id?: number) {
         await actualizarsesiones(em, carrera, 'latest');
         console.log('Se actualizó la carrera: ' + carrera.name);
       }
+      carreraact = carrera;
       //Actualizar ganadores
       await asignarganadores(em, temporada);
     }
@@ -548,17 +548,17 @@ async function actualizarresultados(id?: number) {
           const meeting_key = meetings[0].meeting_key.toString();
           await actualizarsesiones(em, carrera, meeting_key);
           console.log('Se actualizó la carrera: ' + carrera.name);
+          carreraact = carrera;
         } else {
           console.log('No se encontró la carrera en OpenF1: ' + carrera.name);
         }
       }
       //Caso alt: nos mandaron un id que no corresponde a ninguna
-    } else {
-      throw error('No se encontró la carrera');
     }
   }
   await em.flush();
   console.log('hecho!');
+  return carreraact;
 }
 
 // FUNCIONES PARA CONSTRUIR DE CERO UNA BD
