@@ -182,7 +182,7 @@ async function findOne(req: Request, res: Response) {
 }
 
 //post un nuevo piloto
-async function add(req: Request, res: Response) {
+async function add(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Pilotos']
     #swagger.summary = 'Crear un nuevo piloto'
@@ -219,10 +219,7 @@ async function add(req: Request, res: Response) {
   } catch (error: any) {
     // Limpiar archivo subido si hay error
     if (req.file) await deleteFile(getRelativePath(req.file.path));
-    console.error('Error creating piloto:', error);
-    res
-      .status(500)
-      .json({ message: 'Internal server error', error: error.message });
+    next(error);
   }
 }
 

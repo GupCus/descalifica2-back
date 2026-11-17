@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { orm } from '../../shared/db/orm.js';
 import { Usuario } from '../../usuario/usuario.entity.js';
 import { AuthenticatedRequest } from '../../auth/auth.types.js';
@@ -7,6 +7,7 @@ import { pendingRegistrationLinks } from './telegram.service.js';
 export const generarcodigo = async (
   req: AuthenticatedRequest,
   res: Response,
+  next: NextFunction,
 ) => {
   /*
     #swagger.tags = ['Servicios: Telegram']
@@ -62,16 +63,14 @@ export const generarcodigo = async (
       });
     }
   } catch (error: any) {
-    console.error('Hubo un error:', error);
-    return res
-      .status(500)
-      .json({ message: 'Error interno', error: error.message });
+    next(error);
   }
 };
 
 export const verificarVinculacion = async (
   req: AuthenticatedRequest,
   res: Response,
+  next: NextFunction,
 ) => {
   /*
     #swagger.tags = ['Servicios: Telegram']
@@ -113,16 +112,14 @@ export const verificarVinculacion = async (
       telegram_username: usuario.telegram_username || null,
     });
   } catch (error: any) {
-    console.error('Error verificando vinculación:', error);
-    return res
-      .status(500)
-      .json({ message: 'Error interno', error: error.message });
+    next(error);
   }
 };
 
 export const desvincularTelegram = async (
   req: AuthenticatedRequest,
   res: Response,
+  next: NextFunction,
 ) => {
   /*
     #swagger.tags = ['Servicios: Telegram']
@@ -154,14 +151,15 @@ export const desvincularTelegram = async (
       message: 'Cuenta de Telegram desvinculada correctamente.',
     });
   } catch (error: any) {
-    console.error('Error desvinculando Telegram:', error);
-    return res
-      .status(500)
-      .json({ message: 'Error interno', error: error.message });
+    next(error);
   }
 };
 
-export const generarcodigoRegistro = async (_req: Request, res: Response) => {
+export const generarcodigoRegistro = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   /*
     #swagger.tags = ['Servicios: Telegram']
     #swagger.summary = 'Generar código para registro en Telegram'
@@ -195,14 +193,15 @@ export const generarcodigoRegistro = async (_req: Request, res: Response) => {
       codigo,
     });
   } catch (error: any) {
-    console.error('Error generando código de registro:', error);
-    return res
-      .status(500)
-      .json({ message: 'Error interno', error: error.message });
+    next(error);
   }
 };
 
-export const verificarRegistro = async (req: Request, res: Response) => {
+export const verificarRegistro = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   /*
     #swagger.tags = ['Servicios: Telegram']
     #swagger.summary = 'Verificar código de registro en Telegram'
@@ -244,9 +243,6 @@ export const verificarRegistro = async (req: Request, res: Response) => {
       error: pending.error || null,
     });
   } catch (error: any) {
-    console.error('Error verificando registro de Telegram:', error);
-    return res
-      .status(500)
-      .json({ message: 'Error interno', error: error.message });
+    next(error);
   }
 };

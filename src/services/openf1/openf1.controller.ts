@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import {
   actualizarresultados,
   destruirbd_importaropenf1,
@@ -8,6 +8,7 @@ import {
 const openf1actualizarresultadoscarrera = async (
   req: Request,
   res: Response,
+  next: NextFunction,
 ) => {
   /*
     #swagger.tags = ['Servicios: OpenF1']
@@ -52,13 +53,16 @@ const openf1actualizarresultadoscarrera = async (
       return res.status(404).json({ message: 'No se encontró la carrera.' });
     }
   } catch (error: any) {
-    console.error('Hubo un error al actualizar una sesión:', error);
-    res.status(500).json({ message: 'Error interno', error: error.message });
+    next(error);
   }
 };
 
 // Funcion para restablecer toda la BD desde openf1, no le brindo un endpoint por seguridad
-const openf1restablecer = async (req: Request, res: Response) => {
+const openf1restablecer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   console.log('Restableciendo BD...');
   try {
     destruirbd_importaropenf1();
@@ -66,8 +70,7 @@ const openf1restablecer = async (req: Request, res: Response) => {
       .status(202)
       .json({ message: 'Se dio inicio a la regeneración de la BD.' });
   } catch (error: any) {
-    console.error('Hubo un error:', error);
-    res.status(500).json({ message: 'Error interno', error: error.message });
+    next(error);
   }
 };
 

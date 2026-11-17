@@ -36,7 +36,7 @@ function sanitizeSesionInput(req: Request, res: Response, next: NextFunction) {
 
 // Obtener todas las sesiones
 
-async function findAll(req: Request, res: Response) {
+async function findAll(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Sesiones']
     #swagger.summary = 'Obtener todas las sesiones'
@@ -55,7 +55,7 @@ async function findAll(req: Request, res: Response) {
     );
     res.status(200).json({ message: 'OK', data: sesiones });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
@@ -91,7 +91,7 @@ async function findOne(req: Request, res: Response) {
 
 // Crear una sesion
 
-async function add(req: Request, res: Response) {
+async function add(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Sesiones']
     #swagger.summary = 'Crear sesión'
@@ -120,8 +120,7 @@ async function add(req: Request, res: Response) {
       .status(201)
       .json({ message: 'Sesion created successfully', data: sesion });
   } catch (error: any) {
-    console.error('Error creating sesion:', error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 

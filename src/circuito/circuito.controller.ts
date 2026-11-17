@@ -195,7 +195,7 @@ async function deletePhotoImage(req: Request, res: Response) {
 }
 
 //get todos los Circuitos
-async function findAll(req: Request, res: Response) {
+async function findAll(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Circuitos']
     #swagger.summary = 'Obtener todos los circuitos'
@@ -211,7 +211,7 @@ async function findAll(req: Request, res: Response) {
     const data = circuitos.map((circuito) => addImageUrls(req, circuito));
     res.status(200).json({ message: "OK", data });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
@@ -241,7 +241,7 @@ async function findOne(req: Request, res: Response) {
 }
 
 //post un nuevo Circuito
-async function add(req: Request, res: Response) {
+async function add(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Circuitos']
     #swagger.summary = 'Crear un nuevo circuito'
@@ -269,8 +269,7 @@ async function add(req: Request, res: Response) {
       data: addImageUrls(req, circuito),
     });
   } catch (error: any) {
-    console.error("Error creating circuito: ", error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 

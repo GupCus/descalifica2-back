@@ -118,7 +118,7 @@ export const handleMulterErrors: ErrorRequestHandler = (
         .status(413)
         .json({ message: 'El archivo excede el tamaño máximo de 5MB' });
     }
-    return res.status(400).json({ message: `Error de upload: ${err.message}` });
+    return res.status(400).json({ message: 'Error al procesar el archivo subido.' });
   }
 
   if (err.message?.includes('Tipo de archivo no permitido')) {

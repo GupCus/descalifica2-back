@@ -32,7 +32,7 @@ function sanitizeMarca(req: Request, res: Response, next: NextFunction) {
 }
 
 //Traer todas las marcas
-async function findAll(req: Request, res: Response) {
+async function findAll(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Marcas']
     #swagger.summary = 'Obtener todas las marcas'
@@ -48,7 +48,7 @@ async function findAll(req: Request, res: Response) {
     const marcasWithUrls = marcas.map((m) => addImageUrls(m, req));
     res.status(200).json({ message: "OK", data: marcasWithUrls });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
@@ -89,7 +89,7 @@ async function findOne(req: Request, res: Response) {
   }
 }
 
-async function add(req: Request, res: Response) {
+async function add(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Marcas']
     #swagger.summary = 'Crear una nueva marca'
@@ -117,8 +117,7 @@ async function add(req: Request, res: Response) {
       .status(201)
       .json({ message: "Marca created successfully", data: addImageUrls(marca, req) });
   } catch (error: any) {
-    console.error("Error creating marca:", error);
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 

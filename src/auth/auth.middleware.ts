@@ -1,7 +1,21 @@
 import { AuthenticatedRequest, jwtpayload } from "./auth.types.js";
 import { Response, Request, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-export const authenticateToken = (
+import crypto from "node:crypto";
+import { orm } from "../shared/db/orm.js";
+import { Usuario } from "../usuario/usuario.entity.js";
+
+export function getTokenVersion(
+  usuario: Pick<Usuario, "password" | "user_type">,
+): string {
+  return crypto
+    .createHash("sha256")
+    .update(`${usuario.password ?? ""}:${usuario.user_type}`)
+    .digest("hex")
+    .slice(0, 12);
+}
+
+export const authenticateToken = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction,
@@ -17,35 +31,64 @@ export const authenticateToken = (
       });
     }
 
-    jwt.verify(
-      token as string,
-      process.env.JWT_SECRET as string,
-      (err: any, decoded: any) => {
-        if (err) {
-          if (err.name === "TokenExpiredError") {
-            return res.status(403).json({
-              message: "Token expirado :(",
-              error: "TOKEN_EXPIRED",
-            });
-          }
+    let decoded: jwtpayload;
+    try {
+      decoded = jwt.verify(
+        token as string,
+        process.env.JWT_SECRET as string,
+      ) as jwtpayload;
+    } catch (err: any) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(401).json({
+          message: "Token expirado :(",
+          error: "TOKEN_EXPIRED",
+        });
+      }
 
-          return res.status(403).json({
-            message: "Invalid token.",
-            error: "INVALID_TOKEN",
-          });
-        }
+      return res.status(401).json({
+        message: "Invalid token.",
+        error: "INVALID_TOKEN",
+      });
+    }
 
-        req.user = decoded as jwtpayload;
-        next();
-      },
-    );
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { id: decoded.id });
+
+    if (!usuario || !usuario.id) {
+      return res.status(401).json({
+        message: "Usuario no encontrado o cuenta inactiva.",
+        error: "USER_NOT_FOUND",
+      });
+    }
+
+    const expectedTokenVersion = getTokenVersion(usuario);
+    const isVersionMismatch =
+      decoded.token_v !== undefined && decoded.token_v !== expectedTokenVersion;
+    const isRoleMismatch =
+      decoded.user_type !== undefined &&
+      decoded.user_type !== usuario.user_type;
+
+    if (isVersionMismatch || isRoleMismatch) {
+      return res.status(401).json({
+        message:
+          "La sesión ya no es válida. Por favor, iniciá sesión nuevamente.",
+        error: "TOKEN_REVOKED",
+      });
+    }
+
+    req.user = {
+      id: usuario.id,
+      username: usuario.username,
+      user_type: usuario.user_type,
+      email: usuario.email,
+      avatar: usuario.avatar ?? null,
+    };
+    next();
   } catch (error) {
-    console.error(
-      "Error en auth middleware: ",
-      res.status(500).json({
-        message: "Internal server error",
-      }),
-    );
+    console.error("Error en auth middleware: ", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
   }
 };
 
@@ -55,7 +98,7 @@ export const authenticateAdmin = (
   res: Response,
   next: NextFunction,
 ) => {
-  authenticateToken(req, res, () => {
+  return authenticateToken(req, res, () => {
     if (req.user?.user_type === "admin") {
       return next();
     }
@@ -72,7 +115,7 @@ export const authenticateCliente = (
   res: Response,
   next: NextFunction,
 ) => {
-  authenticateToken(req, res, () => {
+  return authenticateToken(req, res, () => {
     if (req.user?.user_type === "cliente") {
       return next();
     }
@@ -88,7 +131,7 @@ export const authorizeSelfOrAdmin = (
   res: Response,
   next: NextFunction,
 ) => {
-  authenticateToken(req, res, () => {
+  return authenticateToken(req, res, () => {
     const targetId = Number.parseInt(req.params.id);
     const isAdmin = req.user?.user_type === "admin";
     const isSelf = req.user?.id != null && req.user.id === targetId;
