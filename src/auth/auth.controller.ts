@@ -13,6 +13,7 @@ import bcrypt from 'bcrypt';
 import { getRelativePath } from '../shared/upload/upload.utils.js';
 import { pendingRegistrationLinks } from '../services/telegram/telegram.service.js';
 import { sendPasswordResetEmail } from '../services/email/email.service.js';
+import { getTokenVersion } from './auth.middleware.js';
 
 async function register(req: Request, res: Response) {
   /*
@@ -191,6 +192,7 @@ async function register(req: Request, res: Response) {
       mail: usuario.email,
       user_type: usuario.user_type,
       username: usuario.username,
+      token_v: getTokenVersion(usuario),
     };
 
     const token = jwt.sign(
@@ -232,22 +234,18 @@ async function checkToken(req: AuthenticatedRequest, res: Response) {
     #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
   */
   try {
-    // Obtener el usuario actual de la BD para verificar datos actualizados
-    const em = orm.em.fork();
-    const usuario = await em.findOne(Usuario, { id: req.user?.id });
-
-    if (!usuario) {
+    if (!req.user) {
       return res.status(401).json({ message: 'Usuario no encontrado' });
     }
 
-    // Devolver datos actualizados de la BD, no del token
+    // req.user ya fue revalidado contra la BD en authenticateToken
     res.status(200).json({
       message: 'Token válido',
       user: {
-        id: usuario.id,
-        username: usuario.username,
-        user_type: usuario.user_type, // Valor actual de la BD
-        avatar: usuario.avatar ? usuario.avatar : null,
+        id: req.user.id,
+        username: req.user.username,
+        user_type: req.user.user_type,
+        avatar: req.user.avatar ?? null,
       },
     });
   } catch (error) {
@@ -334,6 +332,7 @@ async function login(req: AuthenticatedRequest, res: Response) {
       mail: usuario.email,
       user_type: usuario.user_type,
       username: usuario.username,
+      token_v: getTokenVersion(usuario),
     };
 
     const token = jwt.sign(
