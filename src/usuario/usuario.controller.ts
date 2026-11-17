@@ -100,6 +100,7 @@ export interface UsuarioPublicDTO {
   username: string;
   name: string;
   avatar_url?: string | null;
+  is_admin: boolean;
 }
 
 function toUsuarioDTO(req: Request, usuario: Usuario): UsuarioResponseDTO {
@@ -127,6 +128,7 @@ function toUsuarioPublicDTO(req: Request, usuario: Usuario): UsuarioPublicDTO {
     username: usuario.username,
     name: usuario.name,
     avatar_url: usuario.avatar ? buildImageUrl(req, usuario.avatar) : undefined,
+    is_admin: usuario.user_type?.toLowerCase() === 'admin',
   };
 }
 
@@ -423,7 +425,8 @@ async function findPublic(req: Request, res: Response) {
           id: { type: 'integer' },
           username: { type: 'string' },
           name: { type: 'string' },
-          avatar_url: { type: 'string' }
+          avatar_url: { type: 'string' },
+          is_admin: { type: 'boolean' }
         }] 
       }
     }
