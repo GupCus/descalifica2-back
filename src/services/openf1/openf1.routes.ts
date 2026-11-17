@@ -1,10 +1,15 @@
-import { authenticateAdmin } from "../../auth/auth.middleware.js";
-import { Router } from "express";
-import { openf1actualizarresultadoscarrera } from "./openf1.controller.js";
+import { authenticateAdmin } from '../../auth/auth.middleware.js';
+import { Router } from 'express';
+import { openf1actualizarresultadoscarrera } from './openf1.controller.js';
 
 export const of1router = Router();
 of1router.post(
-  "/actualizarresultados/:id",
+  '/actualizarresultados/:id',
+  authenticateAdmin,
+  openf1actualizarresultadoscarrera,
+);
+of1router.post(
+  '/actualizarresultados/',
   authenticateAdmin,
   openf1actualizarresultadoscarrera,
 );
