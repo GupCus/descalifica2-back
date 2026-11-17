@@ -26,7 +26,7 @@ function sanitizeTemporadaInput(
 }
 
 //findALL
-async function findAll(req: Request, res: Response) {
+async function findAll(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Temporadas']
     #swagger.summary = 'Obtener todas las temporadas'
@@ -45,12 +45,12 @@ async function findAll(req: Request, res: Response) {
     );
     res.status(200).json({ message: 'findAll Temporadas', data: temporada });
   } catch (error: any) {
-    res.status(500).json({ message: 'Internal server error' });
+    next(error);
   }
 }
 
 //findOne
-async function findOne(req: Request, res: Response) {
+async function findOne(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Temporadas']
     #swagger.summary = 'Obtener una temporada'
@@ -70,12 +70,12 @@ async function findOne(req: Request, res: Response) {
     );
     res.status(200).json({ data: temporada });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
 //add
-async function add(req: Request, res: Response) {
+async function add(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Temporadas']
     #swagger.summary = 'Crear temporada'
@@ -99,12 +99,12 @@ async function add(req: Request, res: Response) {
       .status(201)
       .json({ message: 'temporada created succesfully', data: temporada });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
 //update
-async function update(req: Request, res: Response) {
+async function update(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Temporadas']
     #swagger.summary = 'Actualizar temporada'
@@ -128,12 +128,12 @@ async function update(req: Request, res: Response) {
     await em.flush();
     res.status(200).json({ message: 'Updated succesfully', data: temporada });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
 //delete
-async function remove(req: Request, res: Response) {
+async function remove(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Temporadas']
     #swagger.summary = 'Eliminar temporada'
@@ -151,7 +151,7 @@ async function remove(req: Request, res: Response) {
     await em.removeAndFlush(temporada);
     res.status(200).json({ message: 'deleted succesfully', data: temporada });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 

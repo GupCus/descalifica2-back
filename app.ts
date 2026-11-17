@@ -69,6 +69,7 @@ import { telegramrouter } from './src/services/telegram/telegram.routes.js';
 import { championshipRouter } from './src/championship/championship.routes.js';
 import { iniciarCronJobs } from './src/services/cron/cron.service.js';
 import { handleMulterErrors } from './src/shared/upload/upload.middleware.js';
+import { errorHandler } from './src/shared/errors/error.middleware.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import swaggerUi from 'swagger-ui-express';
@@ -101,9 +102,6 @@ app.use('/api/telegram', telegramrouter);
 app.use('/api/championship', championshipRouter);
 app.use('/api/nationalities', nationalityRouter);
 
-//Middleware de error para Multer (archivo muy grande, tipo no permitido, etc.)
-app.use(handleMulterErrors);
-
 // Documentación Swagger
 const swaggerFilePath = path.resolve(
   process.cwd(),
@@ -123,6 +121,10 @@ if (fs.existsSync(swaggerFilePath)) {
 app.use((_, res) => {
   res.status(404).send({ message: 'Recurso no encontrado.' });
 });
+
+//Middlewares globales de manejo de errores (Multer + errores generales / BD)
+app.use(handleMulterErrors);
+app.use(errorHandler);
 
 //Intenta actualizar los ultimos resultados, falla si hay una sesión en curso (no pagamos la api)
 try {

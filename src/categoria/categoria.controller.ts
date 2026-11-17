@@ -46,7 +46,7 @@ function addImageUrls(req: Request, categoria: Categoria) {
   return result;
 }
 
-async function uploadLogoImage(req: Request, res: Response) {
+async function uploadLogoImage(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Categorías']
     #swagger.summary = 'Subir logo de la categoría'
@@ -81,11 +81,11 @@ async function uploadLogoImage(req: Request, res: Response) {
       data: addImageUrls(req, categoria),
     });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
-async function deleteLogoImage(req: Request, res: Response) {
+async function deleteLogoImage(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Categorías']
     #swagger.summary = 'Eliminar logo de la categoría'
@@ -112,12 +112,12 @@ async function deleteLogoImage(req: Request, res: Response) {
       data: addImageUrls(req, categoria),
     });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
 //findALL
-async function findAll(req: Request, res: Response) {
+async function findAll(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Categorías']
     #swagger.summary = 'Obtener todas las categorías'
@@ -133,12 +133,12 @@ async function findAll(req: Request, res: Response) {
     const data = categorias.map((c) => addImageUrls(req, c));
     res.status(200).json({ message: 'findAll categorías:', data });
   } catch (error: any) {
-    res.status(500).json({ message: 'Internal server error' });
+    next(error);
   }
 }
 
 //findOne
-async function findOne(req: Request, res: Response) {
+async function findOne(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Categorías']
     #swagger.summary = 'Obtener una categoría por ID'
@@ -154,12 +154,12 @@ async function findOne(req: Request, res: Response) {
     const categoria = await em.findOneOrFail(Categoria, { id });
     res.status(200).json({ data: addImageUrls(req, categoria) });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
 //add
-async function add(req: Request, res: Response) {
+async function add(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Categorías']
     #swagger.summary = 'Crear una nueva categoría'
@@ -190,12 +190,12 @@ async function add(req: Request, res: Response) {
         data: addImageUrls(req, categoria),
       });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
 //update
-async function update(req: Request, res: Response) {
+async function update(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Categorías']
     #swagger.summary = 'Actualizar una categoría'
@@ -233,12 +233,12 @@ async function update(req: Request, res: Response) {
         data: addImageUrls(req, categoria),
       });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
 //delete
-async function remove(req: Request, res: Response) {
+async function remove(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Categorías']
     #swagger.summary = 'Eliminar una categoría'
@@ -259,7 +259,7 @@ async function remove(req: Request, res: Response) {
     await em.removeAndFlush(categoria);
     res.status(200).json({ message: 'deleted succesfully', data: categoria });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 }
 
