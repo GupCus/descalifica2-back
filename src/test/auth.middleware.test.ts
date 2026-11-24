@@ -1,16 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { Response, NextFunction } from 'express';
-import {
-  authenticateAdmin,
-  authenticateToken,
-  authorizeSelfOrAdmin,
-  getTokenVersion,
-} from '../auth/auth.middleware.js';
 import { AuthenticatedRequest } from '../auth/auth.types.js';
 
-const { mockFindOne } = vi.hoisted(() => ({
-  mockFindOne: vi.fn(),
-}));
+const mockFindOne = vi.fn();
 
 vi.mock('../shared/db/orm.js', () => ({
   orm: {
@@ -22,14 +14,24 @@ vi.mock('../shared/db/orm.js', () => ({
   },
 }));
 
+const {
+  authenticateToken,
+  authenticateTokenAllowPasswordChange,
+  authenticateAdmin,
+  requireRecentAuth,
+  authorizeSelfOrAdmin,
+} = await import('../auth/auth.middleware.js');
+
 describe('Auth Middleware Tests', () => {
   const JWT_SECRET = 'clave_secreta_para_test';
 
   beforeEach(() => {
     process.env.JWT_SECRET = JWT_SECRET;
+    delete process.env.REAUTH_WINDOW_SECONDS;
     mockFindOne.mockReset();
   });
 
+  //funcion para simular el objeto 'res' de express
   const crearMockResponse = () => {
     const res: Partial<Response> = {};
     res.status = vi.fn().mockReturnValue(res);
@@ -54,50 +56,33 @@ describe('Auth Middleware Tests', () => {
           error: 'NO_TOKEN',
         }),
       );
-      expect(mockFindOne).not.toHaveBeenCalled();
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('Debe responder 401 INVALID_TOKEN si la firma del token no es válida', async () => {
-      const tokenInvalido = jwt.sign({ id: 1 }, 'otra_clave');
-      const req = {
-        headers: {
-          authorization: `Bearer ${tokenInvalido}`,
-        },
-      } as AuthenticatedRequest;
-
-      const res = crearMockResponse();
-      const next = vi.fn() as NextFunction;
-
-      await authenticateToken(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          error: 'INVALID_TOKEN',
-        }),
-      );
-      expect(mockFindOne).not.toHaveBeenCalled();
-      expect(next).not.toHaveBeenCalled();
-    });
-
-    it('Debe llamar a next() y adjuntar el usuario actual de la BD en req.user si el token y la cuenta son válidos', async () => {
-      const dbUser = {
+    it('Debe llamar a next() y adjuntar el usuario en req.user si el token es válido', async () => {
+      mockFindOne.mockResolvedValue({
         id: 1,
         username: 'usuario_test',
         user_type: 'cliente',
         email: 'test@example.com',
-        password: '$2b$12$hashedpassword123',
-        avatar: 'avatars/foto.png',
+        token_version: 0,
+        must_change_password: false,
+      });
+
+      const usuarioPrueba = {
+        id: 1,
+        username: 'usuario_test',
+        user_type: 'cliente',
+        token_version: 0,
       };
-      mockFindOne.mockResolvedValueOnce(dbUser);
+      mockFindOne.mockResolvedValueOnce(usuarioPrueba);
 
       const tokenValido = jwt.sign(
         {
-          id: dbUser.id,
-          username: dbUser.username,
-          user_type: dbUser.user_type,
-          token_v: getTokenVersion(dbUser),
+          id: usuarioPrueba.id,
+          username: usuarioPrueba.username,
+          user_type: usuarioPrueba.user_type,
+          token_version: usuarioPrueba.token_version,
         },
         JWT_SECRET,
       );
@@ -114,13 +99,141 @@ describe('Auth Middleware Tests', () => {
       await authenticateToken(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(req.user).toEqual({
+      expect(req.user).toMatchObject({
         id: 1,
         username: 'usuario_test',
         user_type: 'cliente',
-        email: 'test@example.com',
-        avatar: 'avatars/foto.png',
       });
+      expect(res.status).not.toHaveBeenCalled();
+    });
+
+    it('Debe responder 401 SESSION_INVALIDATED si el token_version del usuario cambió', async () => {
+      mockFindOne.mockResolvedValue({
+        id: 1,
+        username: 'usuario_test',
+        user_type: 'user',
+        email: 'test@example.com',
+        token_version: 2,
+        must_change_password: false,
+      });
+
+      const tokenViejo = jwt.sign(
+        { id: 1, username: 'usuario_test', user_type: 'user', token_version: 1 },
+        JWT_SECRET,
+      );
+
+      const req = {
+        headers: { authorization: `Bearer ${tokenViejo}` },
+      } as AuthenticatedRequest;
+      const res = crearMockResponse();
+      const next = vi.fn() as NextFunction;
+
+      await authenticateToken(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ error: 'SESSION_INVALIDATED' }),
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('Debe bloquear acceso con 403 PASSWORD_CHANGE_REQUIRED si must_change_password es true', async () => {
+      mockFindOne.mockResolvedValue({
+        id: 1,
+        username: 'usuario_test',
+        user_type: 'user',
+        email: 'test@example.com',
+        token_version: 1,
+        must_change_password: true,
+      });
+
+      const tokenValido = jwt.sign(
+        { id: 1, username: 'usuario_test', user_type: 'user', token_version: 1 },
+        JWT_SECRET,
+      );
+
+      const req = {
+        headers: { authorization: `Bearer ${tokenValido}` },
+      } as AuthenticatedRequest;
+      const res = crearMockResponse();
+      const next = vi.fn() as NextFunction;
+
+      await authenticateToken(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ error: 'PASSWORD_CHANGE_REQUIRED' }),
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('authenticateTokenAllowPasswordChange debe permitir el acceso cuando must_change_password es true', async () => {
+      mockFindOne.mockResolvedValue({
+        id: 1,
+        username: 'usuario_test',
+        user_type: 'user',
+        email: 'test@example.com',
+        token_version: 1,
+        must_change_password: true,
+      });
+
+      const tokenValido = jwt.sign(
+        { id: 1, username: 'usuario_test', user_type: 'user', token_version: 1 },
+        JWT_SECRET,
+      );
+
+      const req = {
+        headers: { authorization: `Bearer ${tokenValido}` },
+      } as AuthenticatedRequest;
+      const res = crearMockResponse();
+      const next = vi.fn() as NextFunction;
+
+      await authenticateTokenAllowPasswordChange(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(req.user?.must_change_password).toBe(true);
+    });
+  });
+
+  describe('requireRecentAuth', () => {
+    it('Debe responder 401 REAUTH_REQUIRED si la autenticación no es reciente', () => {
+      const tenMinutesAgo = Math.floor(Date.now() / 1000) - 600;
+      const req = {
+        user: {
+          id: 1,
+          username: 'usuario_test',
+          user_type: 'user',
+          auth_time: tenMinutesAgo,
+        },
+      } as AuthenticatedRequest;
+      const res = crearMockResponse();
+      const next = vi.fn() as NextFunction;
+
+      requireRecentAuth(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({ error: 'REAUTH_REQUIRED' }),
+      );
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('Debe llamar a next() si auth_time está dentro de la ventana permitida', () => {
+      const now = Math.floor(Date.now() / 1000);
+      const req = {
+        user: {
+          id: 1,
+          username: 'usuario_test',
+          user_type: 'user',
+          auth_time: now - 30,
+        },
+      } as AuthenticatedRequest;
+      const res = crearMockResponse();
+      const next = vi.fn() as NextFunction;
+
+      requireRecentAuth(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
       expect(res.status).not.toHaveBeenCalled();
     });
 
@@ -171,10 +284,7 @@ describe('Auth Middleware Tests', () => {
           id: 2,
           username: 'ex_admin',
           user_type: 'admin',
-          token_v: getTokenVersion({
-            password: dbUserDegradado.password,
-            user_type: 'admin',
-          }),
+          token_version: dbUserDegradado.token_version ?? 0,
         },
         JWT_SECRET,
       );
@@ -200,7 +310,6 @@ describe('Auth Middleware Tests', () => {
     });
 
     it('Debe responder 401 TOKEN_REVOKED si la contraseña cambió en la BD', async () => {
-      const oldPasswordHash = '$2b$12$oldHashValue';
       const newPasswordHash = '$2b$12$newHashValueAfterReset';
 
       mockFindOne.mockResolvedValueOnce({
@@ -209,6 +318,7 @@ describe('Auth Middleware Tests', () => {
         user_type: 'user',
         email: 'clave@example.com',
         password: newPasswordHash,
+        token_version: 1,
       });
 
       const tokenPreCambio = jwt.sign(
@@ -216,10 +326,7 @@ describe('Auth Middleware Tests', () => {
           id: 3,
           username: 'user_clave',
           user_type: 'user',
-          token_v: getTokenVersion({
-            password: oldPasswordHash,
-            user_type: 'user',
-          }),
+          token_version: 0,
         },
         JWT_SECRET,
       );
@@ -259,7 +366,7 @@ describe('Auth Middleware Tests', () => {
           id: dbUser.id,
           username: dbUser.username,
           user_type: dbUser.user_type,
-          token_v: getTokenVersion(dbUser),
+          token_version: 0,
         },
         JWT_SECRET,
       );

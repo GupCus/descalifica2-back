@@ -24,10 +24,12 @@ export interface RegisterRequest {
 
 export interface LoginResponse {
   token: string;
+  must_change_password?: boolean;
   user: {
     id: number;
     username: string;
     user_type: string;
+    must_change_password?: boolean;
   };
 }
 
@@ -36,8 +38,13 @@ export interface AuthenticatedRequest extends Request {
     id: number;
     username: string;
     user_type: string;
-    email: string;
-    avatar?: string | null;
+    email?: string;
+    mail?: string;
+    token_version?: number;
+    must_change_password?: boolean;
+    auth_time?: number;
+    iat?: number;
+    exp?: number;
   };
 }
 
@@ -49,7 +56,9 @@ export interface jwtpayload {
   url_photo?: string;
   email?: string;
   mail?: string;
-  token_v?: string;
+  token_version?: number;
+  must_change_password?: boolean;
+  auth_time?: number; // timestamp (segundos) de la última autenticación/reautenticación
   iat?: number; // fecha de creación del token
   exp?: number; // fecha de expiración del token
 }
