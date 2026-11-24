@@ -141,6 +141,29 @@ const doc = {
             nullable: true,
             example: 'agus_f1',
           },
+          must_change_password: {
+            type: 'boolean',
+            example: false,
+          },
+        },
+      },
+      UsuarioUpdateInput: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', example: 'Fran' },
+          surname: { type: 'string', example: 'Perez' },
+          username: { type: 'string', example: 'agus2001' },
+          email: { type: 'string', example: 'agus@gmail.com' },
+          date_of_birth: {
+            type: 'string',
+            format: 'date',
+            example: '2001-01-01',
+          },
+          fav_driver: { type: 'string', example: 'Franco Colapinto' },
+          fav_team: { type: 'string', example: 'Williams' },
+          fav_circuit: { type: 'string', example: 'Monza' },
+          bio: { type: 'string', example: 'Fan de la F1' },
+          telegram_username: { type: 'string', example: 'agus_f1' },
         },
       },
       UsuarioInput: {

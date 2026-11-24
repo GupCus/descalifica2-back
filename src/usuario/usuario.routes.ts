@@ -8,6 +8,7 @@ import {
   uploadAvatar,
   deleteAvatar,
   findPublic,
+  adminResetPassword,
 } from './usuario.controller.js';
 import {
   uploadImage,
@@ -37,6 +38,13 @@ usuarioRouter.patch(
   authorizeSelfOrAdmin,
   sanitizeUsuario,
   update,
+);
+
+// Reseteo administrativo de contraseña (operación distinta, auditada y con cambio forzado)
+usuarioRouter.post(
+  '/:id/admin-reset-password',
+  authenticateAdmin,
+  (req, res) => adminResetPassword(req as any, res),
 );
 
 // Upload dedicado de avatar

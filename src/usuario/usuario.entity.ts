@@ -3,6 +3,7 @@ import {
   Collection,
   Entity,
   OneToMany,
+  Opt,
   Property,
 } from '@mikro-orm/core';
 import { baseEntity } from '../shared/baseEntity.entity.js';
@@ -42,6 +43,12 @@ export class Usuario extends baseEntity {
   reset_password_token?: string;
   @Property({ nullable: true, hidden: true })
   reset_password_expires?: Date;
+  @Property({ nullable: false, default: 0, hidden: true })
+  token_version: number & Opt = 0;
+  @Property({ nullable: true, hidden: true })
+  password_changed_at?: Date;
+  @Property({ nullable: false, default: false })
+  must_change_password: boolean & Opt = false;
   @OneToMany(() => Blogpost, (blogpost) => blogpost.author)
   posts = new Collection<Blogpost>(this);
   @OneToMany(() => ComentarioPost, (comentario) => comentario.author)

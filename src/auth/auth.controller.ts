@@ -12,7 +12,35 @@ import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import { getRelativePath } from '../shared/upload/upload.utils.js';
 import { pendingRegistrationLinks } from '../services/telegram/telegram.service.js';
-import { sendPasswordResetEmail } from '../services/email/email.service.js';
+import {
+  sendPasswordChangedEmail,
+  sendPasswordResetEmail,
+} from '../services/email/email.service.js';
+import {
+  extractClientIp,
+  recordSecurityEvent,
+} from './security-audit.service.js';
+
+function signAuthToken(usuario: Usuario): string {
+  const payload = {
+    id: usuario.id!,
+    mail: usuario.email,
+    email: usuario.email,
+    user_type: usuario.user_type,
+    username: usuario.username,
+    token_version: usuario.token_version ?? 0,
+    must_change_password: Boolean(usuario.must_change_password),
+    auth_time: Math.floor(Date.now() / 1000),
+  };
+
+  return jwt.sign(
+    payload,
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: process.env.EXPIRA_TOKEN || '24h',
+    } as SignOptions,
+  );
+}
 
 async function register(req: Request, res: Response) {
   /*
@@ -186,27 +214,16 @@ async function register(req: Request, res: Response) {
       });
     }
 
-    const payload = {
-      id: usuario.id,
-      mail: usuario.email,
-      user_type: usuario.user_type,
-      username: usuario.username,
-    };
-
-    const token = jwt.sign(
-      payload,
-      process.env.JWT_SECRET as string,
-      {
-        expiresIn: process.env.EXPIRA_TOKEN,
-      } as SignOptions,
-    );
+    const token = signAuthToken(usuario);
 
     const response: LoginResponse = {
       token: token,
+      must_change_password: false,
       user: {
         id: usuario.id,
         username: usuario.username,
         user_type: usuario.user_type,
+        must_change_password: false,
       },
     };
 
@@ -248,6 +265,7 @@ async function checkToken(req: AuthenticatedRequest, res: Response) {
         username: usuario.username,
         user_type: usuario.user_type, // Valor actual de la BD
         avatar: usuario.avatar ? usuario.avatar : null,
+        must_change_password: Boolean(usuario.must_change_password),
       },
     });
   } catch (error) {
@@ -329,27 +347,16 @@ async function login(req: AuthenticatedRequest, res: Response) {
       usuario.avatar = res.locals.googlePayload.picture;
       await em.flush();
     }
-    const payload = {
-      id: usuario.id,
-      mail: usuario.email,
-      user_type: usuario.user_type,
-      username: usuario.username,
-    };
-
-    const token = jwt.sign(
-      payload,
-      process.env.JWT_SECRET as string,
-      {
-        expiresIn: process.env.EXPIRA_TOKEN,
-      } as SignOptions,
-    );
+    const token = signAuthToken(usuario);
 
     const response: LoginResponse = {
       token: token,
+      must_change_password: Boolean(usuario.must_change_password),
       user: {
         id: usuario.id,
         username: usuario.username,
         user_type: usuario.user_type,
+        must_change_password: Boolean(usuario.must_change_password),
       },
     };
 
@@ -488,17 +495,44 @@ async function resetPassword(req: Request, res: Response) {
 
     // Hashear y actualizar contraseña
     const salt = 12;
+    const changedAt = new Date();
     usuario.password = await bcrypt.hash(newPassword, salt);
 
-    // Invalidar token
+    // Invalidar token de recuperación y todas las sesiones/JWT emitidos
     usuario.reset_password_token = undefined;
     usuario.reset_password_expires = undefined;
+    usuario.token_version = (usuario.token_version ?? 0) + 1;
+    usuario.password_changed_at = changedAt;
+    usuario.must_change_password = false;
 
     await em.flush();
 
+    await recordSecurityEvent({
+      eventType: 'PASSWORD_RESET_BY_TOKEN',
+      targetUserId: usuario.id!,
+      actorUserId: usuario.id!,
+      req,
+      details: 'Contraseña restablecida mediante token de recuperación por correo.',
+    });
+
+    try {
+      await sendPasswordChangedEmail({
+        to: usuario.email,
+        username: usuario.username,
+        changedAt,
+        ipAddress: extractClientIp(req),
+      });
+    } catch (mailError) {
+      console.error(
+        'Error al enviar notificación de cambio de contraseña tras reset:',
+        mailError,
+      );
+    }
+
     return res.status(200).json({
       message:
-        '¡Contraseña restablecida exitosamente! Ya puedes iniciar sesión.',
+        '¡Contraseña restablecida exitosamente! Todas tus sesiones previas fueron cerradas; ya puedes iniciar sesión.',
+      sessionsInvalidated: true,
     });
   } catch (error) {
     console.error('Error en resetPassword:', error);
@@ -506,4 +540,195 @@ async function resetPassword(req: Request, res: Response) {
   }
 }
 
-export { login, register, checkToken, forgotPassword, resetPassword };
+async function reauthenticate(req: AuthenticatedRequest, res: Response) {
+  /*
+    #swagger.tags = ['Auth']
+    #swagger.summary = 'Reautenticar usuario para operaciones sensibles (ej. cambio de contraseña)'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: {
+        password: { type: 'string', example: 'miPasswordActual123' }
+      }
+    }
+    #swagger.responses[200] = {
+      description: 'Reautenticación exitosa',
+      schema: { message: 'Reautenticación exitosa.', token: 'string' }
+    }
+    #swagger.responses[400] = { description: 'Contraseña actual requerida' }
+    #swagger.responses[401] = { description: 'Contraseña incorrecta o sesión inválida' }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
+  try {
+    const { password } = req.body ?? {};
+
+    if (!password || typeof password !== 'string') {
+      return res.status(400).json({
+        message: 'Debes proporcionar tu contraseña actual para reautenticarte.',
+      });
+    }
+
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { id: req.user?.id });
+
+    if (!usuario || !usuario.id) {
+      return res.status(401).json({
+        message: 'Usuario no encontrado.',
+        error: 'SESSION_INVALIDATED',
+      });
+    }
+
+    const isValid = await usuario.compare_password(password);
+    if (!isValid) {
+      return res.status(401).json({
+        message: 'Contraseña actual incorrecta.',
+        error: 'INVALID_CURRENT_PASSWORD',
+      });
+    }
+
+    await recordSecurityEvent({
+      eventType: 'REAUTHENTICATION',
+      targetUserId: usuario.id,
+      actorUserId: usuario.id,
+      req,
+      details: 'Reautenticación exitosa para operación sensible.',
+    });
+
+    const freshToken = signAuthToken(usuario);
+
+    return res.status(200).json({
+      message: 'Reautenticación exitosa.',
+      token: freshToken,
+    });
+  } catch (error) {
+    console.error('Error en reauthenticate:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+async function changePassword(req: AuthenticatedRequest, res: Response) {
+  /*
+    #swagger.tags = ['Auth']
+    #swagger.summary = 'Cambiar la contraseña del usuario autenticado (requiere contraseña actual y reautenticación reciente)'
+    #swagger.security = [{ "bearerAuth": [] }]
+    #swagger.parameters['body'] = {
+      in: 'body',
+      required: true,
+      schema: {
+        currentPassword: { type: 'string', example: 'miPasswordActual123' },
+        newPassword: { type: 'string', example: 'miNuevaPassword456' }
+      }
+    }
+    #swagger.responses[200] = {
+      description: 'Contraseña modificada e invalidación de sesiones',
+      schema: {
+        message: 'Contraseña actualizada exitosamente. Todas las sesiones activas fueron invalidadas; por favor iniciá sesión nuevamente.',
+        sessionsInvalidated: true,
+        emailNotified: true
+      }
+    }
+    #swagger.responses[400] = { description: 'Datos inválidos' }
+    #swagger.responses[401] = { description: 'Contraseña actual incorrecta o reautenticación requerida' }
+    #swagger.responses[500] = { schema: { $ref: '#/components/schemas/ErrorServer' } }
+  */
+  try {
+    const { currentPassword, newPassword } = req.body ?? {};
+
+    if (!currentPassword || typeof currentPassword !== 'string') {
+      return res.status(400).json({
+        message: 'La contraseña actual es obligatoria.',
+      });
+    }
+
+    if (
+      !newPassword ||
+      typeof newPassword !== 'string' ||
+      newPassword.length < 6
+    ) {
+      return res.status(400).json({
+        message: 'La nueva contraseña debe tener al menos 6 caracteres.',
+      });
+    }
+
+    if (newPassword === currentPassword) {
+      return res.status(400).json({
+        message: 'La nueva contraseña debe ser diferente a la actual.',
+      });
+    }
+
+    const em = orm.em.fork();
+    const usuario = await em.findOne(Usuario, { id: req.user?.id });
+
+    if (!usuario || !usuario.id) {
+      return res.status(401).json({
+        message: 'Usuario no encontrado.',
+        error: 'SESSION_INVALIDATED',
+      });
+    }
+
+    const matchesCurrent = await usuario.compare_password(currentPassword);
+    if (!matchesCurrent) {
+      return res.status(401).json({
+        message: 'La contraseña actual es incorrecta.',
+        error: 'INVALID_CURRENT_PASSWORD',
+      });
+    }
+
+    const changedAt = new Date();
+    const salt = 12;
+    usuario.password = await bcrypt.hash(newPassword, salt);
+    usuario.token_version = (usuario.token_version ?? 0) + 1;
+    usuario.password_changed_at = changedAt;
+    usuario.must_change_password = false;
+    usuario.reset_password_token = undefined;
+    usuario.reset_password_expires = undefined;
+
+    await em.flush();
+
+    await recordSecurityEvent({
+      eventType: 'PASSWORD_CHANGED',
+      targetUserId: usuario.id,
+      actorUserId: usuario.id,
+      req,
+      details:
+        'Cambio de contraseña iniciado por el usuario. Todas las sesiones previas fueron invalidadas.',
+    });
+
+    let emailNotified = true;
+    try {
+      await sendPasswordChangedEmail({
+        to: usuario.email,
+        username: usuario.username,
+        changedAt,
+        ipAddress: extractClientIp(req),
+      });
+    } catch (mailError) {
+      emailNotified = false;
+      console.error(
+        'Error al enviar notificación de cambio de contraseña:',
+        mailError,
+      );
+    }
+
+    return res.status(200).json({
+      message:
+        'Contraseña actualizada exitosamente. Todas las sesiones activas fueron invalidadas; por favor iniciá sesión nuevamente.',
+      sessionsInvalidated: true,
+      emailNotified,
+    });
+  } catch (error) {
+    console.error('Error en changePassword:', error);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+export {
+  login,
+  register,
+  checkToken,
+  forgotPassword,
+  resetPassword,
+  reauthenticate,
+  changePassword,
+};
