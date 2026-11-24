@@ -24,7 +24,7 @@ telegramrouter.get('/verificar-registro/:codigo', verificarRegistro);
 telegramrouter.post(
   '/test-top-semanal',
   authenticateAdmin,
-  async (_req, res) => {
+  async (_req, res, next) => {
     /*
       #swagger.tags = ['Servicios: Telegram']
       #swagger.summary = 'Forzar el envío de los posts más populares de la semana'
@@ -38,9 +38,7 @@ telegramrouter.post(
         .status(200)
         .json({ message: 'Envío del top post semanal ejecutado.' });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({ message: 'Error al enviar', error: error.message });
+      next(error);
     }
   },
 );
@@ -48,7 +46,7 @@ telegramrouter.post(
 telegramrouter.post(
   '/test-proximas-sesiones',
   authenticateAdmin,
-  async (_req, res) => {
+  async (_req, res, next) => {
     /*
       #swagger.tags = ['Servicios: Telegram']
       #swagger.summary = 'Forzar chequeo manual de próximas sesiones'
@@ -62,12 +60,7 @@ telegramrouter.post(
         .status(200)
         .json({ message: 'Verificación de próximas sesiones ejecutada.' });
     } catch (error: any) {
-      res
-        .status(500)
-        .json({
-          message: 'Error al verificar próximas sesiones',
-          error: error.message,
-        });
+      next(error);
     }
   },
 );

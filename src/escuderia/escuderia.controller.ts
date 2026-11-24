@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { Escuderia } from "./escuderia.entity.js";
 import { orm } from "../shared/db/orm.js";
-import { NotFoundError } from "@mikro-orm/core";
 import {
   deleteFile,
   buildImageUrl,
@@ -40,7 +39,7 @@ function addImageUrls(req: Request, escuderia: Escuderia) {
   };
 }
 
-async function uploadLogoImage(req: Request, res: Response) {
+async function uploadLogoImage(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Escuderias']
     #swagger.summary = 'Subir imagen de logo de escudería'
@@ -79,15 +78,11 @@ async function uploadLogoImage(req: Request, res: Response) {
     if (req.file) {
       deleteFile(req.file.path);
     }
-    if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
-    } else {
-      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
-    }
+    next(error);
   }
 }
 
-async function deleteLogoImage(req: Request, res: Response) {
+async function deleteLogoImage(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Escuderias']
     #swagger.summary = 'Eliminar imagen de logo de escudería'
@@ -115,15 +110,11 @@ async function deleteLogoImage(req: Request, res: Response) {
       data: addImageUrls(req, escuderia),
     });
   } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
-    } else {
-      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
-    }
+    next(error);
   }
 }
 
-async function uploadCarImage(req: Request, res: Response) {
+async function uploadCarImage(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Escuderias']
     #swagger.summary = 'Subir imagen del auto de la escudería'
@@ -162,15 +153,11 @@ async function uploadCarImage(req: Request, res: Response) {
     if (req.file) {
       deleteFile(req.file.path);
     }
-    if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
-    } else {
-      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
-    }
+    next(error);
   }
 }
 
-async function deleteCarImage(req: Request, res: Response) {
+async function deleteCarImage(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Escuderias']
     #swagger.summary = 'Eliminar imagen del auto de la escudería'
@@ -198,16 +185,12 @@ async function deleteCarImage(req: Request, res: Response) {
       data: addImageUrls(req, escuderia),
     });
   } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
-    } else {
-      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
-    }
+    next(error);
   }
 }
 
 //GET ALL
-async function findAll(req: Request, res: Response) {
+async function findAll(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Escuderias']
     #swagger.summary = 'Obtener todas las escuderías'
@@ -229,12 +212,12 @@ async function findAll(req: Request, res: Response) {
     );
     res.status(200).json({ message: "OK", data: escuderiasWithUrls });
   } catch (error: any) {
-    console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
+    next(error);
   }
 }
 
 //GET ONE
-async function findOne(req: Request, res: Response) {
+async function findOne(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Escuderias']
     #swagger.summary = 'Obtener una escudería por ID'
@@ -254,16 +237,12 @@ async function findOne(req: Request, res: Response) {
     );
     res.status(200).json({ message: "OK", data: addImageUrls(req, escuderia) });
   } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
-    } else {
-      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
-    }
+    next(error);
   }
 }
 
 //POST
-async function add(req: Request, res: Response) {
+async function add(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Escuderias']
     #swagger.summary = 'Crear una nueva escudería'
@@ -296,15 +275,12 @@ async function add(req: Request, res: Response) {
     if (req.file) {
       deleteFile(req.file.path);
     }
-    console.error(error);
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
+    next(error);
   }
 }
 
 //PUT & PATCH
-async function update(req: Request, res: Response) {
+async function update(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Escuderias']
     #swagger.summary = 'Actualizar una escudería'
@@ -343,16 +319,12 @@ async function update(req: Request, res: Response) {
     if (req.file) {
       deleteFile(req.file.path);
     }
-    if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
-    } else {
-      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
-    }
+    next(error);
   }
 }
 
 //DELETE
-async function remove(req: Request, res: Response) {
+async function remove(req: Request, res: Response, next: NextFunction) {
   /*
     #swagger.tags = ['Escuderias']
     #swagger.summary = 'Eliminar una escudería'
@@ -381,13 +353,7 @@ async function remove(req: Request, res: Response) {
     }
     res.status(204).json({ message: "Deleted" });
   } catch (error: any) {
-    if (error instanceof NotFoundError) {
-      res.status(404).json({ message: "Resource not found" });
-    } else if (error.message && error.message.includes("foreign key constraint fails")) {
-      res.status(409).json({ message: "No se puede borrar la escudería porque tiene pilotos u otros registros asociados." });
-    } else {
-      console.error(error); res.status(500).json({ message: "Internal server error", error: error.message });
-    }
+    next(error);
   }
 }
 
