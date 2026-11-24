@@ -52,15 +52,28 @@ const createAuthenticateToken = (options: AuthenticateOptions = {}) => {
 
       if (!usuario) {
         return res.status(401).json({
-          message: 'Usuario no encontrado o sesión inválida.',
-          error: 'SESSION_INVALIDATED',
+          message: 'Usuario no encontrado.',
+          error: 'USER_NOT_FOUND',
         });
       }
 
       const currentTokenVersion = usuario.token_version ?? 0;
       const payloadTokenVersion = decoded.token_version ?? 0;
 
+      if (decoded.user_type && usuario.user_type !== decoded.user_type) {
+        return res.status(401).json({
+          message: 'Sesión revocada por cambio de permisos.',
+          error: 'TOKEN_REVOKED',
+        });
+      }
+
       if (payloadTokenVersion !== currentTokenVersion) {
+        if (usuario.password) {
+          return res.status(401).json({
+            message: 'Sesión revocada por cambio de contraseña.',
+            error: 'TOKEN_REVOKED',
+          });
+        }
         return res.status(401).json({
           message: 'Sesión invalidada. Por favor, iniciá sesión nuevamente.',
           error: 'SESSION_INVALIDATED',

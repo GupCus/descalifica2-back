@@ -17,7 +17,9 @@ vi.mock('../shared/db/orm.js', () => ({
 const {
   authenticateToken,
   authenticateTokenAllowPasswordChange,
+  authenticateAdmin,
   requireRecentAuth,
+  authorizeSelfOrAdmin,
 } = await import('../auth/auth.middleware.js');
 
 describe('Auth Middleware Tests', () => {
@@ -73,14 +75,14 @@ describe('Auth Middleware Tests', () => {
         user_type: 'cliente',
         token_version: 0,
       };
-      mockFindOne.mockResolvedValueOnce(dbUser);
+      mockFindOne.mockResolvedValueOnce(usuarioPrueba);
 
       const tokenValido = jwt.sign(
         {
-          id: dbUser.id,
-          username: dbUser.username,
-          user_type: dbUser.user_type,
-          token_v: getTokenVersion(dbUser),
+          id: usuarioPrueba.id,
+          username: usuarioPrueba.username,
+          user_type: usuarioPrueba.user_type,
+          token_version: usuarioPrueba.token_version,
         },
         JWT_SECRET,
       );
@@ -282,10 +284,7 @@ describe('Auth Middleware Tests', () => {
           id: 2,
           username: 'ex_admin',
           user_type: 'admin',
-          token_v: getTokenVersion({
-            password: dbUserDegradado.password,
-            user_type: 'admin',
-          }),
+          token_version: dbUserDegradado.token_version ?? 0,
         },
         JWT_SECRET,
       );
@@ -311,7 +310,6 @@ describe('Auth Middleware Tests', () => {
     });
 
     it('Debe responder 401 TOKEN_REVOKED si la contraseña cambió en la BD', async () => {
-      const oldPasswordHash = '$2b$12$oldHashValue';
       const newPasswordHash = '$2b$12$newHashValueAfterReset';
 
       mockFindOne.mockResolvedValueOnce({
@@ -320,6 +318,7 @@ describe('Auth Middleware Tests', () => {
         user_type: 'user',
         email: 'clave@example.com',
         password: newPasswordHash,
+        token_version: 1,
       });
 
       const tokenPreCambio = jwt.sign(
@@ -327,10 +326,7 @@ describe('Auth Middleware Tests', () => {
           id: 3,
           username: 'user_clave',
           user_type: 'user',
-          token_v: getTokenVersion({
-            password: oldPasswordHash,
-            user_type: 'user',
-          }),
+          token_version: 0,
         },
         JWT_SECRET,
       );
@@ -370,7 +366,7 @@ describe('Auth Middleware Tests', () => {
           id: dbUser.id,
           username: dbUser.username,
           user_type: dbUser.user_type,
-          token_v: getTokenVersion(dbUser),
+          token_version: 0,
         },
         JWT_SECRET,
       );
